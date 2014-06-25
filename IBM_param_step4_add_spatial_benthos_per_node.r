@@ -128,6 +128,36 @@
 
    # TO DO
  
+   # a fake example:
+   maxpassage                              <- 10
+   Fk_this_metier                          <- 1: maxpassage # frequency of passage on the landscape-node
+   loss_after_one_passage_this_metier_this_landscape_j <- 0.20 # 20%
+   a_trawl_swept_area_per_tstep_km2        <- (0.300 * 4*1.853) # swept 300m fishing at 4knots 
+   area_around_node_km2                    <- 2.5*2.5 # graph node spaced by 2.5 km
+   M_on_landscape_j                        <- 1-((1-(loss_after_one_passage_this_metier_this_landscape_j*(a_trawl_swept_area_per_tstep_km2/area_around_node_km2)))^Fk_this_metier)
+ 
+   # convert in an instantaneous depletion rate
+   M_per_tstep <- rep(0, 9)
+   for(passage in 1: 9)
+      M_per_tstep[passage] <- - ( (1-M_on_landscape_j[passage+1]) -  (1-M_on_landscape_j[passage]) )/     (1-M_on_landscape_j[passage])
+
+   # then check:
+   N <- 1000 
+   for(passage in 1: 9){
+     N<- N* (1-M_per_tstep[passage])
+    print(N)
+     }
+   
+   # which should be equivalent to: 
+   N <- 1000
+   N <- N*(1-M_on_landscape_j[9])
+   print(N)  
+     
+   # so we can summarize by applying the following at each time step,
+   M_on_landscape_j                        <- 1-((1-(loss_after_one_passage_this_metier_this_landscape_j*(a_trawl_swept_area_per_tstep_km2/area_around_node_km2))))
+  
+   
+   
   
   ##---------------------------------------------------------------------------##
   ##---------------------------------------------------------------------------##
