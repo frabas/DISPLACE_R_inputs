@@ -72,6 +72,17 @@
 
 
 
+##----------------------------------------------------------------------------##
+##----------------------------------------------------------------------------##
+##------------------CREATE ONE FILE .dat FOR ESTIMATES OF---------------------##
+##--------------------OF BIOMASS PER CELL PER FUNCTIONAL GROUP----------------##
+##----------------------PER MARINE LANDSCAPE----------------------------------##
+##----------------------------------------------------------------------------##
 
+
+
+   estimates_biomass_per_cell_per_funcgr_per_landscape <- cbind.data.frame(landscape=rep(codes, each=2), biomass_per_cell=10000)  # ??
+   write.table(estimates_biomass_per_cell_per_funcgr_per_landscape, file=file.path("C:","Users", "fbas", "Documents", "GitHub", "DISPLACE_input", paste("benthosspe_",a_case,sep=''),
+                        paste("estimates_biomass_per_cell_per_funcgr_per_landscape.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
 
 
