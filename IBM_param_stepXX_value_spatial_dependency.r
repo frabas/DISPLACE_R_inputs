@@ -774,30 +774,37 @@ add_wind_mills_layer <- function(){
   # same but with planned windmill farms sites
    # high resolution plot
    tiff(filename=file.path(general$main.path,"igraph",
-       paste("map_a_spatial_dependency_and_planned_windmillfarms_sites.tiff",sep='')),
-                                   width = 2800, height = 1600,
+       paste("map_a_spatial_dependency_and_planned_windmillfarms_sites_24Sept14.tiff",sep='')),
+                                   width = 3000, height = 1800,
                                    units = "px", pointsize = 12,  res=300)
 
    #windows(12,4)
    par(mfrow=c(1,2))
-
+     par(xpd = F)
+ 
    plot(index1_per_cell[,'x'],
            index1_per_cell [,'y'],
-           pch=".", xlim=c(9,15), ylim=c(53.5,57.5),  xlab="Longitude", ylab="Latitude", cex.lab=1.5, axes=FALSE,
+           pch=".", xlim=c(9,15), ylim=c(53.5,57.5),  xlab="Longitude °E", ylab="Latitude °N", cex.lab=1.5, axes=FALSE,
            col=Satellite.Palette(21)[index1_per_cell[,"bins"]],
            cex=1.7)
    #    legend("topright", "spatial density index (Quantiles)", fill=Satellite.Palette(11), legend=c(0,.05,0.1,0.15,.2,0.25,.3,0.35,.4,.45,.5,.55,.6,.65,.7,.75,.8,.85,.9,0.95,1))
    axis(1, cex.axis=2); axis(2, las=2, cex.axis=2)
    #plot( sh_coastlines, add=TRUE, col=grey(0.7))
-     map("worldHires", add=TRUE, fill=TRUE,  col=grey(0.7))
-  
+   map("worldHires", add=TRUE, fill=TRUE,  col=grey(0.7))
+   library(SDMTools)
+   x = c(8.9, 9, 9, 8.9)
+   y = c(54.0, 56.4, 56.4, 54.0)     
+   ## CAUTION FACTOR 1000 in the indx calculation...see above                                              
+   legend.gradient (cbind(x = x , y = y ), cols=Satellite.Palette(21), title = "",  limits = c(expression(bold(paste(I[1],"<0.0001"))), expression(bold(paste(I[1],">0.004")))), cex=0.75, col="black")
+
    box()
    mtext("(a)", side=3, line=1, adj=0, cex=1.5)
    add_wind_mills_layer()
 
+   par(xpd = FALSE)
    plot(index3_per_cell[,'x'],
            index3_per_cell [,'y'],
-           pch=".", xlim=c(9,15), ylim=c(53.5,57.5),  xlab="Longitude", ylab="Latitude", cex.lab=1.5, axes=FALSE,
+           pch=".", xlim=c(9,15), ylim=c(53.5,57.5),   xlab="Longitude °E", ylab="Latitude °N", cex.lab=1.5, axes=FALSE,
            col=Satellite.Palette(21)[index3_per_cell[,"bins"]],
            cex=1.7)
    axis(1, cex.axis=2); axis(2, las=2, cex.axis=2)
@@ -806,7 +813,13 @@ add_wind_mills_layer <- function(){
    box()
    mtext("(b)", side=3, line=1, adj=0, cex=1.5)
    add_wind_mills_layer()
-                                                      
+   #legend("topright", legend=levels(index3_per_cell[,"bins"]), fill=Satellite.Palette(21), bty="n", cex=0.5, border=NA)
+   library(SDMTools)
+   x = c(8.9, 9, 9, 8.9)
+   y = c(54.0, 56.4, 56.4, 54.0)                                                   
+   ## CAUTION FACTOR 1000 in the indx calculation...see above                                              
+   legend.gradient (cbind(x = x , y = y ), cols=Satellite.Palette(21), title = "",  limits = c(expression(bold(paste(I[2],"<0.0005"))), expression(bold(paste(I[2],">0.02")))), cex=0.75, col="black")
+ 
    dev.off()
 
    # quantify what is included in the polygon
