@@ -76,10 +76,12 @@ create_graph<-function(general){
  #  while 1 degree latitude =111.2 km also at 57 degree North (but actually almost constant whatever the latitude)
  # caution: avoid bias: apply one resolution grain only per management area becausae of evenly distributed avai.
  #grid1.xy <- do.regular.grid(dx=2.218935,   dy=1.348921, -13.5, 25, 48,   67.0)  # rought grain: 150 by 150 km grid
- grid1.xy <- do.regular.grid(dx= 1.47929,   dy= 0.8992807, -13.5, 25, 48,   67.0)  # rought grain: 100 by 100 km grid
+ grid1.xy <- do.regular.grid(dx= 1.47929,   dy= 0.8992807, -13.5, 25, 48,   67.0)  # rought grain: 60 by 60 km grid
  grid2.xy <- do.regular.grid(dx= 0.03698225,   dy=0.02248201,   7,  25, 53,   60.1)  # finest grain: 2.5 by 2.5 km grid
+ # check with distance(6.999876, 53.00013, 6.999876, 53.00013-0.02248201)
+
  #grid3.xy <- do.regular.grid(dx=0.295858,   dy=0.1798561,   7.5,  16, 53,   60.1)  # medium grain: 30 by 30 km grid
- grid3.xy <- do.regular.grid(dx=0.1972387,   dy=0.1199041,   7.5,  16, 53,   60.1)  # medium grain: 20 by 20 km grid
+ grid3.xy <- do.regular.grid(dx=0.1972387,   dy=0.1199041,   7.5,  16, 53,   60.1)  # medium grain: 10 by 10 km grid
  plot(grid1.xy[,1], grid1.xy[,2], pch=".")
  points(grid2.xy[,1], grid2.xy[,2], col=3, pch=".")
   library(mapdata)
