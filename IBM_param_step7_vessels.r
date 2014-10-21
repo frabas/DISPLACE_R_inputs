@@ -2486,7 +2486,7 @@ if(FRANCOIS){
   
     features <- cbind.data.frame(features, length=0)
     vessel.kw.per.vid <- x[!duplicated(x$VE_REF),c("VE_REF","VE_KW")]
-    features$KW <- round(vessel.kw.per.vid [match( features$VE_REF,vessel.kw.per.vid$VE_REF), "VE_KW"], 0) # map
+    features$KW <- round(as.numeric(as.character(vessel.kw.per.vid [match( features$VE_REF,vessel.kw.per.vid$VE_REF), "VE_KW"])), 0) # map
 
  
  
@@ -2672,17 +2672,31 @@ if(FRANCOIS){
     features <- cbind.data.frame(features, nb_pings_per_trip=0)
     features$nb_pings_per_trip <- round(nb.pings.per.trip.per.vid[as.character(features$VE_REF)], 0) # map
 
-
+    # FUEL CONSUMPTION MULTIPLIER-------------------
+    # not vessel specific (for the time being)
+    features$mult_fuelcons_when_steaming  <-  1
+    features$mult_fuelcons_when_fishing   <-  1.1
+    features$mult_fuelcons_when_returning <-  1.1
+    features$mult_fuelcons_when_inactive  <-  0.2
+    
+    
+    
+    
+    
     ## check for NA on the German side
     head(features)
 
+   
+   
+   
    # order columns and save per quarter----------------------
    for (a.quarter in c("Q1","Q2","Q3","Q4")){
 
     features_a_quarter <-
           features[features$quarter==a.quarter,
            c('VE_REF', 'speed', 'fuelconsrate', 'length', 'KW', 'carrying_capacity_model_nls', 
-                'tank_capacity_model_nls', 'nb_pings_per_trip', 'shape', 'scale', 'av.trip.duration')]
+                'tank_capacity_model_nls', 'nb_pings_per_trip', 'shape', 'scale', 'av.trip.duration',
+                 'mult_fuelcons_when_steaming', 'mult_fuelcons_when_fishing','mult_fuelcons_when_returning','mult_fuelcons_when_inactive')]
 
     # keep only country spe vessels
     #features_a_quarter <-     features_a_quarter[substr(   features_a_quarter$VE_REF,1,3) %in% general$a.country,]

@@ -43,8 +43,11 @@ create_graph<-function(general){
  rownames(harbours) <- harbours$idx.port
  harbours <- as.matrix(harbours)
 
+ # EXPORT HARBOUR (CORRECTED) COORDINATES
+ write.table(harbours, file=file.path(general$main_path_param_harbours, "harbours.dat"), col.names=TRUE, row.names=FALSE, quote=FALSE)
 
-
+ 
+ 
  # create the underlying igraph
  # (caution: remenber that length(ext.y)/2 need to be pair)
  
@@ -643,7 +646,10 @@ if(FALSE){
 general                        <- list()
 general$lim.lat                <- c(49,70) # default
 general$lim.long               <- c(-8.5,25) # default
-general$main_path_ibm_param    <- file.path("C:","displace-project.org","repository","ibm_vessels_param")
+general$main_path_ibm_param    <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw")
+
+model <- "balticonly"
+general$main_path_param_harbours  <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input", paste("harboursspe_", model, sep=""))
 
 
 res <- create_graph(general)
