@@ -107,6 +107,7 @@ for (sce in sces){
 
 
  timesteps   <- 21       #time steps 10 years with 2 semesters each 
+ NbPeriods   <- 2        # 2 semesters within the year
  pop         <- 10000    #number of simulated individuals
 
 
@@ -180,7 +181,7 @@ for(x in 1:length(pa$Ks)){
         varK<-0.01*K
         Kr<-abs(rnorm(1,mean=K,sd=sqrt(varK)) )          #stochasticity in K
 
-        meanI[ii,jj]<-(Linfe-indlength[ii,(jj-1)])*(1-exp(-Kr*2))     
+        meanI[ii,jj]<-(Linfe-indlength[ii,(jj-1)])*(1-exp(-Kr* 1/NbPeriods))     
         varI[ii,jj]<-0.01*meanI[ii,jj]  
 
         inc[ii,jj]<- abs(rnorm(1,mean=meanI[ii,jj],sd=sqrt(varI[ii,jj]))) 
