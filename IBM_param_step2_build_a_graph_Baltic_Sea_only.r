@@ -38,13 +38,13 @@ create_graph<-function(general){
  harbour.list$idx.port <- 1:length(harbour.list$NAVN) # convert in numeric for soft use
 
 
+ rownames( harbour.list) <- harbour.list$NAVN
  harbours <- harbour.list[,c("DEC_LONG","DEC_LAT","idx.port")] # longlat
- colnames(harbours) <- c("x","y","idx.port") # rename
- rownames(harbours) <- harbours$idx.port
+ colnames(harbours) <- c("x","y", "idx.port") # rename
  harbours <- as.matrix(harbours)
 
  # EXPORT HARBOUR (CORRECTED) COORDINATES
- write.table(harbours, file=file.path(general$main_path_param_harbours, "harbours.dat"), col.names=TRUE, row.names=FALSE, quote=FALSE)
+ write.table(harbours, file=file.path(general$main_path_param_harbours, "harbours.dat"), sep=";", col.names=TRUE, row.names=TRUE, quote=FALSE)
 
  
  
