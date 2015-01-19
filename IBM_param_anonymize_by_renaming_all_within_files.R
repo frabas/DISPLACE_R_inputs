@@ -32,6 +32,7 @@ colnames(vids) <- c("idx", "vid")
   file5[,1] <- vids[ match(file5[,1], vids[,2]), 1] 
   write.table(file5, file=file.path(a_path, paste("vesselsspe_freq_fgrounds_quarter", a_quarter, ".dat", sep='')), sep=" ", row.names=FALSE, col.names=TRUE, quote=FALSE)
  
+ 
  }  
   
  
@@ -39,6 +40,16 @@ colnames(vids) <- c("idx", "vid")
   file6 <- read.table(file=file.path(a_path, paste("vesselsspe_percent_tacs_per_pop_semester", a_semester, ".dat",sep='')), header=TRUE)
   file6[,1] <- vids[ match(file6[,1], vids[,2]), 1] 
   write.table(file6, file=file.path(a_path, paste("vesselsspe_percent_tacs_per_pop_semester", a_semester, ".dat", sep='')), sep=" ", row.names=FALSE, col.names=TRUE, quote=FALSE)
+ 
+  file7 <- read.table(file=file.path(a_path, paste("vesselsspe_betas_semester", a_semester, ".dat",sep='')), header=TRUE)
+  file7[,1] <- vids[ match(file7[,1], vids[,2]), 1] 
+  write.table(file7, file=file.path(a_path, paste("vesselsspe_betas_semester", a_semester, ".dat", sep='')), sep=" ", row.names=FALSE, col.names=TRUE, quote=FALSE)
+ 
+  file8 <- read.table(file=file.path(a_path, paste("vesselsspe_betas_se_semester", a_semester, ".dat",sep='')), header=TRUE)
+  file8[,1] <- vids[ match(file8[,1], vids[,2]), 1] 
+  write.table(file8, file=file.path(a_path, paste("vesselsspe_betas_se_semester", a_semester, ".dat", sep='')), sep=" ", row.names=FALSE, col.names=TRUE, quote=FALSE)
+ 
+ 
  }
     
 
