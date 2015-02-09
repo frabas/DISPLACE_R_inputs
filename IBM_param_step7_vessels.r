@@ -12,8 +12,8 @@ FRANCOIS  <- FALSE  # DEN
  # GENERAL SETTINGS
  if(FRANCOIS) {
   general <- list()
-  general$main.path      <- file.path("C:","displace-project.org","repository", "ibm_vessels_param")
-  general$main.path.code <- file.path("C:","displace-project.org","repository", "ibm_vessels_param_R")
+  general$main.path      <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_raw")
+  general$main.path.code <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
 
   #general$igraph               <- 4 # for the Canadian paper
   #general$case_study           <- "canadian_paper"
@@ -296,6 +296,11 @@ function (tacsat, string = TRUE)
 
   x.inharb <- x.inharb[!is.na(x.inharb$SI_STATE),] 
 
+  # input to DISPLACE_GUI
+  write.table(x.fishing, file=file.path(general$main.path,"merged_tables", general$case_study,
+           paste("all_merged_weight_on_fishing_pings_",general$a.country,"_",general$a.year,".txt",sep='')), sep=";", quote=FALSE, row.names=FALSE, col.names=TRUE)
+  write.table(x.inharb, file=file.path(general$main.path,"merged_tables", general$case_study,
+           paste("all_merged_pings_in_harbours_",general$a.country,"_",general$a.year,".txt",sep='')), sep=";", quote=FALSE, row.names=FALSE, col.names=TRUE)
 
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##

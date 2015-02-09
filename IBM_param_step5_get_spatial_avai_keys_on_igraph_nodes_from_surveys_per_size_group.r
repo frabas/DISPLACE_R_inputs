@@ -484,7 +484,7 @@ return(coord)
 #--------------------
 set.avai <- function(lst.avai,sp,S,areas){
      obj <- get(paste("coord.",sp,".",S, sep=''), env=.GlobalEnv) # get in .GlobalEnv
-     source(file=file.path("C:","displace-project.org","repository","ibm_vessels_param_R","IBM_param_utils_longlat_to_ICESareas.r"))
+     source(file=file.path("C:","Users","fbas", "Documents", "GitHub", "DISPLACE_R_inputs","IBM_param_utils_longlat_to_ICESareas.r"))
      ICESareas       <- longlat_to_ICESareas(obj)
      idx.areas          <- which(ICESareas %in% areas)
      obj.in.areas <- obj[idx.areas,]
@@ -598,6 +598,62 @@ if(nmy=="2005_2010")  load(file.path("C:","displace-project.org","repository","i
 if(nmy=="2010")       load(file.path("C:","displace-project.org","repository","ibm_vessels_param","avai",paste("cpue_graph",igraph,"_2010.RData", sep='')))
 if(nmy=="2008_2012")  load(file.path("C:","displace-project.org","repository","ibm_vessels_param","avai",paste("cpue_graph",igraph,"_2008_2012.RData", sep='')))
 if(nmy=="2012")       load(file.path("C:","displace-project.org","repository","ibm_vessels_param","avai",paste("cpue_graph",igraph,"_2012.RData", sep='')))
+
+
+# input to DISPLACE_GUI
+ obj       <- ibts.cpue
+ obj$Stock <- as.character(obj$Species) # init
+ obj$x     <- as.numeric(as.character(obj$ShootLon)) # init
+ obj$y     <- as.numeric(as.character(obj$ShootLat)) # init
+ source(file=file.path("C:","Users","fbas", "Documents", "GitHub", "DISPLACE_R_inputs","IBM_param_utils_longlat_to_ICESareas.r"))
+ obj$ICESareas  <- longlat_to_ICESareas(obj)
+ # convert Species in Stock name
+ idx                <- obj$Species %in% c("SPR", "PLE", "FLE", "TUR", "DAB") & obj$ICESareas %in% c("IVa", "IVb", "IVc") 
+ obj[idx, "Stock" ] <- paste(obj[idx,"Species"], 'nsea', sep="_")
+ idx                <- obj$Species %in% c("SPR", "PLE", "FLE", "TUR", "DAB") & obj$ICESareas %in% c("IIIan","IIIas")
+ obj[idx, "Stock" ] <- paste(obj[idx,"Species"], 'kask', sep="_")
+ idx                <- obj$Species %in% c("SPR", "PLE", "FLE", "TUR", "DAB") & obj$ICESareas %in% c("IIIan","IIIas")
+ obj[idx, "Stock" ] <- paste(obj[idx,"Species"], 'kask', sep="_")
+ idx                <- obj$Species %in% c("SPR", "PLE", "FLE", "TUR", "DAB") & obj$ICESareas %in% c("22", "23", "24", "25", "26", "27","28-1","28-2","29","30","31","32")
+ obj[idx, "Stock" ] <- paste(obj[idx,"Species"], '2232', sep="_")
+
+ idx                <- obj$Species %in% c("COD", "HAD") & obj$ICESareas %in% c("IVa", "IVb", "IVc","IIIan")
+ obj[idx, "Stock" ] <- paste(obj[idx,"Species"], 'nsea', sep="_")
+ idx                <- obj$Species %in% c("COD", "HAD") & obj$ICESareas %in% c("IIIas")
+ obj[idx, "Stock" ] <- paste(obj[idx,"Species"], 'kat', sep="_")
+ idx                <- obj$Species %in% c("COD", "HAD") & obj$ICESareas %in% c("22", "23", "24")
+ obj[idx, "Stock" ] <- paste(obj[idx,"Species"], '2224', sep="_")
+ idx                <- obj$Species %in% c("COD", "HAD") & obj$ICESareas %in% c("25", "26", "27","28-1","28-2","29","30","31","32")
+ obj[idx, "Stock" ] <- paste(obj[idx,"Species"], '2532', sep="_")
+
+ idx                <- obj$Species %in% c("HER") & obj$ICESareas %in% c("IVa", "IVb", "IVc")
+ obj[idx, "Stock" ] <- paste(obj[idx,"Species"], 'nsea', sep="_")
+ idx                <- obj$Species %in% c("HER") & obj$ICESareas %in% c("IIIan")
+ obj[idx, "Stock" ] <- paste(obj[idx,"Species"], '3a22', sep="_")
+ idx                <- obj$Species %in% c("HER") & obj$ICESareas %in% c("22", "23", "24")
+ obj[idx, "Stock" ] <- paste(obj[idx,"Species"], '3a22', sep="_")
+ idx                <- obj$Species %in% c("HER") & obj$ICESareas %in% c("25", "26", "27","28-1","28-2","29","30","31","32")
+ obj[idx, "Stock" ] <- paste(obj[idx,"Species"], '2532', sep="_")
+
+ all_other_species  <- !obj$Species %in% c("SPR", "PLE", "FLE", "TUR", "DAB", "COD", "HAD", "HER")
+ idx                <- all_other_species & obj$ICESareas %in% c("IVa", "IVb", "IVc")
+ obj[idx, "Stock" ] <- paste(obj[idx,"Species"], 'nsea', sep="_")
+ idx                <- all_other_species & obj$ICESareas %in% c("IIIan","IIIas")
+ obj[idx, "Stock" ] <- paste(obj[idx,"Species"], 'kask', sep="_")
+ idx                <- all_other_species & obj$ICESareas %in% c("22", "23", "24")
+ obj[idx, "Stock" ] <- paste(obj[idx,"Species"], '2224', sep="_")
+ idx                <- all_other_species & obj$ICESareas %in% c("25", "26", "27","28-1","28-2","29","30","31","32")
+ obj[idx, "Stock" ] <- paste(obj[idx,"Species"], '2532', sep="_")
+
+  
+  write.table(obj, file=file.path("C:", "Users", "fbas", "Documents", "GitHub" ,"DISPLACE_input_raw", "avai",
+           paste("survey_pop_distribution_on_points_ibts_2008_2012.txt",sep='')), sep=";", quote=FALSE, row.names=FALSE, col.names=TRUE)
+     # but missing: the stock name. because species name is not giving the stock name then stock need to be given before processing into the GUI
+
+
+
+
+
 
 
 print(nmy)
