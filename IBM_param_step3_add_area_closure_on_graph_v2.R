@@ -57,11 +57,31 @@ load(file.path(general$main.path,"graphsspe", "11_graphibm.RData")) # built from
   Scenario1             <<- readShapePoly(file.path(general$main.path,"graphsspe", "shp", "Scenario1_Habita525.shp"), 
                                     proj4string= CRS("+proj=longlat +ellps=WGS84"))
   Scenario1_proj        <<- spTransform(Scenario1, CRS("+proj=longlat +ellps=WGS84")) # actually,  already in WGS
- 
+  
+  Scenario1             <<- readShapePoly(file.path(general$main.path,"graphsspe", "shp", "Scenario1_Habita525.shp"), 
+                                    proj4string= CRS("+proj=longlat +ellps=WGS84"))
+  Scenario1_proj        <<- spTransform(Scenario1, CRS("+proj=longlat +ellps=WGS84")) # actually,  already in WGS
+
   #Scenario2             <<- readShapePoly(file.path(general$main.path,"graphsspe", "shp", "Scenario2_OffshoreWindFarms.shp"), 
   #                                  proj4string= CRS("+proj=longlat +ellps=WGS84"))
   #Scenario2_proj        <<- spTransform(Scenario2, CRS("+proj=longlat +ellps=WGS84")) # actually,  already in WGS
     
+  
+  #Habitats_WGS84             <<- readShapePoly(file.path("C:","Users","fbas","Documents","GitHub","Elance_studiofuga","Habitats_WGS84","Habitats_WGS84.shp"), 
+  #                                  proj4string= CRS("+proj=longlat +ellps=WGS84"))
+  #
+  #Habitats_WGS84$landscape_code<-Habitats_WGS84$grid_code
+  #writeSpatialShape(Habitats_WGS84, file.path("C:","Users","fbas","Documents","GitHub","Elance_studiofuga","Habitats_WGS84","code_for_landscapes_WGS84.shp")
+  #                                  )
+  
+  #shapeB             <<- readShapePoly(file.path("C:","Users","fbas","Documents","GitHub","Elance_studiofuga","Shapefiles","Shapefiles","Ices_Area_Edited.shp"), 
+  #                                  proj4string= CRS("+proj=longlat +ellps=WGS84"))
+  #
+  #shapeB$node_code<-shapeB$Code
+  #writeSpatialShape(shapeB, file.path("C:","Users","fbas","Documents","GitHub","Elance_studiofuga","Shapefiles","Shapefiles","code_for_areas_WGS84.shp")
+  #                                  )
+
+  
  
  plot(coord, xlim=c(8, 15), ylim=c(53,59), pch=".")
  plot(Scenario1_proj, add=TRUE, border=2)
