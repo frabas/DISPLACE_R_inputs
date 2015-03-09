@@ -2122,7 +2122,7 @@ if(FRANCOIS){
         paste("combined_met_names.",general$a.year,".igraph", general$igraph,".RData", sep='')))    # get 'combined_met_names'
   ping.fgrounds$LE_MET_level6         <- unlist(lapply(strsplit(as.character(ping.fgrounds$LE_MET_level6), split="_"), function(x) paste(x[1],'_',x[2],sep='')))   # remove mesh size and useless selective grid info 
   # rename metiers into INTEGER metiers
-  ping.fgrounds$LE_MET_level6         <- factor(ping.fgrounds$LE_MET_level6)
+   ping.fgrounds$LE_MET_level6         <- factor(ping.fgrounds$LE_MET_level6)
   levels(ping.fgrounds$LE_MET_level6) <- combined_met_names$idx[ match(levels(ping.fgrounds$LE_MET_level6), as.character(combined_met_names$met))] 
   
 
@@ -2177,6 +2177,59 @@ if(FRANCOIS){
                  paste("metier_discards_ogives.dat",sep='')),
                    col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE)
        }
+
+
+
+
+ ## MLS ###################
+# pop parameters
+ pa <- read.csv(file=file.path(general$main.path,
+                  paste("IBM_datainput_stockdata_",case_study,".csv", sep='')), 
+                    sep=';', header=TRUE)
+
+ filename_met_Q1 <- file.path(general$main.path, "metiersspe",
+                  paste("metierspe_mls_cat_semester1.dat", sep=''))
+ filename_met_Q2 <- file.path(general$main.path, "metiersspe",
+                  paste("metierspe_mls_cat_semester2.dat", sep=''))
+
+ 
+ # load the combined graph with the "merged" table
+ load(file.path(general$main.path, "merged_tables", general$case_study,
+               paste("ping.fgrounds.",general$a.country,".",general$a.year,".igraph",
+                general$igraph,".RData",sep='')))
+
+ load(file.path(general$main.path, "merged_tables", general$case_study, 
+        paste("combined_met_names.",general$a.year,".igraph", general$igraph,".RData", sep='')))    # get 'combined_met_names'
+  ping.fgrounds$LE_MET_level6         <- unlist(lapply(strsplit(as.character(ping.fgrounds$LE_MET_level6), split="_"), function(x) paste(x[1],'_',x[2],sep='')))   #
+  ping.fgrounds$LE_MET_level6         <- factor(ping.fgrounds$LE_MET_level6)
+  levels(ping.fgrounds$LE_MET_level6) <- combined_met_names$idx[ match(levels(ping.fgrounds$LE_MET_level6), as.character(combined_met_names$met))] 
+
+
+ mls <- data.frame(NULL)
+ for (met in levels(ping.fgrounds$LE_MET_level6) ) { 
+    mls     <- rbind.data.frame(mls, cbind.data.frame(metier=rep(met, length(0:(nrow(pa)-1))), pop= 0:(nrow(pa)-1), mls=pa[,"mls_cat"])) 
+    }
+    
+  mls <- orderBy(~metier+pop, data=mls)
+ 
+ # save the .dat file
+ if(FRANCOIS) {  
+  write.table(mls[,c("metier", "mls")], 
+                file=filename_met_Q1,
+                  append=FALSE, sep=" ", col.names=TRUE, row.names=FALSE, quote=FALSE) 
+  write.table(mls[,c("metier", "mls")], 
+                file=filename_met_Q2,
+                  append=FALSE, sep=" ", col.names=TRUE, row.names=FALSE, quote=FALSE) 
+ }
+
+
+
+
+
+
+
+
+
 
 
 

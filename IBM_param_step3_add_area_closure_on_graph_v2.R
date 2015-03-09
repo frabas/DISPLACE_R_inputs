@@ -67,19 +67,19 @@ load(file.path(general$main.path,"graphsspe", "11_graphibm.RData")) # built from
   #Scenario2_proj        <<- spTransform(Scenario2, CRS("+proj=longlat +ellps=WGS84")) # actually,  already in WGS
     
   
-  #Habitats_WGS84             <<- readShapePoly(file.path("C:","Users","fbas","Documents","GitHub","Elance_studiofuga","Habitats_WGS84","Habitats_WGS84.shp"), 
-  #                                  proj4string= CRS("+proj=longlat +ellps=WGS84"))
-  #
-  #Habitats_WGS84$landscape_code<-Habitats_WGS84$grid_code
-  #writeSpatialShape(Habitats_WGS84, file.path("C:","Users","fbas","Documents","GitHub","Elance_studiofuga","Habitats_WGS84","code_for_landscapes_WGS84.shp")
-  #                                  )
+  Habitats_WGS84             <<- readShapePoly(file.path("C:","Users","fbas","Documents","GitHub","Elance_studiofuga","Habitats_WGS84","Habitats_WGS84.shp"), 
+                                    proj4string= CRS("+proj=longlat +ellps=WGS84"))
   
-  #shapeB             <<- readShapePoly(file.path("C:","Users","fbas","Documents","GitHub","Elance_studiofuga","Shapefiles","Shapefiles","Ices_Area_Edited.shp"), 
-  #                                  proj4string= CRS("+proj=longlat +ellps=WGS84"))
-  #
-  #shapeB$node_code<-shapeB$Code
-  #writeSpatialShape(shapeB, file.path("C:","Users","fbas","Documents","GitHub","Elance_studiofuga","Shapefiles","Shapefiles","code_for_areas_WGS84.shp")
-  #                                  )
+  Habitats_WGS84$hab_code<-Habitats_WGS84$grid_code
+  writeSpatialShape(Habitats_WGS84, file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input","graphsspe","shp","code_for_landscapes_WGS84.shp")
+                                    )
+  
+  shapeB             <<- readShapePoly(file.path("C:","Users","fbas","Documents","GitHub","Elance_studiofuga","Shapefiles","Shapefiles","Ices_Area_Edited.shp"), 
+                                    proj4string= CRS("+proj=longlat +ellps=WGS84"))
+  
+  shapeB$area_code<-shapeB$Code
+  writeSpatialShape(shapeB, file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input","graphsspe","shp","code_for_areas_WGS84.shp")
+                                   )
 
   
  

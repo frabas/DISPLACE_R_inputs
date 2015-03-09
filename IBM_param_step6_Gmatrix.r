@@ -3,7 +3,7 @@
 FRANCOIS <- TRUE
 TANJA    <- FALSE
 if(TANJA)    main.path <- file.path("C:","Dropbox","Vessel","ibm_vessels_param")
-if(FRANCOIS) main.path <- file.path("C:","displace-project.org","repository", "ibm_vessels_param")
+if(FRANCOIS) main.path <- file.path("C:","Users", "fbas", "Documents", "GitHub", "DISPLACE_input_raw")
 
 
 #case_study <- "canadian_paper"  # 0 to 37 pops
@@ -49,6 +49,9 @@ if(case_study=="baltic_only"){
  pa <- read.csv(file=file.path(main.path,
                   paste("IBM_datainput_stockdata_",case_study,".csv", sep='')), 
                     sep=',', header=TRUE)
+
+                                                            
+
 
 ################################
 ################################
