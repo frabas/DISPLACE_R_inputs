@@ -1,8 +1,6 @@
 
 
 FRANCOIS <- TRUE
-TANJA    <- FALSE
-if(TANJA)    main.path <- file.path("C:","Dropbox","Vessel","ibm_vessels_param")
 if(FRANCOIS) main.path <- file.path("C:","Users", "fbas", "Documents", "GitHub", "DISPLACE_input_raw")
 
 
@@ -63,25 +61,28 @@ if(case_study=="baltic_only"){
 vbg <- function (Linf, K, to=0, timesteps) {
         Linf * (1 - exp(-K * (timesteps - to)))
 }
-a_pop_pa <- pa[pa$pop.to.keeps =="SPR.2232", ]
-plot( 1:21, vbg (a_pop_pa[,'Linfs'],a_pop_pa[,'Ks'], 0, 1:21), type="b")
-lines( 1:21, vbg (a_pop_pa[,'Linfs'],a_pop_pa[,'Ks']*0.8, 0, 1:21), type="b", col=2)  
-# alter the brody growth curvature parameter k which determines how fast the fish approaches its Linf
-lines( 1:21, vbg (a_pop_pa[,'Linfs'],a_pop_pa[,'Ks']*0.5, 0, 1:21), type="b", col=3)
+# some checks...
+#a_pop_pa <- pa[pa$pop.to.keeps =="SPR.2232", ]
+#plot( 1:21, vbg (a_pop_pa[,'Linfs'],a_pop_pa[,'Ks'], 0, 1:21), type="b")
+#lines( 1:21, vbg (a_pop_pa[,'Linfs'],a_pop_pa[,'Ks']*0.8, 0, 1:21), type="b", col=2)  
+## alter the brody growth curvature parameter k which determines how fast the fish approaches its Linf
+#lines( 1:21, vbg (a_pop_pa[,'Linfs'],a_pop_pa[,'Ks']*0.5, 0, 1:21), type="b", col=3)
 
 # SSB-R
 ssbr <- function (alpha, beta, ssb) {
        alpha*ssb*exp(-beta*ssb)
 }
-a_pop_pa <- pa[pa$pop.to.keeps =="SPR.2232", ]
-plot( seq(0, 1000000000, by=1e6), ssbr (alpha=a_pop_pa[,'a_SSB'], beta=a_pop_pa[,'b_SSB'], ssb=seq(0, 1000000000, by=1e6)), type="l")
-lines(seq(0, 1000000000, by=1e6), ssbr (a_pop_pa[,'a_SSB']*0.5,a_pop_pa[,'b_SSB']*0.5, seq(0, 1000000000, by=1e6)), type="l", col=2)
-lines(seq(0, 1000000000, by=1e6), ssbr (a_pop_pa[,'a_SSB']*1.2,a_pop_pa[,'b_SSB']*1.2, seq(0, 1000000000, by=1e6)), type="l", col=3)
-assess <- read.table(file='C:/Users/fba/Dropbox/ibm_vessels_param/summary_table_from_WGBFAS11_SPR_BE.txt',header = TRUE,  sep=",")
-points( assess$TOTSPBIO*1e6, assess$RECRUITS*1e6, pch="+", cex=2)
+
+# some checks...
+#a_pop_pa <- pa[pa$pop.to.keeps =="SPR.2232", ]
+#plot( seq(0, 1000000000, by=1e6), ssbr (alpha=a_pop_pa[,'a_SSB'], beta=a_pop_pa[,'b_SSB'], ssb=seq(0, 1000000000, by=1e6)), type="l")
+#lines(seq(0, 1000000000, by=1e6), ssbr (a_pop_pa[,'a_SSB']*0.5,a_pop_pa[,'b_SSB']*0.5, seq(0, 1000000000, by=1e6)), type="l", col=2)
+#lines(seq(0, 1000000000, by=1e6), ssbr (a_pop_pa[,'a_SSB']*1.2,a_pop_pa[,'b_SSB']*1.2, seq(0, 1000000000, by=1e6)), type="l", col=3)
+#assess <- read.table(file='C:/Users/fba/Dropbox/ibm_vessels_param/summary_table_from_WGBFAS11_SPR_BE.txt',header = TRUE,  sep=",")
+#points( assess$TOTSPBIO*1e6, assess$RECRUITS*1e6, pch="+", cex=2)
 
 
-# build a matrix a scenarios
+# build a matrix of scenarios
 multiplier_for_biolsce_all_pops  <- expand.grid(biolsce_maturity=1, biolsce_M=1, biolsce_weight=1, biolsce_init_pops=1, biolsce_init_pops_2011=1, 
                                          biolsce_fecundity=1, biolsce_Ks=c(1, 0.8), biolsce_recru=c(1, 0.5), 
                                           pop=c('SPR.2232', 'HER.3a22', 'COD.2224'))
@@ -109,9 +110,9 @@ for (sce in sces){
 
 
 
- timesteps   <- 21       #time steps 10 years with 2 semesters each 
+ timesteps   <- 21       # time steps 10 years with 2 semesters each 
  NbPeriods   <- 2        # 2 semesters within the year
- pop         <- 10000    #number of simulated individuals
+ pop         <- 10000    # number of simulated individuals
 
 
 # init the output file with headers (a multimap for c++ with / pop idx / values over the szgroup) 
@@ -161,10 +162,10 @@ for(x in 1:length(pa$Ks)){
 
 
   #simulate individual growth trajectories
-  indlength<-mat.or.vec(pop,timesteps)  #define growth matrix
-  meanI    <-mat.or.vec(pop,timesteps)      #mean Increment
-  inc      <-mat.or.vec(pop,timesteps)        #increment
-  varI     <-mat.or.vec(pop,timesteps)       #variance of increment
+  indlength<-mat.or.vec(pop,timesteps)      # define growth matrix
+  meanI    <-mat.or.vec(pop,timesteps)      # mean Increment
+  inc      <-mat.or.vec(pop,timesteps)      # increment
+  varI     <-mat.or.vec(pop,timesteps)      # variance of increment
 
   #assign initial size of recruits
   for(i in 1:pop){
@@ -290,7 +291,7 @@ for(x in 1:length(pa$Ks)){
     weight<- rep(0, 14)
    }
     init_weight<-rbind(pa$index_pops[x],weight) 
-    write(init_weight[,1:14], file=file.path(main.path,"popsspe",paste("init_weight_per_szgroup_biolsce",sce,".dat",sep='')),sep=" ",ncolumns=2, append=TRUE) 
+  write(init_weight[,1:14], file=file.path(main.path,"popsspe", paste("init_weight_per_szgroup_biolsce",sce,".dat",sep='')),sep=" ",ncolumns=2, append=TRUE) 
  
 
   #build size transition matrix G
@@ -368,7 +369,7 @@ for(x in 1:length(pa$Ks)){
    } else{
     # fill in with fake numbers for implicit pops i.e.
     #  the pops for which we do not have info on N because not assessed by ICES
-    # in this case the pop is not truly simulated in the IBM simulation but catches can still be done
+    # in this  case the pop is not truly simulated in the IBM simulation but catches can still be done
     # using historic vessel and species-specific cpues...see Bastardie et al 2010
      options(scipen=99)
     write.table(cbind(rep(pa$index_pops[x],14), rep(100000,14))[1:14,],
@@ -445,12 +446,11 @@ res
 #ICES have a summary database at http://www.ices.dk/datacentre/StdGraphDB/FishStockDB.mdb containing a summary 
 #of all stocks assessments done by ICES.
 #These data are in the form of an access database.
-library(RODBC);library(googleVis)
-if(FRANCOIS) channel <- odbcConnectAccess("C:\\Users\\fba\\Dropbox\\ibm_vessels_param\\FishStockDB.mdb")
-if(TANJA) channel <- odbcConnectAccess("C:\\Users\\Tanja\\Documents\\My Dropbox\\Vessel\\ibm_vessels_param\\FishStockDB.mdb")
-fishdta <- sqlFetch(channel,"Fishdata")[,1:9]
-fishhrv <- gvisMotionChart(fishdta, idvar="FishStock", timevar="Year")
-plot(fishhrv) ## pretty nice!
+#library(RODBC);library(googleVis)
+#if(FRANCOIS) channel <- odbcConnectAccess("C:\\Users\\fba\\Dropbox\\ibm_vessels_param\\FishStockDB.mdb")
+#fishdta <- sqlFetch(channel,"Fishdata")[,1:9]
+#fishhrv <- gvisMotionChart(fishdta, idvar="FishStock", timevar="Year")
+#plot(fishhrv) ## pretty nice!
 # we can use this database to get total landings per stock (but no discards info unfortunatly)
 ### but only ASSESSED stocks...so we need to use e.g. ICES_catch_statistics_1950_2009 instead 
 ## (http://www.ices.dk/fish/CATChSTATISTICS.asp) to get all landed species

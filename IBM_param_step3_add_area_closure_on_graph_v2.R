@@ -45,8 +45,10 @@ return(path) # index pts compatible with coord
 ##-------------LOAD THE GRAPH TO ALTER--------------------------------------##
 ##--------------------------------------------------------------------------##
 
-## FILES FOR BUILDING A IGRAPH
-load(file.path(general$main.path,"graphsspe", "11_graphibm.RData")) # built from the R code - balticonly DEN, DEU, SWE
+ ## FILES FOR BUILDING A IGRAPH
+ load(file.path(general$main.path,"graphsspe", "11_graphibm.RData")) # built from the R code - balticonly DEN, DEU, SWE
+
+
 
 ##--------------------------------------------------------------------------##
 ##-------------DEFINE ZONES FOR CLOSURE-------------------------------------##

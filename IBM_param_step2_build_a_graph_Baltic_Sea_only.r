@@ -577,6 +577,140 @@ return(short.path.dists)
 }
 
 
+   #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ library(maps)
+
+  ICESarea2 <-
+function (tacsat, string = TRUE)
+{
+    library(sp)
+    ICES.area <- rep(NA, dim(tacsat)[1])
+    ICES.area[point.in.polygon(point.x = tacsat$SI_LONG, point.y = tacsat$SI_LATI,
+        pol.x = c(8.648336, 7.034822, 7.357525, 9.083985, 9.608377,
+            10.22958, 10.689431, 11.084742, 11.617201, 12.068985,
+            11.972174, 10.59262, 9.971417, 9.39862, 8.648336),
+        pol.y = c(57.08073, 57.99182, 58.20964, 58.87187, 59.32015,
+            59.86417, 59.99375, 59.8804, 58.96783, 58.0774, 57.4653,
+            57.74247, 57.50441, 57.10708, 57.08073)) > 0] <- ifelse(string, 'kask', '0')
+    ICES.area[point.in.polygon(point.x = tacsat$SI_LONG, point.y = tacsat$SI_LATI,
+        pol.x = c(10.59262, 11.97217, 12.15883, 12.70796, 13.12992,
+            12.80622, 12.95073, 12.72185, 12.45127, 12.29556,
+            12.13384, 11.99063, 11.58487, 11.58487, 11.63281,
+            11.49492, 11.3094, 11.27652, 10.71374, 10.70218,
+            10.24553, 10.19351, 10.42472, 10.59262), pol.y = c(57.74247,
+            57.4653, 57.48032, 56.94085, 56.46389, 56.36135,
+            56.19091, 56.16918, 56.29535, 56.12728, 55.49119,
+            55.28764, 55.63113, 55.91101, 55.90623, 55.94866,
+            55.97965, 56.00988, 56.14253, 56.25853, 56.49587,
+            57.11107, 57.63566, 57.74247)) > 0] <-ifelse(string,'kask', '0')
+    ICES.area[point.in.polygon(point.x = tacsat$SI_LONG, point.y = tacsat$SI_LATI,
+        pol.x = c(-4, 7, 8, 7, 7, 7.906163, -4, -4.6, -4.6, -4),
+        pol.y = c(62, 62, 61.5, 60, 58, 57.5, 57.5, 57.3, 58.2,
+            58.4)) > 0] <- ifelse(string,'nsea', '1')
+    ICES.area[point.in.polygon(point.x = tacsat$SI_LONG, point.y = tacsat$SI_LATI,
+        pol.x = c(7.906163, 8.6488368, 8.5, 10.3, 10.3, 9.2,
+            9.2, 7.11, -1, -4, -1.78), pol.y = c(57.5, 57.08073,
+            57, 57.3, 57, 56.2, 52.7, 53.5, 53.5, 56.1, 57.5)) >
+        0] <- ifelse(string,'nsea', '1')
+    ICES.area[point.in.polygon(point.x = tacsat$SI_LONG, point.y = tacsat$SI_LATI,
+        pol.x = c(0, 0.5, 7.5, 7.5), pol.y = c(53.5, 51, 51,
+            53.5)) > 0] <- ifelse(string,'nsea', '1')
+    ICES.area[point.in.polygon(point.x = tacsat$SI_LONG, point.y = tacsat$SI_LATI,
+        pol.x = c(12, 12, 11.94, 11.97, 12, 12, 15, 15, 14.78,
+            14.2, 13.7, 12.81, 12.44), pol.y = c(55.3, 54.75,
+            54.67, 54.56, 54.56, 53.5, 53.5, 55, 55.3, 55.4,
+            55.5, 55.38, 55.33)) > 0] <- ifelse(string,'2224', '2')
+    ICES.area[point.in.polygon(point.x = tacsat$SI_LONG, point.y = tacsat$SI_LATI,
+        pol.x = c(14.2, 14.78, 15, 15, 18, 18, 14.2), pol.y = c(55.4,
+            55.3, 55, 53, 53, 56.5, 56.5)) > 0] <- ifelse(string,'2532', '3')
+    ICES.area[point.in.polygon(point.x = tacsat$SI_LONG, point.y = tacsat$SI_LATI,
+        pol.x = c(18, 18, 22, 22), pol.y = c(56.5, 53.5, 53.5,
+            56.5)) > 0] <- ifelse(string,'2532', '3')
+    ICES.area[point.in.polygon(point.x = tacsat$SI_LONG, point.y = tacsat$SI_LATI,
+        pol.x = c(18, 18, 18.32, 18.32, 19, 19, 16, 16), pol.y = c(56.5,
+            57, 57, 57.5, 57.925, 59.762, 59.762, 56.5)) > 0] <- ifelse(string,'2532', '3')
+    ICES.area[point.in.polygon(point.x = tacsat$SI_LONG, point.y = tacsat$SI_LATI,
+        pol.x = c(19, 19, 18.45, 18.3, 18, 18, 21.5, 21.72, 21.98,
+            22.17, 22.24, 21.93), pol.y = c(58.5, 57.9, 57.58,
+            57, 57, 56.5, 56.5, 57.57, 57.97, 58.04, 58.15,
+            58.5)) > 0] <- ifelse(string,'2532', '3')
+    ICES.area[point.in.polygon(point.x = tacsat$SI_LONG, point.y = tacsat$SI_LATI,
+        pol.x = c(21.5, 21.72, 21.98, 22.17, 22.24, 22.24, 23,
+            25, 25), pol.y = c(56.5, 57.57, 57.97, 58.04, 58.15,
+            58.35, 58.5, 58.5, 56.5)) > 0] <- ifelse(string,'2532', '3')
+    ICES.area[point.in.polygon(point.x = tacsat$SI_LONG, point.y = tacsat$SI_LATI,
+        pol.x = c(19, 17.975, 21.6, 21.8, 23.325, 23.325, 23.191,
+            23, 23, 23.5, 23.6, 24, 23.692, 22.5, 22.1, 21.92,
+            19), pol.y = c(59.762, 60.5, 60.5, 60.7, 60.5, 59.965,
+            59.867, 59.827, 59, 59, 59.05, 58.75, 59.5, 59.5,
+            58.35, 58.5, 58.5)) > 0] <- ifelse(string,'2532', '3')
+    ICES.area[point.in.polygon(point.x = tacsat$SI_LONG, point.y = tacsat$SI_LATI,
+        pol.x = c(16.5, 16.5, 19.7, 19.7, 22.6, 21.4), pol.y = c(60.5,
+            63.7, 63.7, 63.5, 63.5, 60.5)) > 0] <- ifelse(string,'2532', '3')
+    ICES.area[point.in.polygon(point.x = tacsat$SI_LONG, point.y = tacsat$SI_LATI,
+        pol.x = c(19.7, 19.7, 25.7, 25.7, 19.7), pol.y = c(63.7,
+            63.5, 63.5, 67, 67)) > 0] <-ifelse(string,'2532', '3')
+    ICES.area[point.in.polygon(point.x = tacsat$SI_LONG, point.y = tacsat$SI_LATI,
+        pol.x = c(23.325, 23.325, 23.191, 23, 23, 30.5, 30.5),
+        pol.y = c(60.5, 59.965, 59.867, 59.827, 59, 59, 60.5)) >
+        0] <- ifelse(string,'2532', '3')
+    ICES.area[point.in.polygon(point.x = tacsat$SI_LONG, point.y = tacsat$SI_LATI,
+        pol.x = c(12.297, 12.13, 12.45, 12.81, 12.94, 13.21,
+            12.5, 12.448), pol.y = c(56.13, 55.48, 55.31, 55.38,
+            55.41, 55.71, 56.29, 56.305)) > 0] <- ifelse(string,'2224', '2')
+    ICES.area[point.in.polygon(point.x = tacsat$SI_LONG, point.y = tacsat$SI_LATI,
+        pol.x = c(10.1, 10.75, 10.71, 11.58, 11.58, 11.99, 11.94,
+            11.97, 12, 12, 9.3, 9.3), pol.y = c(56.6, 56.3, 56.15,
+            55.9, 55.65, 55, 54.67, 54.56, 54.56, 53.75, 53.75,
+            56.6)) > 0] <- ifelse(string,'2224', '2')
+    return(ICES.area)
+}
+
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ICESrectangle <- function (dF)
+{
+    rectChar1n2 <- as.integer(2 * (dF[, "SI_LATI"] - 35.5))
+    rectChar3 <- ifelse(dF[, "SI_LONG"] <= -40, "A", ifelse(dF[,
+        "SI_LONG"] <= -30, "B", ifelse(dF[, "SI_LONG"] <= -20,
+        "C", ifelse(dF[, "SI_LONG"] <= -10, "D", ifelse(dF[,
+            "SI_LONG"] <= 0, "E", ifelse(dF[, "SI_LONG"] <= 10,
+            "F", ifelse(dF[, "SI_LONG"] <= 20, "G", ifelse(dF[,
+                "SI_LONG"] <= 30, "H", "I"))))))))
+    rectChar4 <- as.integer(dF[, "SI_LONG"]%%10)
+    rectID <- paste(rectChar1n2, rectChar3, rectChar4, sep = "")
+    return(rectID)
+}
+
+
+   #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ICESrectangle2LonLat <- function (statsq, midpoint = F) {
+    part1 <- substr(statsq, 1, 2)
+    part2 <- substr(statsq, 3, 4)
+    labels <- 0:90
+    latlabels <- ifelse(labels < 10, paste("0", labels, sep = ""),
+        as.character(labels))
+    latvalues <- seq(35.5, 80.5, 0.5) + 0.25
+    lonlabels <- paste(rep(LETTERS[2:8], rep(10, 7)), rep(0:9,
+        7), sep = "")
+    lonvalues <- (-40:29) + 0.5
+    indx <- match(part1, latlabels)
+    lat <- latvalues[indx]
+    indx <- match(part2, lonlabels)
+    lon <- lonvalues[indx]
+    if (any(is.na(lat)) | any(is.na(lon)))
+        warning("Some stat squares have not been recognised.")
+    if (midpoint == F) {
+        lat <- lat - 0.25
+        lon <- lon - 0.5
+    }
+    return(data.frame(SI_LATI = lat, SI_LONG = lon))
+   }
+
+
+
 ###############################################################################
 ###############################################################################
 ###############################################################################
@@ -697,6 +831,7 @@ windows(15,15)
 #load(file.path(general$main_path_ibm_param,"igraph","8_graphibm.RData")) # built from the R code
 load(file.path(general$main_path_ibm_param,"igraph","11_graphibm.RData")) # built from the R code
 
+
  # save a plot
  windows(5,5)
  plot(coord[,1], coord[,2], pch=".", xlab="Longitude", ylab="Latitude", xlim=c(-8,23), ylim=c(52,65))
@@ -729,6 +864,38 @@ load(file.path(general$main_path_ibm_param,"igraph","11_graphibm.RData")) # buil
        #paste("map_graph6_points_zoom_in.jpeg",sep='')), type="jpeg")
 
  
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ # create a file with node/code area for area-based management...
+ code_area           <- data.frame(coord)
+ colnames(code_area) <- c("SI_LONG","SI_LATI","code_area")
+ code_area$code_area <- ICESarea2(code_area, string=FALSE)
+ code_area[is.na(code_area[,3]), 3] <- 10 # open sea
+ # check
+ points(code_area[,1],code_area[,2], col=code_area[,3], pch=16)
+ code_area[,1] <- as.numeric(as.character(code_area[,1]))
+ code_area[,2] <- as.numeric(as.character(code_area[,2]))
+ code_area[,3] <- as.numeric(as.character(code_area[,3]))
+ if(FRANCOIS) write.table(signif(c(as.matrix(code_area)), 4),file=file.path(general$main.path,"igraph", paste("code_area_for_graph", general$igraph,"_points.dat",sep="")), row.names=FALSE, quote=FALSE)
+
+
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ # create a file with node/ICES square for area-based management...
+ code_square             <- data.frame(coord)
+ colnames(code_square)   <- c("SI_LONG","SI_LATI","code_square")
+ code_square$code_square <- ICESrectangle(code_square)
+ code_square[is.na(code_square[,3]), 3] <- '99A9' # not found
+ code_square[, 1:2]      <- signif(code_square[, 1:2],4)
+ write.table(code_square,file=file.path(general$main.path,"igraph", paste("code_square_for_graph",general$igraph,"_points.dat",sep="")), row.names=FALSE, quote=FALSE)
+
+
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ 
+
+
+
  
 # using ggmap
 library(ggplot2)
