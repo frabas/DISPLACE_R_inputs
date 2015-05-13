@@ -7,6 +7,16 @@
  ##!!!!!!!!!!!!!!!!PER POP AND SEMESTER!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
 
+  general <- list()
+  general$main.path      <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_raw")
+  general$main.path.code <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
+
+     
+  general$igraph                <- 11
+  general$case_study            <- "baltic_only"
+  general$case_study_countries  <- c("DEN", "SWE", "DEU")    # for the Baltic only
+  general$a.year                <- "2012"
+
  if(FRANCOIS){
    if(general$case_study=="canadian_paper"){
       year      <- "2010"

@@ -128,7 +128,7 @@
  for(st in levels(prices_best_size_cat$stock)) {
     rg_fishprice[[st]] <- matrix(0, ncol=5, nrow=12)
     for(m in 1 : length(months)) {
-       rg_fishprice[[st]][m,]                  <- quantile(prices_best_size_cat[prices_best_size_cat$month==months[m], "price"],
+       rg_fishprice[[st]][m,]                  <- quantile(prices_best_size_cat[prices_best_size_cat$month==months[m] & prices_best_size_cat$stock==st, "price"],
                                              probs=c(0,0.25,0.50,0.75,1))
     }
  }

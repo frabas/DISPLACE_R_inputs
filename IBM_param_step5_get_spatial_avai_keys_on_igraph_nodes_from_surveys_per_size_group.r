@@ -645,6 +645,13 @@ if(nmy=="2012")       load(file.path("C:","displace-project.org","repository","i
  idx                <- all_other_species & obj$ICESareas %in% c("25", "26", "27","28-1","28-2","29","30","31","32")
  obj[idx, "Stock" ] <- paste(obj[idx,"Species"], '2532', sep="_")
 
+ 
+ #library(reshape)
+ #obj <- melt(obj, id=c("Survey", "Year", "Semester", "Quarter", "id", "ShootLon", "ShootLat", "Species", "Stock", "x", "y", "ICESareas")) 
+ #colnames(obj)[colnames(obj) %in% "variable"] <- "SizeGroup"
+ #colnames(obj)[colnames(obj) %in% "value"]    <- "NbIndiv"
+ #levels(obj$SizeGroup) <- gsub("nb_indiv.","",levels(obj$SizeGroup))
+ 
   
   write.table(obj, file=file.path("C:", "Users", "fbas", "Documents", "GitHub" ,"DISPLACE_input_raw", "avai",
            paste("survey_pop_distribution_on_points_ibts_2008_2012.txt",sep='')), sep=";", quote=FALSE, row.names=FALSE, col.names=TRUE)
