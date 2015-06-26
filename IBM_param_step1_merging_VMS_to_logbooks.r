@@ -12,9 +12,10 @@ HEINO    <- FALSE
 
 # set your own path here:
 if(FRANCOIS){
-   main_path_data         <-  file.path("C:","merging", "EflaloAndTacsat")
-   main_path_ibm_param    <- file.path("C:","displace-project.org","repository", "ibm_vessels_param")   
-   main_path_ibm_param_R  <- file.path("C:","displace-project.org","repository", "ibm_vessels_param_R")   
+   main_path_data         <- file.path("C:","merging", "EflaloAndTacsat")
+   main_path_ibm_param    <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw")  
+   main_path_ibm_param_R  <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_R_inputs") 
+
    }
 if(HEINO){
    main_path_data          <-  file.path("C:","merging", "EflaloAndTacsat","GermanEflaloTacsat")
@@ -38,8 +39,16 @@ if(HEINO){
   #y <- "2009"  
   #y <- "2010"
   y <- "2012"
+  #y <- "2013"
+  y <- "2014"
   
   if(FRANCOIS){ 
+                # ease the loading by creating RData objects.
+                #tacsat <- read.table(file.path("C:","merging","EflaloAndTacsat", paste("tacsat2_",y,".csv",sep="")), header=TRUE, sep=",")
+                #save(tacsat, file=file.path("C:","merging","EflaloAndTacsat", paste("tacsat",y,".RData",sep="")))
+                #eflalo <- read.table(file.path("C:","merging","EflaloAndTacsat", paste("eflalo3_",y,".csv",sep="")), header=TRUE, sep=",")
+                #save(eflalo, file=file.path("C:","merging","EflaloAndTacsat", paste("eflalo_",y,".RData",sep="")))
+                
                 load(file.path(main_path_data, paste("tacsat",y,".RData",sep='')) )
                 load(file.path(main_path_data, paste("eflalo_",y,".RData",sep='')))
   }
@@ -287,6 +296,7 @@ if(HEINO){
   ###--------------------------------###
   eflalo$LE_MET_level6 <- eflalo$LE_MET
   eflalo <- eflalo[eflalo$LE_MET!="No_logbook6",]
+  eflalo <- eflalo[eflalo$LE_MET!="No_logbook6_>10",]
   if(FRANCOIS) eflalo$VE_FLT<-"fleet1"
 
 

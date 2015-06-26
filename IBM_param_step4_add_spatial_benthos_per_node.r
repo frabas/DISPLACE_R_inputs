@@ -9,23 +9,45 @@
 # 3. attach a mortality function
 # 4. attach a recovery function
 
- a_case <- "balticonly"
+ a_case <- "myfish"
 
   # GENERAL SETTINGS
   if(a_case=="balticonly"){
      general <- list()
-     general$main.path      <- file.path("C:","displace-project.org","repository", "ibm_vessels_param")
-     general$main.path.code <- file.path("C:","displace-project.org","repository", "ibm_vessels_param_R")
+     general$main.path      <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input")
+     general$main.path.code <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_R_inputs")
    
      general$igraph                <- 11
      general$case_study            <- "baltic_only"
      general$case_study_countries  <- c("DEN", "SWE", "DEU")    # for the Baltic only
      general$a.year                <- "2012"
      }
+     
+  if(a_case=="myfish"){   
+     general <- list()
+     general$main.path      <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input")
+     general$main.path.code <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_R_inputs")
+     
+     general$igraph                <- 56
+     general$case_study            <- "myfish"
+     general$case_study_countries  <- c("DEN", "SWE", "DEU")    # for the myfish cod app
+     general$a.year                <- "2012"
+     }
     
- 
-  load(file.path(general$main.path, "igraph", paste(general$igraph, "_graphibm.RData",sep=''))) # built from the R code
+                                                      
+  #load(file.path(general$main.path, "igraph", paste(general$igraph, "_graphibm.RData",sep=''))) # built from the R code
+  coord <- read.table(file=file.path(general$main.path, "graphsspe", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
+  coord <- as.matrix(as.vector(coord))
+  coord <- matrix(coord, ncol=3)
+  colnames(coord) <- c('x', 'y', 'harb')
+  plot(coord[,1], coord[,2])
 
+
+ 
+  graph <- read.table(file=file.path(general$main.path, "graphsspe", paste("graph", general$igraph, ".dat", sep=""))) # build from the c++ gui
+  graph <- as.matrix(as.vector(graph))
+  graph <- matrix(graph, ncol=3)
+  segments(coord[graph[,1]+1,1], coord[graph[,1]+1,2], coord[graph[,2]+1,1], coord[graph[,2]+1,2], col=4) # CAUTION: +1, because c++ to R
  
   ##---------------------------------------------------------------------------##
   ##---------------------------------------------------------------------------##
@@ -98,7 +120,7 @@
  
  
   # EXPORT FOR C++------------
-  write(coord[, 'landscapes_code'], file=file.path(general$main.path,"igraph", paste("coord", general$igraph,"_with_landscape.dat", sep='')), ncol=1)
+  write(coord[, 'landscapes_code'], file=file.path(general$main.path,"graphsspe", paste("coord", general$igraph,"_with_landscape.dat", sep='')), ncol=1)
   nrow(coord)
   ncol(coord)
   #----------------------------

@@ -34,17 +34,35 @@ c.listquote <- function( ... ) {
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
+
+general                     <- list()
+general$main_path           <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_raw")
+general$main_path_input     <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input")
+general$main_path_R_inputs  <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
+general$igraph              <- "4"  # for the CJFAS paper
+general$igraph              <- "11"  # for the Baltic onyl case   
+general$igraph              <- "56"   # for the myfish case
+general$method              <- "maximum" # for the canadian paper
+general$threshold           <- 50
+general$method              <- "inverse" # for the baltic only CS. because the grid mesh size if much finer
+general$threshold           <- 25
+general$p                   <- 0.1
+# => http://fr.wikipedia.org/wiki/Pond%C3%A9ration_inverse_%C3%A0_la_distance : p est un nombre positif réel, appelé le paramètre de puissance. Ici, le poids des points voisins diminue lorsque la distance augmente. Les plus grandes valeurs de p donnent une influence plus grande aux valeurs les plus proches du point interpolé. Pour 0 < p < 1 u(x) donne des pics lissés au-dessus du point interpolé xk, alors que pour p > 1 le pic devient plus pointu. 
+
+
+
+
 if(FALSE){
-#igraph    <- "4"  # for the CJFAS paper
-igraph    <- "11"  # for the Baltic onyl case
+
+
 for (nmy in c("2008_2012", "2012")){
 ## CAUTION HERE: we need to run the script twice:
 # 1: for the ibm runs: smoothed distribution over a period of 5 years
 # 2: for the glm informing the catch equation (only one year to be sure to have the correponding avai to the origin of landings in this year)
 
 
-bits.cpue <- read.table("C:\\displace-project.org\\repository\\ibm_vessels_param\\IBM_datainput_DATRAS_CPUE_all_sp_per_length_per_haul_BITS_2008_2012.csv", header=TRUE, sep=",")
-ibts.cpue <- read.table("C:\\displace-project.org\\repository\\ibm_vessels_param\\IBM_datainput_DATRAS_CPUE_selected_sp_per_length_per_haul_NS-IBTS_2008_2012.csv", header=TRUE, sep=",")
+bits.cpue <- read.table(file.path(general$main_path, "IBM_datainput_DATRAS_CPUE_all_sp_per_length_per_haul_BITS_2008_2012.csv"), header=TRUE, sep=",")
+ibts.cpue <- read.table(file.path(general$main_path, "IBM_datainput_DATRAS_CPUE_selected_sp_per_length_per_haul_NS-IBTS_2008_2012.csv"), header=TRUE, sep=",")
 
 #selected in datras for NS-IBTS: 
 #                 Sandeel        Ammodytes marinus      SAN
@@ -80,7 +98,7 @@ ibts.cpue$Year <- factor(ibts.cpue$Year)
 bits.cpue$Year <- factor(bits.cpue$Year)
 
 # get species fao code + add missing or mispelling species e.g. PRA and SAN
-load("C:\\displace-project.org\\repository\\ibm_vessels_param\\IBM_datainput_speciesLatinNames.rda")
+load(file.path(general$main_path, "IBM_datainput_speciesLatinNames.rda"))
 speciesLatinNames <- rbind.data.frame(speciesLatinNames, 
                               data.frame(species_eng="Pandalus", ff_species_latin="Pandalus", fao_code="PRA"))
 speciesLatinNames <- rbind.data.frame(speciesLatinNames, 
@@ -90,7 +108,7 @@ speciesLatinNames <- rbind.data.frame(speciesLatinNames,
 ## so use the commercial cpue instead. 
 ## caution: tricky there because replace the records of the ibts survey with the commercial (Danish) geolocalized cpue...
 # load the data from VMS/logbook coupling
-load("C:\\output\\merged_DEN_2012\\all_merged_weight_2012.RData")
+load(file.path(general$main_path, "merged_tables", "baltic_only", "all_merged_weight_DEN_2012.RData"))
 spp <- c("LE_KG_PRA", "LE_KG_CSH", "LE_KG_OYF", "LE_KG_MUS", "LE_KG_NEP")
 ibts.cpue$Species <- as.character(ibts.cpue$Species)
 bits.cpue$Species <- as.character(bits.cpue$Species)
@@ -141,16 +159,27 @@ rm(all.merged); gc(reset=TRUE)
 
 bits.cpue$Species_latin <- bits.cpue$Species
 ibts.cpue$Species_latin <- ibts.cpue$Species
-bits.cpue$Species <- speciesLatinNames$fao_code[match(bits.cpue$Species, speciesLatinNames$ff_species_latin)]
-ibts.cpue$Species <- speciesLatinNames$fao_code[match(ibts.cpue$Species, speciesLatinNames$ff_species_latin)]
+bits.cpue$Species       <- speciesLatinNames$fao_code[match(bits.cpue$Species, speciesLatinNames$ff_species_latin)]
+ibts.cpue$Species       <- speciesLatinNames$fao_code[match(ibts.cpue$Species, speciesLatinNames$ff_species_latin)]
 
-bits.cpue <- bits.cpue[!is.na(bits.cpue$Species),] 
-ibts.cpue <- ibts.cpue[!is.na(ibts.cpue$Species),] 
+bits.cpue               <- bits.cpue[!is.na(bits.cpue$Species),] 
+ibts.cpue               <- ibts.cpue[!is.na(ibts.cpue$Species),] 
 
 
 ## FILES FOR BUILDING A IGRAPH
-load(file.path("C:","displace-project.org","repository","ibm_vessels_param","igraph",paste(igraph,"_graphibm.RData",sep=''))) # get coord
+#load(file.path("C:","displace-project.org","repository","ibm_vessels_param","igraph",paste(igraph,"_graphibm.RData",sep=''))) # get coord  from the R code
+coord <- read.table(file=file.path(general$main_path_input, "graphsspe", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
+coord <- as.matrix(as.vector(coord))
+coord <- matrix(coord, ncol=3)
+colnames(coord) <- c('x', 'y', 'dist')
+#plot(coord[,1], coord[,2])
+
+
+
 coord <- cbind(coord, 1:nrow(coord)) # keep track of the idx_node
+
+
+
 
 # BUILD THE IGRAPH OBJECT IN R
 # library(igraph)
@@ -173,15 +202,15 @@ levels(ibts.cpue$Semester) <- c(1,1,2,2) # IBTS in Q1, Q2 and Q3
 #------------------------  
 # keep only relevant species
 # BITS
-species.to.keep <- c("COD", "PLE", "HER", "SPR", "WHG", "TUR", "FLE", "DAB", "POK", "SOL", "HOM", "MON", "HKE", "HAD", 
+species.to.keep     <- c("COD", "PLE", "HER", "SPR", "WHG", "TUR", "FLE", "DAB", "POK", "SOL", "HOM", "MON", "HKE", "HAD", 
                           "MUS", "OYF", "NEP")
-bits.cpue <- bits.cpue [bits.cpue$Species %in% species.to.keep,] 
-bits.cpue$Species <- factor(bits.cpue$Species)
+bits.cpue           <- bits.cpue [bits.cpue$Species %in% species.to.keep,] 
+bits.cpue$Species   <- factor(bits.cpue$Species)
 
 # NS-IBTS
-species.to.keep <- levels(ibts.cpue$Species) # keep all, actually...
-ibts.cpue <- ibts.cpue [ibts.cpue$Species %in% species.to.keep,] 
-ibts.cpue$Species <- factor(ibts.cpue$Species)
+species.to.keep     <- levels(ibts.cpue$Species) # keep all, actually...
+ibts.cpue           <- ibts.cpue [ibts.cpue$Species %in% species.to.keep,] 
+ibts.cpue$Species   <- factor(ibts.cpue$Species)
 
 
 
@@ -209,32 +238,32 @@ for (sp in c("CSH","PRA")){
     ibts.cpue[ibts.cpue$Species==sp,'ShootLat'] <- round(as.numeric(as.character(ibts.cpue[ibts.cpue$Species==sp,'ShootLat'])),1)
     ibts.cpue[ibts.cpue$Species==sp,'ShootLon'] <- round(as.numeric(as.character(ibts.cpue[ibts.cpue$Species==sp,'ShootLon'])),1)
     } #=> discretise a little bit the coordinates to improve the aggregation and speed up the reshape()!
-ibts.cpue$ShootLat <- factor(ibts.cpue$ShootLat)
-ibts.cpue$ShootLon <- factor(ibts.cpue$ShootLon)
-ibts.cpue$size_group <- factor(ibts.cpue$size_group)
-ibts.cpue$id <- factor(paste(ibts.cpue$Year,".",ibts.cpue$Quarter,".",
-                          ibts.cpue$HaulNo,".",ibts.cpue$Species,".",ibts.cpue$ShootLon,".",ibts.cpue$ShootLat, sep=''))
-DT  <- data.table(ibts.cpue) # library data.table for fast grouping replacing aggregate()
-eq1  <- c.listquote(paste("sum(","CPUE_number_per_hour",",na.rm=TRUE)",sep=""))
-agg.ibts.cpue <- DT[,eval(eq1),by=list(Survey,Year,Semester,Quarter,id, ShootLon,ShootLat, Species,size_group)]
-agg.ibts.cpue <- data.frame(agg.ibts.cpue)
-colnames(agg.ibts.cpue) <- c("Survey", "Year", "Semester", "Quarter", "id", "ShootLon", "ShootLat", "Species", "size_group", "nb_indiv")
+ibts.cpue$ShootLat        <- factor(ibts.cpue$ShootLat)
+ibts.cpue$ShootLon        <- factor(ibts.cpue$ShootLon)
+ibts.cpue$size_group      <- factor(ibts.cpue$size_group)
+ibts.cpue$id              <- factor(paste(ibts.cpue$Year,".",ibts.cpue$Quarter,".",
+                                          ibts.cpue$HaulNo,".",ibts.cpue$Species,".",ibts.cpue$ShootLon,".",ibts.cpue$ShootLat, sep=''))
+DT                        <- data.table(ibts.cpue) # library data.table for fast grouping replacing aggregate()
+eq1                       <- c.listquote(paste("sum(","CPUE_number_per_hour",",na.rm=TRUE)",sep=""))
+agg.ibts.cpue             <- DT[,eval(eq1),by=list(Survey,Year,Semester,Quarter,id, ShootLon,ShootLat, Species,size_group)]
+agg.ibts.cpue             <- data.frame(agg.ibts.cpue)
+colnames(agg.ibts.cpue)   <- c("Survey", "Year", "Semester", "Quarter", "id", "ShootLon", "ShootLat", "Species", "size_group", "nb_indiv")
 
 # BITS
 for (sp in c("OYF","MUS","NEP")){
     bits.cpue[bits.cpue$Species==sp,'ShootLat'] <- round(as.numeric(as.character(bits.cpue[bits.cpue$Species==sp,'ShootLat'])),1)
     bits.cpue[bits.cpue$Species==sp,'ShootLon'] <- round(as.numeric(as.character(bits.cpue[bits.cpue$Species==sp,'ShootLon'])),1)
     } #=> discretise a little bit the coordinates to improve the aggregation and speed up the reshape()!
-bits.cpue$ShootLat <- factor(bits.cpue$ShootLat)
-bits.cpue$ShootLon <- factor(bits.cpue$ShootLon)
-bits.cpue$size_group <- factor(bits.cpue$size_group)
-bits.cpue$id <- factor(paste(bits.cpue$Year,".",bits.cpue$Quarter,".",
-                              bits.cpue$HaulNo,".",bits.cpue$Species,".",bits.cpue$ShootLon,".",bits.cpue$ShootLat, sep=''))
-DT  <- data.table(bits.cpue) # library data.table for fast grouping replacing aggregate()
-eq1  <- c.listquote(paste("sum(","CPUE_number_per_hour",",na.rm=TRUE)",sep=""))
-agg.bits.cpue <- DT[,eval(eq1),by=list(Survey,Year,Semester,Quarter,id, ShootLon,ShootLat, Species,size_group)]
-agg.bits.cpue <- data.frame(agg.bits.cpue)
-colnames(agg.bits.cpue) <- c("Survey", "Year", "Semester", "Quarter", "id", "ShootLon", "ShootLat", "Species", "size_group", "nb_indiv")
+bits.cpue$ShootLat        <- factor(bits.cpue$ShootLat)
+bits.cpue$ShootLon        <- factor(bits.cpue$ShootLon)
+bits.cpue$size_group      <- factor(bits.cpue$size_group)
+bits.cpue$id              <- factor(paste(bits.cpue$Year,".",bits.cpue$Quarter,".",
+                                          bits.cpue$HaulNo,".",bits.cpue$Species,".",bits.cpue$ShootLon,".",bits.cpue$ShootLat, sep=''))
+DT                        <- data.table(bits.cpue) # library data.table for fast grouping replacing aggregate()
+eq1                       <- c.listquote(paste("sum(","CPUE_number_per_hour",",na.rm=TRUE)",sep=""))
+agg.bits.cpue             <- DT[,eval(eq1),by=list(Survey,Year,Semester,Quarter,id, ShootLon,ShootLat, Species,size_group)]
+agg.bits.cpue             <- data.frame(agg.bits.cpue)
+colnames(agg.bits.cpue)   <- c("Survey", "Year", "Semester", "Quarter", "id", "ShootLon", "ShootLat", "Species", "size_group", "nb_indiv")
 
 #------------------------  
 #------------------------  
@@ -245,12 +274,12 @@ colnames(agg.bits.cpue) <- c("Survey", "Year", "Semester", "Quarter", "id", "Sho
 library(doBy)
 
 # NS-IBTS
-agg.ibts.cpue <- orderBy(~size_group, data=agg.ibts.cpue)
-ibts.cpue.lst <- NULL # chunk by chunk
+agg.ibts.cpue            <- orderBy(~size_group, data=agg.ibts.cpue)
+ibts.cpue.lst            <- NULL # chunk by chunk
 levels(agg.ibts.cpue$id) <- 1:length(levels(agg.ibts.cpue$id)) # make it easier...
 for(sp in unique(ibts.cpue$Species)){
-cat(paste(sp, "\n"))
-ibts.cpue.lst[[sp]] <- reshape(agg.ibts.cpue[agg.ibts.cpue$Species==sp,], timevar="size_group",
+   cat(paste(sp, "\n"))
+   ibts.cpue.lst[[sp]]      <- reshape(agg.ibts.cpue[agg.ibts.cpue$Species==sp,], timevar="size_group",
          idvar="id", direction="wide", v.names="nb_indiv")
 
   # make dim compatible for do.call("rbind")
@@ -301,7 +330,7 @@ head(bits.cpue[bits.cpue$Species=="MUS",])
 
 # save                      
 save(bits.cpue, ibts.cpue, 
-   file=file.path("C:","displace-project.org","repository","ibm_vessels_param","avai",paste("cpue_graph",igraph,"_",nmy,".RData",sep='')))
+   file=file.path(general$main_path, "avai", paste("cpue_graph",igraph,"_",nmy,".RData",sep='')))
 
 } # end for
 } # end FALSE
@@ -356,10 +385,9 @@ function(lon,lat,lonRef,latRef){
   
   
 #------------------------  
+#------------------------       
 #------------------------  
-#------------------------  
-get_cpue_on_graph_nodes <-  function (obj=bits.cpue, igraph=4, coord=coord, sp=sp, S=S,
-                          general=list(threshold=30, p=0.5, sp=c("COD"), S=1, method="maximum", years=nmy)){
+get_cpue_on_graph_nodes <-  function (obj=bits.cpue,coord=coord, sp=sp, S=S, years=nmy, survey="bits", general=general){
   
   nb_size_group <- 13
 
@@ -380,7 +408,7 @@ get_cpue_on_graph_nodes <-  function (obj=bits.cpue, igraph=4, coord=coord, sp=s
  obj$ShootLat <- an(obj$ShootLat)
  
  # a comment
- a.comment <- paste("graph", igraph, "_", sp,"_","S",S,"_",general$method,"_",general$years ,"_",general$survey, sep='')
+ a.comment <- paste("graph", general$igraph, "_", sp,"_","S",S,"_",general$method,"_", years,"_", survey, sep='')
  
 
   # compute the distance from each node of the graph to the nearest survey points 
@@ -437,7 +465,7 @@ get_cpue_on_graph_nodes <-  function (obj=bits.cpue, igraph=4, coord=coord, sp=s
                 an(obj$ShootLon)[ an(names(lst.graph.pts.with.idx.in.obj[[node]])) ], 
                  an(obj$ShootLat)[ an(names(lst.graph.pts.with.idx.in.obj[[node]])) ], col=3)
               points(x=coord[node,"x"], y=coord[node,"y"], col="red") # a pt of the graph g
-         savePlot(filename = file.path("C:","Users","fba","Dropbox","ibm_vessels_param","avai", paste("jpeg_igraph",igraph,"_",general$years,sep=''),
+         savePlot(filename = file.path(general$main_path, "avai", paste("jpeg_igraph", igraph,"_", years,sep=''),
                             paste(a.comment,"link_nodes_with_surveys_",general$threshold,".jpeg",sep="")),type ="jpeg")
 
          }
@@ -455,7 +483,7 @@ get_cpue_on_graph_nodes <-  function (obj=bits.cpue, igraph=4, coord=coord, sp=s
                 cex=obj[obj$Species==sp,szgroup] /max(coord[,paste(sp,".",szgroup,sep='')], obj[obj$Species==sp,szgroup])*4)
     map(add=TRUE, xlim=c(-10,25),ylim=c(50,65))
     title(szgroup)
-    savePlot(filename = file.path("C:","displace-project.org","repository","ibm_vessels_param","avai", paste("jpeg_igraph",igraph,"_", general$years,sep=''),
+    savePlot(filename = file.path(general$main_path, "avai", paste("jpeg_igraph",igraph,"_", years,sep=''),
                             paste(a.comment,"_",szgroup,".jpeg",sep="")),type ="jpeg")
  
    } # end vzgruop
@@ -482,9 +510,9 @@ return(coord)
 #--------------------
 #--------------------
 #--------------------
-set.avai <- function(lst.avai,sp,S,areas){
+set.avai <- function(lst.avai, sp, S, areas){
      obj <- get(paste("coord.",sp,".",S, sep=''), env=.GlobalEnv) # get in .GlobalEnv
-     source(file=file.path("C:","Users","fbas", "Documents", "GitHub", "DISPLACE_R_inputs","IBM_param_utils_longlat_to_ICESareas.r"))
+     source(file=file.path(general$main_path_R_inputs,"IBM_param_utils_longlat_to_ICESareas.r"))
      ICESareas       <- longlat_to_ICESareas(obj)
      idx.areas          <- which(ICESareas %in% areas)
      obj.in.areas <- obj[idx.areas,]
@@ -551,42 +579,11 @@ regions=c('uk','ireland','france','germany','netherlands', 'norway','belgium',
 'switzerland','czechoslovakia','finland','libya', 'hungary','yugoslavia','poland','greece','romania','bulgaria', 'slovakia','morocco',
 'tunisia','algeria','egypt' ))
 library(maptools)
-ices_areas <- readShapeSpatial("C:\\displace-project.org\\repository\\ibm_vessels_param\\ices_areas\\ices_areas")
+ices_areas <- readShapeSpatial(file.path(general$main_path, "ices_areas", "ices_areas"))
 plot(ices_areas, col="grey",  add=TRUE)
 
-load("C:\\displace-project.org\\repository\\ibm_vessels_param\\IBM_datainput_balticBathy.RData")
-#contour(balticBathy$x,balticBathy$y,balticBathy$z,levels=c(60,120),add=T)
-# replaced by: to filter out the noise
-ma <- function(x,n){filter(x,rep(1/n,n), sides=1)}   # moving average filter
-mm <- function(x,n){runmed(x, k=n)}                   # moving median filter
-dd  <- mm(x=as.vector(balticBathy$z), n=21)
-dd <- matrix(dd, nrow=dim(balticBathy$z)[1], ncol=dim(balticBathy$z)[2])
-dd  <- mm(x=as.vector(t(balticBathy$z)), n=21)
-dd <- matrix(dd, nrow=dim(t(balticBathy$z))[1], ncol=dim(t(balticBathy$z))[2])
-contour(balticBathy$x,balticBathy$y, t(dd) ,levels=c(60,120),add=T)
 
 
-load("C:\\displace-project.org\\repository\\ibm_vessels_param\\IBM_datainput_nseaBathy.RData")
-#contour(nseaBathy$x,nseaBathy$y,nseaBathy$z,levels=c(60,120),add=T)
-# replaced by: to filter out the noise
-ma <- function(x,n){filter(x,rep(1/n,n), sides=1)}   # moving average filter
-mm <- function(x,n){runmed(x, k=n)}                   # moving median filter
-dd  <- mm(x=as.vector(nseaBathy$z), n=31)
-dd <- matrix(dd, nrow=dim(nseaBathy$z)[1], ncol=dim(nseaBathy$z)[2])
-dd  <- mm(x=as.vector(t(nseaBathy$z)), n=31)
-dd <- matrix(dd, nrow=dim(t(nseaBathy$z))[1], ncol=dim(t(nseaBathy$z))[2])
-contour(nseaBathy$x,nseaBathy$y, t(dd) ,levels=c(60,120),add=T)
-
-
-method    <- "maximum" # for the canadian paper
-threshold <- 50
-igraph    <- "4"  # fro the paper
-
-method    <- "inverse" # for the baltic only CS. because the mesh size if much finer the inverse would be better but unfortunately the survey points are too scarce.....
-threshold <- 25
-igraph    <- "11"  # for Baltic only case
-p         <- 0.1
-# => http://fr.wikipedia.org/wiki/Pond%C3%A9ration_inverse_%C3%A0_la_distance : p est un nombre positif réel, appelé le paramètre de puissance. Ici, le poids des points voisins diminue lorsque la distance augmente. Les plus grandes valeurs de p donnent une influence plus grande aux valeurs les plus proches du point interpolé. Pour 0 < p < 1 u(x) donne des pics lissés au-dessus du point interpolé xk, alors que pour p > 1 le pic devient plus pointu. 
 
 
 #for (nmy in c("2005_2010", "2010")){
@@ -594,10 +591,10 @@ for (nmy in c("2008_2012", "2012")){
 #for (nmy in c("2012")){
 
 
-if(nmy=="2005_2010")  load(file.path("C:","displace-project.org","repository","ibm_vessels_param","avai",paste("cpue_graph",igraph,"_2005_2010.RData", sep='')))
-if(nmy=="2010")       load(file.path("C:","displace-project.org","repository","ibm_vessels_param","avai",paste("cpue_graph",igraph,"_2010.RData", sep='')))
-if(nmy=="2008_2012")  load(file.path("C:","displace-project.org","repository","ibm_vessels_param","avai",paste("cpue_graph",igraph,"_2008_2012.RData", sep='')))
-if(nmy=="2012")       load(file.path("C:","displace-project.org","repository","ibm_vessels_param","avai",paste("cpue_graph",igraph,"_2012.RData", sep='')))
+if(nmy=="2005_2010")  load(file.path(general$main_path, "avai",paste("cpue_graph",igraph,"_2005_2010.RData", sep='')))
+if(nmy=="2010")       load(file.path(general$main_path, "avai",paste("cpue_graph",igraph,"_2010.RData", sep='')))
+if(nmy=="2008_2012")  load(file.path(general$main_path, "avai",paste("cpue_graph",igraph,"_2008_2012.RData", sep='')))
+if(nmy=="2012")       load(file.path(general$main_path, "avai",paste("cpue_graph",igraph,"_2012.RData", sep='')))
 
 
 # input to DISPLACE_GUI
@@ -605,7 +602,7 @@ if(nmy=="2012")       load(file.path("C:","displace-project.org","repository","i
  obj$Stock <- as.character(obj$Species) # init
  obj$x     <- as.numeric(as.character(obj$ShootLon)) # init
  obj$y     <- as.numeric(as.character(obj$ShootLat)) # init
- source(file=file.path("C:","Users","fbas", "Documents", "GitHub", "DISPLACE_R_inputs","IBM_param_utils_longlat_to_ICESareas.r"))
+ source(file=file.path(general$main_path_R_inputs, "IBM_param_utils_longlat_to_ICESareas.r"))
  obj$ICESareas  <- longlat_to_ICESareas(obj)
  # convert Species in Stock name
  idx                <- obj$Species %in% c("SPR", "PLE", "FLE", "TUR", "DAB") & obj$ICESareas %in% c("IVa", "IVb", "IVc") 
@@ -653,8 +650,8 @@ if(nmy=="2012")       load(file.path("C:","displace-project.org","repository","i
  #levels(obj$SizeGroup) <- gsub("nb_indiv.","",levels(obj$SizeGroup))
  
   
-  write.table(obj, file=file.path("C:", "Users", "fbas", "Documents", "GitHub" ,"DISPLACE_input_raw", "avai",
-           paste("survey_pop_distribution_on_points_ibts_2008_2012.txt",sep='')), sep=";", quote=FALSE, row.names=FALSE, col.names=TRUE)
+  write.table(obj, file=file.path(general$main_path, "avai",
+           paste("survey_pop_distribution_on_points_ibts_",nmy,"_",igraph,".txt",sep='')), sep=";", quote=FALSE, row.names=FALSE, col.names=TRUE)
      # but missing: the stock name. because species name is not giving the stock name then stock need to be given before processing into the GUI
 
 
@@ -665,7 +662,12 @@ if(nmy=="2012")       load(file.path("C:","displace-project.org","repository","i
 
 print(nmy)
 # load a graph
-load(file.path("C:","displace-project.org","repository","ibm_vessels_param", "igraph", paste(igraph, "_graphibm.RData",sep=''))) # built from the R code
+#load(file.path("C:","displace-project.org","repository","ibm_vessels_param","igraph",paste(igraph,"_graphibm.RData",sep=''))) # get coord  from the R code
+coord <- read.table(file=file.path(general$main_path_input, "graphsspe", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
+coord <- as.matrix(as.vector(coord))
+coord <- matrix(coord, ncol=3)
+colnames(coord) <- c('x', 'y', 'dist')
+#plot(coord[,1], coord[,2])
 coord <- cbind(coord, 1:nrow(coord)) # keep track of the idx_node
 
 
@@ -679,28 +681,23 @@ for (sp in as.character(spp)){ # per species
       if(sp %in% unique(bits.cpue$Species)){
         flag1 <-1
        assign(paste("bits.coord.",sp,".",S,sep=''),
-            get_cpue_on_graph_nodes (obj=bits.cpue, igraph=igraph, coord=coord, sp=sp, S=S, ## BITS
-                       general=list(main.path =file.path("C:","displace-project.org","repository","ibm_vessels_param"),
-                       threshold=threshold,  p=p, method=method, years=nmy, survey="bits")),  envir =.GlobalEnv  
-      )}                 
+            get_cpue_on_graph_nodes (obj=bits.cpue, coord=coord, sp=sp, S=S, years=nmy, survey="bits", general=general),  envir =.GlobalEnv )}                 
       if(sp %in% unique(ibts.cpue$Species)){
         flag2<-1
         assign(paste("ibts.coord.",sp,".",S,sep=''),
-            get_cpue_on_graph_nodes (obj=ibts.cpue, igraph=igraph, coord=coord, sp=sp, S=S, ## IBTS
-                       general=list(main.path =file.path("C:","displace-project.org","repository","ibm_vessels_param"),
-                       threshold=threshold,  p=p, method=method, years=nmy, survey="ibts")),  envir =.GlobalEnv 
-      )}
+            get_cpue_on_graph_nodes (obj=ibts.cpue, coord=coord, sp=sp, S=S, years=nmy, survey="ibts", general=general),  envir =.GlobalEnv )}
       # combined surveys => choose the max value  
       if((flag1+flag2)==2){
         assign(paste("coord.",sp,".",S,sep=''),
           pmax( get(paste("bits.coord.",sp,".",S,sep=''))  ,  get(paste("ibts.coord.",sp,".",S,sep=''))
       ),  envir =.GlobalEnv)} else{
-        if(flag1==1){ assign(paste("coord.",sp,".",S,sep=''),get(paste("bits.coord.",sp,".",S,sep='')),  envir =.GlobalEnv  )          
+        if(flag1==1){ assign(paste("coord.",sp,".",S,sep=''), get(paste("bits.coord.",sp,".",S,sep='')),  envir =.GlobalEnv  )          
         }else{
          if(flag2==1){ assign(paste("coord.",sp,".",S,sep=''), get(paste("ibts.coord.",sp,".",S,sep='')),  envir =.GlobalEnv  )          
        }}}
    } # end S
  } # end sp 
+
 
 # check with plot
 obj <- coord.COD.1
@@ -838,8 +835,8 @@ for (S in as.character(1:2)){
 
 
 # save to R
-save("lst.avai", file = file.path("C:","displace-project.org","repository","ibm_vessels_param", "avai",
-                            paste("lst_avai_igraph",igraph,"_", nmy,"_",method,"_", threshold, ".RData",sep="")) )
+save("lst.avai", file = file.path(general$main_path, "avai",
+                            paste("lst_avai_igraph", general$igraph,"_", nmy,"_",general$method,"_", general$threshold, ".RData",sep="")) )
 ## CAUTION the ibts and bits surveys are combinations of hauls from different scientifc vessels
 ## with potentially gear trawl with different selectivity ogives....
 

@@ -46,7 +46,7 @@ if(case_study=="baltic_only"){
 # pop parameters
  pa <- read.csv(file=file.path(main.path,
                   paste("IBM_datainput_stockdata_",case_study,".csv", sep='')), 
-                    sep=',', header=TRUE)
+                    sep=';', header=TRUE)
 
                                                             
 
@@ -55,6 +55,9 @@ if(case_study=="baltic_only"){
 ################################
 ################################
 ################################
+
+##### DEFINE THE BIOLOGICAL SCENARIOS #################################
+##### (RELATED TO STOCK CONDITIONING AND POTENTIAL MIXING #############
 
 
 #von bertalanfy growth
@@ -95,13 +98,42 @@ write.table(multiplier_for_biolsce_all_pops, quote=FALSE,
                    row.names=FALSE, col.names=TRUE)
 
 
+hyperstability_param <- cbind(pop=c(0:(nrow(pa)-1)), hyperstability_param=0.7) # apply 0.7 to all pop    
+ # in Harvey et al 2001 cjfas:  cod, flatfish, and gadiformes, finding strong evidence that CPUE was most likely to
+ # remain high while abundance declines (i.e., hyperstability, where b
+ # < 1). The range in the mean of the random effects distribution for b was quite small, 0.64–0.75
+write.table(hyperstability_param, quote=FALSE,
+                 file=file.path(main.path,"popsspe",paste("hyperstability_param.dat",sep='')), append=FALSE,
+                   row.names=FALSE, col.names=TRUE)
+
+
+
+
+
+if(case_study =="canadian_paper") sces <- 1  
+if(case_study =="baltic_only")    sces <- 1:4
+
+
+# overall migration fluxes at 0 by default
+for(x in 1:length(pa$Ks)){
+  if(!is.na(pa$index_pops[x])){
+    for (sce in sces){
+
+     write.table("# to_pop_num overall_fluxes_of_N_in_proportion_per_size_group", quote=FALSE,
+                 file=file.path(main.path,"popsspe",paste(pa$index_pops[x],"overall_migration_fluxes_","semester1","_","biolsce",sce,".dat",sep='')), append=FALSE,
+                   row.names=FALSE, col.names=FALSE)
+     write.table("# to_pop_num overall_fluxes_of_N_in_proportion_per_size_group", quote=FALSE,
+                 file=file.path(main.path,"popsspe",paste(pa$index_pops[x],"overall_migration_fluxes_","semester2","_","biolsce",sce,".dat",sep='')), append=FALSE,
+                   row.names=FALSE, col.names=FALSE)
+
+}}}
+
+
 ################################
 ################################
 ################################
 ################################
 
-if(case_study =="canadian_paper") sces <- 1  
-if(case_study =="baltic_only")    sces <- 1:4
 
 ##### FOR-LOOP OVER BIOLOGICAL SCENARIOS ############
 # ....because some parts of the parameterization are scenario specific!
