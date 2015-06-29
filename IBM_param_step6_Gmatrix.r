@@ -6,8 +6,12 @@ if(FRANCOIS) main.path <- file.path("C:","Users", "fbas", "Documents", "GitHub",
 
 #case_study <- "canadian_paper"  # 0 to 37 pops
 case_study  <- "baltic_only"     # 0 to 30
+case_study  <- "myfish"          # 0 to 30
+
+
 if(case_study=="canadian_paper") a_size_group_bin_in_cm <- 10
 if(case_study=="baltic_only")    a_size_group_bin_in_cm <- 5
+if(case_study=="myfish")         a_size_group_bin_in_cm <- 5
 
 
 if(case_study=="canadian_paper"){
@@ -39,6 +43,20 @@ if(case_study=="baltic_only"){
  a.year <- 2012
  }
  
+ 
+if(case_study=="myfish"){
+ # pop number per age group 2012 
+ number <- read.csv(file=file.path(main.path,
+                 "IBM_datainput_abundance_2012.csv"),
+                    sep=",",header=TRUE)     
+ 
+ # pop number per age group 2013 (take the following year after the start year, for validation)
+ #number_yplus1 <- read.csv(file=file.path(main.path,
+ #                "IBM_datainput_abundance_2013.csv"),
+ #                   sep=",",header=TRUE)  ## NOT YET AVAILABLE  !!  
+ number_yplus1 <-  number # data not available yet...then temporary!!
+ a.year <- 2012
+ }
  
 
 
@@ -86,17 +104,34 @@ ssbr <- function (alpha, beta, ssb) {
 
 
 # build a matrix of scenarios
-multiplier_for_biolsce_all_pops  <- expand.grid(biolsce_maturity=1, biolsce_M=1, biolsce_weight=1, biolsce_init_pops=1, biolsce_init_pops_2011=1, 
+if(case_study=="baltic_only"){
+  multiplier_for_biolsce_all_pops  <- expand.grid(biolsce_maturity=1, biolsce_M=1, biolsce_weight=1, biolsce_init_pops=1, biolsce_init_pops=1, 
                                          biolsce_fecundity=1, biolsce_Ks=c(1, 0.8), biolsce_recru=c(1, 0.5), 
                                           pop=c('SPR.2232', 'HER.3a22', 'COD.2224'))
 
 
-multiplier_for_biolsce_all_pops <- cbind(sce=1: (nrow(multiplier_for_biolsce_all_pops)/length(unique(multiplier_for_biolsce_all_pops$pop))), multiplier_for_biolsce_all_pops)
+  multiplier_for_biolsce_all_pops <- cbind(sce=1: (nrow(multiplier_for_biolsce_all_pops)/length(unique(multiplier_for_biolsce_all_pops$pop))), multiplier_for_biolsce_all_pops)
 
-write.table(multiplier_for_biolsce_all_pops, quote=FALSE,
+  write.table(multiplier_for_biolsce_all_pops, quote=FALSE,
                  file=file.path(main.path,"popsspe",paste("multiplier_for_biolsce.dat",sep='')), append=FALSE,
                    row.names=FALSE, col.names=TRUE)
 
+  }
+                    
+# build a matrix of (biological) scenarios
+if(case_study=="myfish"){
+  multiplier_for_biolsce_all_pops  <- expand.grid(biolsce_maturity=1, biolsce_M=c(1, 1.1), biolsce_weight=c(1,0.97), biolsce_init_pops=1, biolsce_init_pops=1, 
+                                         biolsce_fecundity=1, biolsce_Linfs=c(1, 0.6), biolsce_Ks=c(1), biolsce_recru=c(1), 
+                                          pop=c('COD.2532'))   # see SS3 model settings in ICES WKBALTCOD 2015
+
+
+  multiplier_for_biolsce_all_pops <- cbind(sce=1: (nrow(multiplier_for_biolsce_all_pops)/length(unique(multiplier_for_biolsce_all_pops$pop))), multiplier_for_biolsce_all_pops)
+
+  write.table(multiplier_for_biolsce_all_pops, quote=FALSE,
+                 file=file.path(main.path,"popsspe",paste("multiplier_for_biolsce",case_study,".dat",sep='')), append=FALSE,
+                   row.names=FALSE, col.names=TRUE)
+
+  }
 
 hyperstability_param <- cbind(pop=c(0:(nrow(pa)-1)), hyperstability_param=0.7) # apply 0.7 to all pop    
  # in Harvey et al 2001 cjfas:  cod, flatfish, and gadiformes, finding strong evidence that CPUE was most likely to
@@ -112,6 +147,7 @@ write.table(hyperstability_param, quote=FALSE,
 
 if(case_study =="canadian_paper") sces <- 1  
 if(case_study =="baltic_only")    sces <- 1:4
+if(case_study =="myfish")         sces <- 1:nrow(multiplier_for_biolsce_all_pops)
 
 
 # overall migration fluxes at 0 by default
@@ -169,9 +205,9 @@ for(x in 1:length(pa$Ks)){
   d               <-pa$ds[x]                #d*L^e fecundity
   e               <-pa$es[x]
   stock           <-pa$pop.to.keeps[x]
-  aa              <-pa$aa[x]               
+  aa              <-pa$aa[x]                #aa*(l+5)^bb/1000
   bb              <-pa$bb[x]              
-  a_SSB           <-pa$a_SSB[x]           
+  a_SSB           <-pa$a_SSB[x]             #Ricker
   b_SSB           <-pa$b_SSB[x]           
   r_age           <-pa$r_age[x]
 
@@ -180,11 +216,11 @@ for(x in 1:length(pa$Ks)){
   if(nrow(multiplier_for_biolsce)!=0){ # ie in case the pop is found in the sce matrix....
     # species-specific parameters AND sce
     K               <-K     *multiplier_for_biolsce[sce, "biolsce_Ks"]   
-    Linf            <-Linf    
+    Linf            <-Linf  *multiplier_for_biolsce[sce, "biolsce_Linfs"]     
     l50             <-l50
     d               <-d     *multiplier_for_biolsce[sce, "biolsce_fecundity"]       
     e               <-e
-    aa              <-aa    *multiplier_for_biolsce[sce, "biolsce_weight"]
+    aa              <-aa   
     bb              <-bb    *multiplier_for_biolsce[sce, "biolsce_weight"]
     a_SSB           <-a_SSB *multiplier_for_biolsce[sce, "biolsce_recru"]
     b_SSB           <-b_SSB *multiplier_for_biolsce[sce, "biolsce_recru"]
@@ -283,8 +319,12 @@ for(x in 1:length(pa$Ks)){
 
   # init number per size group   comes in Thousands!
   if(stock %in% levels(number$stock)){
-    number1        <- number       [number$stock %in% stock,2:12]     #age 0-10    
-    number1_yplus1 <- number_yplus1[number_yplus1$stock %in% stock,2:12]     #age 0-10    
+    if(nrow(multiplier_for_biolsce)!=0){
+    number1        <- number       [number$stock %in% stock, 2:12]     * multiplier_for_biolsce[sce, "biolsce_biolsce_init_pops"]        #age 0-10    
+    } else{
+    number1        <- number       [number$stock %in% stock, 2:12]       
+    }
+    number1_yplus1 <- number_yplus1[number_yplus1$stock %in% stock, 2:12]     #age 0-10    
                                     
      
     number1[is.na(number1)]               <- 0
@@ -374,12 +414,17 @@ for(x in 1:length(pa$Ks)){
   #build size distribution vector L
   surv<-round(exp(-(0.12*27*(l+0.5)^(-1))),4)      #length dependent mortality vector using the lower bound length (+1 to ignore 0) to get survival
   mort<-round((1-surv),4)
+  
+  if(nrow(multiplier_for_biolsce)!=0){
+     mort <- mort * multiplier_for_biolsce[sce, "biolsce_M"]
+  }
+  
   ## EXPORT
   mort <- cbind (pa$index_pops[x], mort)
   write.table(mort[1:14,], file=file.path(main.path,"popsspe",paste("init_M_per_szgroup_biolsce",sce,".dat",sep='')), append=TRUE, sep=" ", col.names=FALSE, row.names=FALSE) 
 
 
-  #need a first row to decribe recruitment for stable size distribution from SSB
+  #need a first row to describe recruitment for stable size distribution from SSB
   fec<- d*(l+5)^(e)          #   fecundity 
   fec[is.na(fec)]<-0
   fec<-round(fec,2)
