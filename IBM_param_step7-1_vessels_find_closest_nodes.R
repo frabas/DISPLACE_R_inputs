@@ -4,8 +4,9 @@
 
  # GENERAL SETTINGS
   general <- list()
-  general$main.path      <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_raw")
-  general$main.path.code <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
+  general$main.path             <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_raw")
+  general$main.path.code        <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
+  general$main_path_input       <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input")
 
   general$igraph                <- 11
   general$case_study            <- "baltic_only"
@@ -14,6 +15,14 @@
   general$a.country             <- "DEN"
   #general$a.country             <- "DEU"
   #general$a.country             <- "SWE"
+
+
+  general$igraph                <- 56
+  general$case_study            <- "myfish"
+  general$case_study_countries  <- c("DEN")    # for the Baltic only
+  general$a.year                <- "2012"
+  general$a.country             <- "DEN"
+ 
 
   # mkdir
   dir.create(path=file.path(general$main.path, "merged_tables", general$case_study),
@@ -63,7 +72,12 @@
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
 
   # load the graph
-  load(file.path(general$main.path, "igraph", paste(general$igraph, "_graphibm.RData",sep=''))) # built from the R code
+  #load(file.path(general$main.path, "igraph", paste(general$igraph, "_graphibm.RData",sep=''))) # built from the R code
+  coord <- read.table(file=file.path(general$main_path_input, "graphsspe", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
+  coord <- as.matrix(as.vector(coord))
+  coord <- matrix(coord, ncol=3)
+  colnames(coord) <- c('x', 'y', 'idx.port')
+  #plot(coord[,1], coord[,2])
 
 
   # caution: remove the ports to be sure to have no fishnig ground in ports
@@ -107,7 +121,8 @@
    # points(coord[ping.fgrounds$pt_graph,1], coord[ping.fgrounds$pt_graph,2])
 
     # for "in harbour" pings: find the node of the graph for each harbour
-    x.inharb$idx_port <- harbour.list$idx.port [match(x.inharb$land_harb, harbour.list$NAVN) ]  # translate name into idx_port from coord
+    harbour_list      <- read.table(file=file.path(general$main.path, "harbours.dat"), sep=";")
+    x.inharb$idx_port <- harbour_list$idx.port [match(x.inharb$land_harb, rownames(harbour_list)) ]  # translate name into idx_port from coord
     x.inharb$pt_graph <- coord.harbours [,'idx'] [ match(x.inharb$idx_port, coord.harbours[,'idx.port']) ] #...then translate idx_port into idx_node
     ping.harbours <- x.inharb
 
@@ -231,6 +246,15 @@
 
 
 
+
+    if(general$case_study=="myfish"){
+        # keep all vessels on board (for ensuring further use of the same parameterisation)....
+        # but remenber we are only interested at looking to Baltic cod fisheries in the outcomes
+        # so we will need to get rid of irrelevant vessels in the simulator output files before tabulating/plotting
+    vid_this_case_study <- as.character(unique(ping.fgrounds$VE_REF))
+    }  # end case_study
+
+
    ####-------
    ####-------
    ####-------
@@ -240,7 +264,7 @@
       cat(paste("save 'ping.fgrounds', this year...OK\n\n",sep=""))
     save(ping.harbours,  file=file.path(general$main.path, "merged_tables", general$case_study,
              paste("ping.harbours.",general$a.country,".",general$a.year,".igraph",general$igraph,".RData", sep='')))
-     cat(paste("save 'ping.harbours', this year...OK\n\n",sep=""))
+      cat(paste("save 'ping.harbours', this year...OK\n\n",sep=""))
     save(vid_this_case_study,  file=file.path(general$main.path, "merged_tables", general$case_study,
              paste("vid_this_case_study_",general$a.country,".",general$a.year,".igraph",general$igraph,".RData", sep='')))
       cat(paste("save 'vid_this_case_study', this year...OK\n\n",sep=""))

@@ -3,10 +3,12 @@
 ## Francois Bastardie (DTU-Aqua)
 ## outputs: mainly .dat files to be used for the IBM simulations
 
+
  # GENERAL SETTINGS
   general <- list()
-  general$main.path      <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_raw")
-  general$main.path.code <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
+  general$main.path             <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_raw")
+  general$main.path.code        <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
+  general$main_path_input       <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input")
 
   general$igraph                <- 11
   general$case_study            <- "baltic_only"
@@ -16,6 +18,12 @@
   #general$a.country             <- "DEU"
   #general$a.country             <- "SWE"
 
+
+  general$igraph                <- 56
+  general$case_study            <- "myfish"
+  general$case_study_countries  <- c("DEN")    # for the Baltic only
+  general$a.year                <- "2012"
+  general$a.country             <- "DEN"
   # mkdir
   dir.create(path=file.path(general$main.path, "merged_tables", general$case_study),
                       showWarnings = TRUE, recursive = TRUE, mode = "0777")
@@ -80,7 +88,7 @@
  save(metier_names,  file=file.path(general$main.path, "merged_tables", general$case_study, ## SAVE
                      paste("metier_names.",general$a.country,".",general$a.year,".igraph",
                       general$igraph,".RData", sep='')))
- write.table(metier_names, file.path(general$main.path, "metiersspe",paste("metier_names_",general$a.country,"_",general$a.year,".txt",sep='')),
+ write.table(metier_names, file.path(general$main.path, "metiersspe", paste("metier_names_",general$a.country,"_",general$a.year,".txt", sep='')),
                quote=FALSE, col.names=FALSE, row.names=FALSE)
 
  #levels(x$LE_MET_level6) <-
@@ -121,8 +129,15 @@
  ## (to be used as in Bastardie et al 2010)
  ## will be used for stocks for which we do not have N_pops because not assessed by ICES
  ## => implicit populations vs. explicit ones
- load(file.path(general$main.path, "igraph", paste(general$igraph, "_graphibm.RData",sep=''))) # built from the R code
- coord_pt_graph <- coord[x$pt_graph,] # replace coord of vms point by the coord of the graph node before finding out the stock area
+ 
+ #load(file.path(general$main.path, "igraph", paste(general$igraph, "_graphibm.RData",sep=''))) # built from the R code
+ coord <- read.table(file=file.path(general$main_path_input, "graphsspe", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
+ coord <- as.matrix(as.vector(coord))
+ coord <- matrix(coord, ncol=3)
+ colnames(coord) <- c('x', 'y', 'idx.port')
+ #plot(coord[,1], coord[,2])
+
+  coord_pt_graph <- coord[x$pt_graph,] # replace coord of vms point by the coord of the graph node before finding out the stock area
 
  #x$SI_LONG <- as.numeric(as.character(coord_pt_graph[,'x']))
  #x$SI_LATI <- as.numeric(as.character(coord_pt_graph[,'y']))
