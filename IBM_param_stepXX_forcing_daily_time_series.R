@@ -176,16 +176,20 @@
 ##------------------------------------------------------------------------------##
 
 param_ts <- rbind.data.frame(
-cbind.data.frame (value=as.vector(t(rg_wspeed)), limit=rep(c("0", "25", "50", "75", "max"), length=length(as.vector(t(rg_wspeed)))), month=rep(months,each=5), area="all_area",variable="wspeed", a_dim=0, a_min=0, a_max=18, a_res=0.1),
-cbind.data.frame (value=as.vector(t(rg_fuelprice)), limit=rep(c("0", "25", "50", "75", "max"), length=length(as.vector(t(rg_fuelprice)))), month=rep(months,each=5), area="all_area",variable="fuelprice", a_dim=0, a_min=0.4, a_max=1, a_res=0.05)
+cbind.data.frame (value=as.vector(t(rg_wspeed)), limit=rep(c("0", "25", "50", "75", "max"), length=length(as.vector(t(rg_wspeed)))), month=rep(months,each=5), area="all_area",variable="wspeed", a_dim=0, a_min=0, a_max=18, a_res=0.1, threshold1=5, threshold2=10, threshold3=NA),
+cbind.data.frame (value=as.vector(t(rg_fuelprice)), limit=rep(c("0", "25", "50", "75", "max"), length=length(as.vector(t(rg_fuelprice)))), month=rep(months,each=5), area="all_area",variable="fuelprice", a_dim=0, a_min=0.4, a_max=1, a_res=0.05, threshold1=0.5, threshold2=0.7, threshold3=NA)
 )
 
 for(st in 1: length(rg_fishprice)){
 a_stock <- names(rg_fishprice)[st]
 param_ts <- rbind.data.frame( param_ts,
-  cbind.data.frame (value=as.vector(t(rg_fishprice[[a_stock]])), limit=rep(c("0", "25", "50", "75", "max"), length=length(as.vector(t(rg_fishprice[[a_stock]])))),  month=rep(months,each=5), area="all_area",variable="fishprice", a_dim=a_stock, a_min=min(rg_fishprice[[a_stock]]), a_max=max(rg_fishprice[[a_stock]]), a_res=0.1)
+  cbind.data.frame (value=as.vector(t(rg_fishprice[[a_stock]])), limit=rep(c("0", "25", "50", "75", "max"), length=length(as.vector(t(rg_fishprice[[a_stock]])))),  month=rep(months,each=5), area="all_area",variable="fishprice", a_dim=a_stock, a_min=min(rg_fishprice[[a_stock]]), a_max=max(rg_fishprice[[a_stock]]), a_res=0.1, threshold1=30, threshold2=50, threshold3=NA)
  )
 }
+
+
+
+
 
 write.table(param_ts, file=file.path('C:','Users','fbas','Documents','GitHub','DISPLACE_input', 'externalforcing_balticonly', 'param_timeseries.dat'),
                  row.names=FALSE, col.names=TRUE, sep= " ", quote=FALSE)

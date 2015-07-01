@@ -106,7 +106,7 @@ ssbr <- function (alpha, beta, ssb) {
 # build a matrix of scenarios
 if(case_study=="baltic_only"){
   multiplier_for_biolsce_all_pops  <- expand.grid(biolsce_maturity=1, biolsce_M=1, biolsce_weight=1, biolsce_init_pops=1, biolsce_init_pops=1, 
-                                         biolsce_fecundity=1, biolsce_Ks=c(1, 0.8), biolsce_recru=c(1, 0.5), 
+                                         biolsce_fecundity=1, biolsce_Ks=c(1, 0.8), biolsce_recru=c(1, 0.5),   biolsce_mig=c(0),
                                           pop=c('SPR.2232', 'HER.3a22', 'COD.2224'))
 
 
@@ -121,7 +121,7 @@ if(case_study=="baltic_only"){
 # build a matrix of (biological) scenarios
 if(case_study=="myfish"){
   multiplier_for_biolsce_all_pops  <- expand.grid(biolsce_maturity=1, biolsce_M=c(1, 1.1), biolsce_weight=c(1,0.97), biolsce_init_pops=1, biolsce_init_pops=1, 
-                                         biolsce_fecundity=1, biolsce_Linfs=c(1, 0.6), biolsce_Ks=c(1), biolsce_recru=c(1), 
+                                         biolsce_fecundity=1, biolsce_Linfs=c(1, 0.6), biolsce_Ks=c(1), biolsce_recru=c(1), biolsce_mig=c(0,1), 
                                           pop=c('COD.2532'))   # see SS3 model settings in ICES WKBALTCOD 2015
 
 
@@ -161,6 +161,29 @@ for(x in 1:length(pa$Ks)){
      write.table("# to_pop_num overall_fluxes_of_N_in_proportion_per_size_group", quote=FALSE,
                  file=file.path(main.path,"popsspe",paste(pa$index_pops[x],"overall_migration_fluxes_","semester2","_","biolsce",sce,".dat",sep='')), append=FALSE,
                    row.names=FALSE, col.names=FALSE)
+    # => empty mig files per default
+
+   if(multiplier_for_biolsce_all_pops[sce, "biolsce_mig"]==1 && pa$pop.to.keeps[x]=="COD.2532"){ 
+          mig_fluxes     <- matrix(10, nrow=14, ncol=2) # mig toward pop 10 COD.2224 for 14 szgroup
+      
+          fish_East_to_SD24_2011 	   <- c(0.00000, 	5373.68296, 	15222.38671, 	4815.92611, 	1484.57475, 	673.65356, 	171.55592, 	118.22825, 0) # 0 to 8+, from the East/West cod project 
+          fish_East_2011 	           <- c(0, 0, 254486, 164884, 92503, 40135, 19579, 15054, 11203)  # age 0 to 8+ in thousands in 2013  from 
+          prop_migrants_per_age      <- fish_East_to_SD24_2011 / fish_East_2011
+          prop_migrants_per_age[1:2] <- prop_migrants_per_age[3]  
+          ALK                        <- read.table("C:/Users/fbas/Documents/GitHub/DISPLACE_input/popsspe_balticonly/11spe_percent_age_per_szgroup_biolsce1.dat", header=FALSE, sep=" ") # circular coding because ALK already known!
+          prop_migrants_per_length   <-  as.matrix(ALK[,1:9]) %*% prop_migrants_per_age   # lengthgroups x ages [sum to 1 by age]  %*% age => lengthgroups
+          mig_fluxes[,2]             <- prop_migrants_per_length
+          #mig_fluxes[,2] <- 0.1 
+          
+     write.table(mig_fluxes, quote=FALSE,
+                 file=file.path(main.path,"popsspe",paste(pa$index_pops[x],"overall_migration_fluxes_","semester1","_","biolsce",sce,".dat",sep='')), append=TRUE,
+                   row.names=FALSE, col.names=FALSE)
+     write.table(mig_fluxes, quote=FALSE,
+                 file=file.path(main.path,"popsspe",paste(pa$index_pops[x],"overall_migration_fluxes_","semester2","_","biolsce",sce,".dat",sep='')), append=TRUE,
+                   row.names=FALSE, col.names=FALSE)
+   
+   }
+
 
 }}}
 
