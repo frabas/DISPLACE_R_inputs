@@ -11,7 +11,7 @@
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
 
 
-## IBM parametrisation
+ ## IBM parametrisation
  ## Francois Bastardie (DTU-Aqua)
  ## outputs: mainly .dat files to be used for the IBM simulations
 
@@ -33,7 +33,7 @@
 
  general$igraph                <- 56
  general$case_study            <- "myfish"
- general$case_study_countries  <- c("DEN")    # for the Baltic only
+ general$case_study_countries  <- c("DEN")    
  general$a.year                <- "2012"
  general$a.country             <- "DEN"
 

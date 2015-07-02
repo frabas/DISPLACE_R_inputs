@@ -1,48 +1,99 @@
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!LINK METIERS TO TARGET STOCKS!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!met_target_names.txt!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
- ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
 
 
+ ## POP SPE
+ ## IBM parametrisation
+ ## Francois Bastardie (DTU-Aqua)
+ ## outputs: mainly .dat files to be used for the IBM simulations
 
+
+ # GENERAL SETTINGS
   general <- list()
-  general$main.path       <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_raw")
-  general$main.path.input <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input")
-  general$main.path.code  <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
+  general$main.path             <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_raw")
+  general$main.path.code        <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
+  general$main_path_input       <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input")
+
   general$igraph                <- 11
   general$case_study            <- "baltic_only"
-  general$case_study_name       <- "balticonly"
   general$case_study_countries  <- c("DEN", "SWE", "DEU")    # for the Baltic only
   general$a.year                <- "2012"
-  #years     <- "2010"
-      #method    <- "inverse"
-      #threshold <- "50"
+  general$a.country             <- "DEN"
+  #general$a.country             <- "DEU"
+  #general$a.country             <- "SWE"
+
+
+  general$igraph                <- 56
+  general$case_study            <- "myfish"
+  general$case_study_countries  <- c("DEN")    # for the Baltic only
+  general$a.year                <- "2012"
+  general$a.country             <- "DEN"
+  # mkdir
+  dir.create(path=file.path(general$main.path, "merged_tables", general$case_study),
+                      showWarnings = TRUE, recursive = TRUE, mode = "0777")
+
+  if(general$case_study=="canadian_paper"){
+      year      <- "2010"
+      years     <- "2005_2010"
+      method    <- "maximum"
+      threshold <- "50"
+      }
+  if(general$case_study=="baltic_only"){
       year      <- "2012"
       years     <- "2008_2012"
       method    <- "inverse"
       threshold <- "25"
-      load(file.path(general$main.path,"merged_tables", general$case_study, paste("x.agg.DEN.",year,".igraph",general$igraph,".RData",sep='')))
-     x_agg_den <- x.agg ; x_agg_den$country <- "DEN"
-     load(file.path(general$main.path,"merged_tables", general$case_study, paste("metier_names.DEN.",year,".igraph",general$igraph,".RData",sep='')))
-     metier_names_den           <- metier_names
-     colnames(metier_names_den) <- c("met", "idx")
-      combined_met_names <-  data.frame(metier_names_den)
-   load(file.path(general$main.path,"merged_tables", general$case_study, paste("x.agg.DEU.",year,".igraph",general$igraph,".RData",sep='')))
-     x_agg_deu <- x.agg ; x_agg_deu$country <- "DEU"
-     load(file.path(general$main.path,"merged_tables", general$case_study, paste("metier_names.DEU.",year,".igraph",general$igraph,".RData",sep='')))
-     metier_names_deu <- metier_names  ; colnames(metier_names_deu) <- c("met", "idx")
-     combined_met_names <-  data.frame(metier_names_deu)
-    load(file.path(general$main.path,"merged_tables", general$case_study, paste("x.agg.SWE.",year,".igraph",general$igraph,".RData",sep='')))
-     x_agg_swe <- x.agg ; x_agg_swe$country <- "SWE"
-     load(file.path(general$main.path,"merged_tables", general$case_study, paste("metier_names.SWE.",year,".igraph",general$igraph,".RData",sep='')))
-     metier_names_swe <- metier_names  ; colnames(metier_names_swe) <- c("met", "idx")
-     combined_met_names <-  data.frame(metier_names_swe)
-   # rename the metiers because of the combination of dnk and ger
-     combined_met_names        <- merge(metier_names_den, metier_names_deu, by="met", all=TRUE, suffixes = c(".den",".deu"))
-     combined_met_names        <- merge(combined_met_names, metier_names_swe, by="met", all=TRUE)
-     colnames(combined_met_names) <- c('met', 'idx.den', 'idx.deu', 'idx.swe')
-     combined_met_names$idx    <- 0:(nrow(combined_met_names)-1) # dont forget the c++ offset...
+      }
+
+  if(general$case_study=="myfish"){
+      year      <- "2012"
+      years     <- "2008_2012"
+      method    <- "inverse"
+      threshold <- "25"
+      }
+
+
+     
+      
+      
+     if('DEN' %in% general$case_study_countries) {
+       load(file.path(general$main.path,"merged_tables", general$case_study, paste("x.agg.DEN.",year,".igraph",general$igraph,".RData",sep='')))
+       x_agg_den <- x.agg ; x_agg_den$country <- "DEN"
+       load(file.path(general$main.path,"merged_tables", general$case_study, paste("metier_names.", general$a.country,".", general$a.year,".igraph",general$igraph,".RData",sep='')))
+       metier_names_den           <- metier_names
+       colnames(metier_names_den) <- c("met", "idx")
+       combined_met_names         <-  data.frame(metier_names_den)
+       }
+       
+     if('DEU' %in% general$case_study_countries) {
+       load(file.path(general$main.path,"merged_tables", general$case_study, paste("x.agg.DEU.",year,".igraph",general$igraph,".RData",sep='')))
+       x_agg_deu <- x.agg ; x_agg_deu$country <- "DEU"
+       load(file.path(general$main.path,"merged_tables", general$case_study, paste("metier_names.DEU.",year,".igraph",general$igraph,".RData",sep='')))
+       metier_names_deu <- metier_names  ; colnames(metier_names_deu) <- c("met", "idx")
+       combined_met_names <-  data.frame(metier_names_deu)
+       }
+       
+       
+     if('SWE' %in% general$case_study_countries) {
+       load(file.path(general$main.path,"merged_tables", general$case_study, paste("x.agg.SWE.",year,".igraph",general$igraph,".RData",sep='')))
+       x_agg_swe <- x.agg ; x_agg_swe$country <- "SWE"
+       load(file.path(general$main.path,"merged_tables", general$case_study, paste("metier_names.SWE.",year,".igraph",general$igraph,".RData",sep='')))
+       metier_names_swe <- metier_names  ; colnames(metier_names_swe) <- c("met", "idx")
+       combined_met_names <-  data.frame(metier_names_swe)
+       }
+       
+     # rename the metiers because of the combination of dnk and ger
+     if('DEN' %in% general$case_study_countries &&
+          'DEU' %in% general$case_study_countries &&
+            'SWE' %in% general$case_study_countries) {
+       combined_met_names           <- merge(metier_names_den, metier_names_deu, by="met", all=TRUE, suffixes = c(".den",".deu"))
+       combined_met_names           <- merge(combined_met_names, metier_names_swe, by="met", all=TRUE)
+       colnames(combined_met_names) <- c('met', 'idx.den', 'idx.deu', 'idx.swe')
+       combined_met_names$idx       <- 0:(nrow(combined_met_names)-1) # dont forget the c++ offset...
+     
      # rename for den
      levels(x_agg_den$LE_MET_level6) <-
         combined_met_names$idx[ match(levels(x_agg_den$LE_MET_level6), as.character(combined_met_names$idx.den))]
@@ -52,8 +103,9 @@
      # rename for swe
      levels(x_agg_swe$LE_MET_level6) <-
        combined_met_names$idx[ match(levels(x_agg_swe$LE_MET_level6), as.character(combined_met_names$idx.swe))]
+     
      # save
-   # rbind Germany, Denmark and Sweden
+     # rbind Germany, Denmark and Sweden
      combined_columns   <- unique(c(names(x_agg_den),names(x_agg_deu),names(x_agg_swe)))
      idx_col            <- grep("KG", combined_columns)
      combined_columns   <- c(combined_columns[!(1:length(combined_columns)) %in% idx_col], sort(combined_columns[idx_col]))
@@ -64,9 +116,15 @@
      x_agg_deu          <- x_agg_deu[, combined_columns] # order column names
      x_agg_swe          <- x_agg_swe[, combined_columns] # order column names
      x.agg              <- rbind(x_agg_den, x_agg_deu, x_agg_swe) # rbind
-head(x.agg )
+     head(x.agg )
+     
+     } else{
+      x.agg  <- x_agg_den           
+     }
 
 
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  c.listquote <- function (...)
    {
     args <- as.list(match.call()[-1])
@@ -90,11 +148,21 @@ head(x.agg )
     return(as.call(lstquote))
    }
 
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
 
 
-    # find out areas
-  load(file.path(general$main.path, "igraph", paste(general$igraph, "_graphibm.RData",sep=''))) # built from the R code
+ # find out areas
+ #load(file.path(general$main.path, "igraph", paste(general$igraph, "_graphibm.RData",sep=''))) # built from the R code
+ coord <- read.table(file=file.path(general$main_path_input, "graphsspe", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
+ coord <- as.matrix(as.vector(coord))
+ coord <- matrix(coord, ncol=3)
+ colnames(coord) <- c('x', 'y', 'idx.port')
+ #plot(coord[,1], coord[,2])
+
+ 
  coord_pt_graph <- coord[x.agg$pt_graph,] # replace coord of vms point by the coord of the graph node before finding out the stock area
+ 
  source(file=file.path(general$main.path.code,"IBM_param_utils_longlat_to_ICESareas.r"))
  x.agg$x      <- as.numeric(as.character(coord_pt_graph[,'x']))
  x.agg$y      <- as.numeric(as.character(coord_pt_graph[,'y']))
@@ -105,12 +173,12 @@ head(x.agg )
  x.agg[(x.agg$area %in% c('25', '26', '27', '28-1', '28-2', '29','30', '31', '32')), 'area'] <- '2532'
 
 
-# aggregate per metier
-  library(data.table)
- nm           <- names(x.agg)
- idx.col.w    <- grep('KG', nm) # index columns with species weight
- idx.col      <- c(idx.col.w) # index columns with species weight
- DT           <- data.table(x.agg) # library data.table for fast grouping replacing aggregate()
+ # aggregate per metier
+ library(data.table)
+ nm               <- names(x.agg)
+ idx.col.w        <- grep('KG', nm) # index columns with species weight
+ idx.col          <- c(idx.col.w) # index columns with species weight
+ DT               <- data.table(x.agg) # library data.table for fast grouping replacing aggregate()
  # AGGREGATE WEIGHT AND EFFORT PER SPECIES
  eq1              <- c.listquote( paste ("sum(",nm[idx.col],",na.rm=TRUE)",sep="") )
  x.agg2           <- DT[,eval(eq1),by=list(LE_MET_level6, area)]
@@ -152,7 +220,7 @@ head(x.agg )
   colnames(x.agg2.long) <- c("LE_MET_level6",   "stock", "KG")
 
   # subset for relevant populations
-  pop_names                   <- read.table(file.path(general$main.path.input, paste("popsspe_", general$case_study_name, sep=''), paste("pop_names_",general$case_study,".txt", sep='')))
+  pop_names                   <- read.table(file.path(general$main.path, "popsspe",paste("pop_names_",general$case_study,".txt", sep='')))
   x.agg2.long                 <- x.agg2.long[x.agg2.long$stock %in% pop_names[,1],] # keep simulated stocks only
   x.agg2.long$stock           <- factor(x.agg2.long$stock)
   levels(x.agg2.long$stock )  <- pop_names[,2][ match(levels(x.agg2.long$stock), as.character(pop_names[,1]))] # map the name to integer
@@ -170,9 +238,11 @@ head(x.agg )
    x.agg2.long                 <- do.call ("rbind", lapply( split(x.agg2.long, f=x.agg2.long$LE_MET_level6), function(x) {res <- x[1:5,]; if(all(res$KG!=0)) res else x[1,] } ) )
 
 
+  
   # export to c++ as a multimap
   write.table(x.agg2.long[, c("LE_MET_level6", "mapped_stk_code")],
-          file=file.path(general$main.path.input, paste("metiersspe_", general$case_study_name, sep=''),
+          file=file.path(general$main.path, "metiersspe",
            "met_target_names.txt"),
             col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE)
+
 
