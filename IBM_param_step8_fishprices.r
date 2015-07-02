@@ -5,7 +5,7 @@
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
 
 
- ## POP SPE
+ ## HARBOUR SPE
  ## IBM parametrisation
  ## Francois Bastardie (DTU-Aqua)
  ## outputs: mainly .dat files to be used for the IBM simulations

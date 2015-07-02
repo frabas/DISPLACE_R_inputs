@@ -1,26 +1,46 @@
-## IBM
-## find landings per month per species for each igraph node
-## to be used for the depletion of the pops each month that would result from
-## the not explicitly described other activities
-## in the simulation, e.g. other country like  the Swedish fleet...
-## but should also be used for vessels not equipped with VMS i.e. smaller vessels...
-
-
-
- general <-
-        list(   main.path.ibm= file.path("C:","Users", "fba", "Dropbox", "ibm_vessels_param"),
-                   region.of.interest= "BE_and_BW_and_Kattegat",
-                    #a.year="2010")
-                    a.year="2012")
-
-  general$case_study <- "baltic_only"
-  if(general$case_study=="canadian_paper")    general$igraph <- 4
-  if(general$case_study=="baltic_only_2010")  general$igraph <- 6
-  if(general$case_study=="baltic_only")       general$igraph <- 11
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!find landings per month per species for each igraph node!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  
-  general$main.path      <- file.path("C:","displace-project.org","repository", "ibm_vessels_param")
-  general$main.path.code <- file.path("C:","displace-project.org","repository", "ibm_vessels_param_R")
+ ## find landings per month per species for each igraph node
+ ## to be used for the depletion of the pops each month that would result from
+ ## the not explicitly described "other" activities
+ ## in the simulation, e.g. from foreign countries...
+ ## but should also be used for vessels not equipped with VMS i.e. smaller vessels...
 
+ 
+ ## POP SPE
+ ## IBM parametrisation
+ ## Francois Bastardie (DTU-Aqua)
+ ## outputs: mainly .dat files to be used for the IBM simulations
+
+# GENERAL SETTINGS
+  general <- list()
+  general$main.path             <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_raw")
+  general$main.path.code        <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
+  general$main_path_input       <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input")
+
+  general$igraph                <- 11
+  general$case_study            <- "baltic_only"
+  general$case_study_countries  <- c("DEN", "SWE", "DEU")    # for the Baltic only
+  general$a.year                <- "2012"
+  general$a.country             <- "DEN"
+  #general$a.country             <- "DEU"
+  #general$a.country             <- "SWE"
+
+
+  general$igraph                <- 56
+  general$case_study            <- "myfish"
+  general$case_study_countries  <- c("DEN")    # for the Baltic only
+  general$a.year                <- "2012"
+  general$a.country             <- "DEN"
+
+
+  general$region.of.interest   <- "BE_and_BW_and_Kattegat"
+           
+ 
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!UTILS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
@@ -179,9 +199,18 @@ function (tacsat, string = TRUE)
  ##---------------------------------------
  ## READ IGRAPH CODE SQUARE---------------
  ##---------------------------------------
-  code_square_per_node <- read.table(file=file.path(general$main.path,  "igraph", 
-                              paste("code_square_for_graph",general$igraph,"_points.dat", sep='')), header=TRUE) # built in ibm_param_vessels.r
+  #code_square_per_node <- read.table(file=file.path(general$main.path,  "igraph", 
+  #                            paste("code_square_for_graph",general$igraph,"_points.dat", sep='')), header=TRUE) # built in ibm_param_vessels.r
 
+  # replaced by:
+  coord <- read.table(file=file.path(general$main_path_input, "graphsspe", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
+  coord <- as.matrix(as.vector(coord))
+  coord <- matrix(coord, ncol=3)
+  colnames(coord) <- c('SI_LONG', 'SI_LATI', 'idx.port')
+  code_square_per_node <- cbind.data.frame(coord, code_square= ICESrectangle (coord))
+  #plot(coord[,1], coord[,2])
+
+  
   code_square_per_node$pt_graph <- 0:(nrow(code_square_per_node)-1)
 
 
@@ -208,15 +237,15 @@ function (tacsat, string = TRUE)
    library(data.table)
    DT  <- data.table(landings_all) # library data.table for fast grouping replacing aggregate()
    # AGGREGATE WEIGHT PER SPECIES
-   eq1  <- c.listquote( paste ("sum(",nm[idx.col],",na.rm=TRUE)",sep="") )
-   DT$X2010 <-as.double(DT$X2012)
-   DT$REG.GEAR.COD<-as.factor(DT$REG.GEAR.COD)
-   DT$VESSEL_LENGTH<-as.factor(DT$VESSEL_LENGTH)
-   DT$RECTANGLE<-as.factor(DT$RECTANGLE)
-   DT$SPECIES  <-as.factor(DT$SPECIES)
-   DT$COUNTRY  <-as.factor(DT$COUNTRY)
-   land.agg    <- DT[,eval(eq1), by=list(COUNTRY, REG.GEAR.COD, VESSEL_LENGTH, RECTANGLE, SPECIES)]
-   land.agg    <- data.frame(land.agg)
+   eq1                <- c.listquote( paste ("sum(",nm[idx.col],",na.rm=TRUE)",sep="") )
+   DT$X2010           <- as.double(DT$X2012)
+   DT$REG.GEAR.COD    <- as.factor(DT$REG.GEAR.COD)
+   DT$VESSEL_LENGTH   <- as.factor(DT$VESSEL_LENGTH)
+   DT$RECTANGLE       <- as.factor(DT$RECTANGLE)
+   DT$SPECIES         <- as.factor(DT$SPECIES)
+   DT$COUNTRY         <- as.factor(DT$COUNTRY)
+   land.agg           <- DT[,eval(eq1), by=list(COUNTRY, REG.GEAR.COD, VESSEL_LENGTH, RECTANGLE, SPECIES)]
+   land.agg           <- data.frame(land.agg)
    colnames(land.agg) <- c("country","metier", "vsize", "rectangle", "species", "landings")
   
    # correct some levels....baltic_only_2010
@@ -283,12 +312,19 @@ function (tacsat, string = TRUE)
   
   # first, take a look...
   #unique(landings[landings$country %in% c('DEU', 'DNK'),"vsize"])
-   unique(landings[landings$country %in% c( 'DNK', 'DEU', 'SWE') ,"vsize"])
+  if(general$case_study=="balticonly") unique(landings[landings$country %in% c( 'DNK', 'DEU', 'SWE') ,"vsize"])
+  if(general$case_study=="myfish")     unique(landings[landings$country %in% c( 'DNK') ,"vsize"])
 
   # then remove simulated vessels:
   #idx_to_remove <- which(landings$country %in% c('DEU', 'DNK')  & 
-  idx_to_remove <- which(landings$country %in% c( 'DNK', 'DEU', 'SWE')  & 
+   if(general$case_study=="balticonly"){
+     idx_to_remove <- which(landings$country %in% c( 'DNK', 'DEU', 'SWE')  & 
                       landings$vsize %in% c('o18t24m','o24t40m','o40m', 'o15m', 'o12t18m'))
+     }
+   if(general$case_study=="myfish"){
+     idx_to_remove <- which(landings$country %in% c( 'DNK')  & 
+                      landings$vsize %in% c('o18t24m','o24t40m','o40m', 'o15m', 'o12t18m'))
+     }
   idx_to_keep   <- (1:nrow(landings))[-idx_to_remove]
   
  
@@ -327,29 +363,29 @@ function (tacsat, string = TRUE)
 
 
   # aggregate
-  nm         <- names(landings)
-  idx.col  <- grep('landings', nm) # index columns with species weight
+  nm                 <- names(landings)
+  idx.col            <- grep('landings', nm) # index columns with species weight
   library(data.table)
-  DT  <- data.table(landings) # library data.table for fast grouping replacing aggregate()
+  DT                 <- data.table(landings) # library data.table for fast grouping replacing aggregate()
   # AGGREGATE WEIGHT PER SPECIES
-  eq1  <- c.listquote( paste ("sum(",nm[idx.col],",na.rm=TRUE)",sep="") )
-  DT$landings<-as.double(DT$landings)
-  DT$rectangle<-as.factor(DT$rectangle)
-  DT$species<-as.factor(DT$species)
-  land.agg <- DT[,eval(eq1),by=list(rectangle, species)]
-  land.agg <- data.frame( land.agg)
+  eq1                <- c.listquote( paste ("sum(",nm[idx.col],",na.rm=TRUE)",sep="") )
+  DT$landings        <- as.double(DT$landings)
+  DT$rectangle       <- as.factor(DT$rectangle)
+  DT$species         <- as.factor(DT$species)
+  land.agg           <- DT[,eval(eq1),by=list(rectangle, species)]
+  land.agg           <- data.frame( land.agg)
   colnames(land.agg) <- c("rectangle", "species", nm[idx.col])
 
 
   
-   # keep pops of interest only
-    pop_names                        <- read.table(file.path(general$main.path,  "popsspe",paste("pop_names_",general$case_study,".txt", sep="")))
-   land.agg       <- land.agg[land.agg$species %in% pop_names[,1],] # keep simulated stocks only 
-   land.agg$species <- factor(land.agg$species)
-   levels(land.agg$species)  <- pop_names[,2][ match(levels(land.agg$species), as.character(pop_names[,1]))] # map the name to integer
-   land.agg$species <- as.numeric(as.character(land.agg$species))
-   library(doBy)
-   land.agg       <- orderBy(~species, data=land.agg) # library(doBy) # order from 0 to nbstock
+  # keep pops of interest only
+  pop_names                    <- read.table(file.path(general$main.path,  "popsspe",paste("pop_names_",general$case_study,".txt", sep="")))
+  land.agg                     <- land.agg[land.agg$species %in% pop_names[,1],] # keep simulated stocks only 
+  land.agg$species             <- factor(land.agg$species)
+  levels(land.agg$species)     <- pop_names[,2][ match(levels(land.agg$species), as.character(pop_names[,1]))] # map the name to integer
+  land.agg$species             <- as.numeric(as.character(land.agg$species))
+  library(doBy)
+  land.agg                     <- orderBy(~species, data=land.agg) # library(doBy) # order from 0 to nbstock
  
   
    # STECF data are annual while we need semester data at least 
@@ -363,7 +399,7 @@ function (tacsat, string = TRUE)
    
    
    # STECF data are in TONS 
-   # while paprameterisation for c++ need kilos...
+   # while parameterisation for c++ need kilos...
    land.agg$landings <- land.agg$landings *1000 
   
   
@@ -391,8 +427,8 @@ function (tacsat, string = TRUE)
         
         # find out the number of graph nodes per square (presence for this species this semester) 
         # to later make the dispaching of landings between points
-        nb_pt_graph_per_square <- tapply(code_square_pop_semester$pt_graph, code_square_pop_semester$code_square, length)
-        code_square_pop_semester$code_square <- factor(code_square_pop_semester$code_square)
+        nb_pt_graph_per_square                          <- tapply(code_square_pop_semester$pt_graph, code_square_pop_semester$code_square, length)
+        code_square_pop_semester$code_square            <- factor(code_square_pop_semester$code_square)
         code_square_pop_semester$nb_pt_graph_per_square <- nb_pt_graph_per_square[as.character(code_square_pop_semester$code_square)]
     
         # subset this pop this semester
@@ -434,7 +470,7 @@ function (tacsat, string = TRUE)
         colnames(merged_this_species_this_quarter)  <- c('pt_graph', 'landings')
         }
   
- #browser()       
+ 
             # save for a multimap in c++  pt_graph / landings kg per month (to be used every months)
             # to fill in the pop attribute
         write.table(round(merged_this_species_this_quarter[, c('pt_graph', 'landings')]),
