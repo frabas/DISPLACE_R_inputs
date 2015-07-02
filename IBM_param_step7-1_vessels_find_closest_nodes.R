@@ -269,4 +269,18 @@
              paste("vid_this_case_study_",general$a.country,".",general$a.year,".igraph",general$igraph,".RData", sep='')))
       cat(paste("save 'vid_this_case_study', this year...OK\n\n",sep=""))
 
+
+
+   #...and slightly modify the name of metiers and save metier names
+   ping.fgrounds$LE_MET_level6 <- factor(ping.fgrounds$LE_MET_level6)
+   ping.fgrounds$LE_MET_level6 <- as.factor(unlist(lapply(strsplit( as.character(ping.fgrounds$LE_MET_level6), split="_"),
+                                  function(x) paste(x[1],'_',x[2],sep=''))))   # remove mesh size and useless selective grid info
+
+   metier_names <- cbind(levels(ping.fgrounds$LE_MET_level6), 0:(length(levels(ping.fgrounds$LE_MET_level6))-1))
+   save(metier_names,  file=file.path(general$main.path, "merged_tables", general$case_study, ## SAVE
+                     paste("metier_names.",general$a.country,".",general$a.year,".igraph",
+                      general$igraph,".RData", sep='')))
+   write.table(metier_names, file.path(general$main.path, "metiersspe", paste("metier_names_",general$a.country,"_",general$a.year,".txt", sep='')),
+               quote=FALSE, col.names=FALSE, row.names=FALSE)
+
    
