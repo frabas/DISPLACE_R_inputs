@@ -9,7 +9,34 @@
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
 
 ## POP SPE
-if(FRANCOIS){
+## IBM parametrisation
+## Francois Bastardie (DTU-Aqua)
+## outputs: mainly .dat files to be used for the IBM simulations
+
+
+ # GENERAL SETTINGS
+  general <- list()
+  general$main.path             <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_raw")
+  general$main.path.code        <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
+  general$main_path_input       <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input")
+
+  general$igraph                <- 11
+  general$case_study            <- "baltic_only"
+  general$case_study_countries  <- c("DEN", "SWE", "DEU")    # for the Baltic only
+  general$a.year                <- "2012"
+  general$a.country             <- "DEN"
+  #general$a.country             <- "DEU"
+  #general$a.country             <- "SWE"
+
+
+  general$igraph                <- 56
+  general$case_study            <- "myfish"
+  general$case_study_countries  <- c("DEN")    # for the Baltic only
+  general$a.year                <- "2012"
+  general$a.country             <- "DEN"
+  # mkdir
+  dir.create(path=file.path(general$main.path, "merged_tables", general$case_study),
+                      showWarnings = TRUE, recursive = TRUE, mode = "0777")
 
   if(general$case_study=="canadian_paper"){
       year      <- "2010"
@@ -17,7 +44,14 @@ if(FRANCOIS){
       method    <- "maximum"
       threshold <- "50"
       }
-   if(general$case_study=="baltic_only"){
+  if(general$case_study=="baltic_only"){
+      year      <- "2012"
+      years     <- "2008_2012"
+      method    <- "inverse"
+      threshold <- "25"
+      }
+
+  if(general$case_study=="myfish"){
       year      <- "2012"
       years     <- "2008_2012"
       method    <- "inverse"
@@ -32,7 +66,7 @@ if(FRANCOIS){
                        # HERE WE use lst_avai_2008_2012.RData instead of 2012 only.
 
  # load outputs from glm  to get the pop to keep
- load(file.path(general$main.path, "popsspe", paste("betas_DEN_DEU_SWE_INTEGER_",general$case_study,".RData", sep='')) )
+ load(file.path(general$main.path, "popsspe", paste("betas",general$case_study,"_INTEGER_",general$case_study,".RData", sep='')) )
  pops      <- as.character(unique(all.betas0$pop))
  pop_names <- read.table(file.path(general$main.path, "popsspe",paste("pop_names_",general$case_study,".txt", sep='')))
 
@@ -189,6 +223,9 @@ if(FRANCOIS){
                       showWarnings = TRUE, recursive = TRUE, mode = "0777")
    call_make_avai_files(lst.avai, add_stochastic_variation=FALSE, num="", general=general)
 
+   
+   if(general$case_study!= "myfish"){
+   
    # add a multivariate lognormal error
    cat("if it still doesn't exist, 'stochast_avai' folder is created in ",
                       file.path(general$main.path,"popsspe","\n"))
@@ -197,9 +234,9 @@ if(FRANCOIS){
    n<-50
    increment <- sprintf("%03d", 1:n)
    for(i in 1:n)  call_make_avai_files(lst.avai, add_stochastic_variation=TRUE, num=increment[i], general=general)
+   }
 
 
- }  # end if FRANCOIS
 
 
 

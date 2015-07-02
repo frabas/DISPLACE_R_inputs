@@ -11,10 +11,43 @@
  ## DNK00[xx]_freq_possible_metiers_quarter[xx].dat !!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ 
+ ## IBM parametrisation
+ ## Francois Bastardie (DTU-Aqua)
+ ## outputs: mainly .dat files to be used for the IBM simulations
+
+
+ # GENERAL SETTINGS
+ general <- list()
+ general$main.path             <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_raw")
+ general$main.path.code        <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
+ general$main_path_input       <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input")
+
+ general$igraph                <- 11
+ general$case_study            <- "baltic_only"
+ general$case_study_countries  <- c("DEN", "SWE", "DEU")    # for the Baltic only
+ general$a.year                <- "2012"
+ general$a.country             <- "DEN"
+ #general$a.country             <- "DEU"
+ #general$a.country             <- "SWE"
+
+
+ general$igraph                <- 56
+ general$case_study            <- "myfish"
+ general$case_study_countries  <- c("DEN")    # for the Baltic only
+ general$a.year                <- "2012"
+ general$a.country             <- "DEN"
 
 
  # load the graph
- load(file.path(general$main.path, "igraph", paste(general$igraph,  "_graphibm.RData",sep=''))) # built from the R code
+ #load(file.path(general$main.path, "igraph", paste(general$igraph,  "_graphibm.RData",sep=''))) # built from the R code
+ coord <- read.table(file=file.path(general$main_path_input, "graphsspe", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
+ coord <- as.matrix(as.vector(coord))
+ coord <- matrix(coord, ncol=3)
+ colnames(coord) <- c('x', 'y', 'idx.port')
+ #plot(coord[,1], coord[,2])
+
+ 
  coord            <-  cbind(coord, idx=1:nrow(coord))  ## CAUTION: start at 1
  coord.fgrounds   <-  coord[coord[,'idx.port']==0,]
  coord.harbours   <-  coord[coord[,'idx.port']!=0,]
@@ -93,8 +126,8 @@
      cat(paste("save the combined 'ping.harbours', this year...OK\n\n",sep=""))
 
  } else{ # end combine countries
- ping.fgrounds <- ping.fgrounds.dnk
- ping.harbours <- ping.harbours.dnk
+ ping.fgrounds <- ping.fgrounds.den
+ ping.harbours <- ping.harbours.den
  }
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
@@ -142,22 +175,33 @@
  #levels(ping.fgrounds$LE_MET_level6) <-
  #   paste("met", 0:(length(levels(ping.fgrounds$LE_MET_level6))-1), "_", levels(ping.fgrounds$LE_MET_level6), "_",general$a.country, sep='')
  # NEED JUST INTEGERS!, replaced by:
-  ping.fgrounds$LE_MET_char          <- ping.fgrounds$LE_MET_level6
-  load(file.path(general$main.path, "merged_tables", general$case_study,
-        paste("combined_met_names.",general$a.year,".igraph", general$igraph,".RData", sep='')))    # get 'combined_met_names'
-  ping.fgrounds$LE_MET_level6         <- unlist(lapply(strsplit(as.character(ping.fgrounds$LE_MET_level6), split="_"), function(x) paste(x[1],'_',x[2],sep='')))   # remove mesh size and useless selective grid info
-  # rename metiers into INTEGER metiers
-   ping.fgrounds$LE_MET_level6         <- factor(ping.fgrounds$LE_MET_level6)
-  levels(ping.fgrounds$LE_MET_level6) <- combined_met_names$idx[ match(levels(ping.fgrounds$LE_MET_level6), as.character(combined_met_names$met))]
+ ping.fgrounds$LE_MET_char          <- ping.fgrounds$LE_MET_level6
+ ping.fgrounds$LE_MET_level6         <- unlist(lapply(strsplit(as.character(ping.fgrounds$LE_MET_level6), split="_"), function(x) paste(x[1],'_',x[2],sep='')))   # remove mesh size and useless selective grid info
+ # rename metiers into INTEGER metiers
+ ping.fgrounds$LE_MET_level6         <- factor(ping.fgrounds$LE_MET_level6)
+  
+ #load(file.path(general$main.path, "merged_tables", general$case_study,
+ #      paste("combined_met_names.",general$a.year,".igraph", general$igraph,".RData", sep='')))    # get 'combined_met_names'
+ # levels(ping.fgrounds$LE_MET_level6) <- combined_met_names$idx[ match(levels(ping.fgrounds$LE_MET_level6), as.character(combined_met_names$met))]
+ 
+ # get metier_names
+ load(file.path(general$main.path,"merged_tables", general$case_study, paste("metier_names.", general$a.country,".", general$a.year,".igraph",general$igraph,".RData",sep='')))
+  
+ # NEED JUST INTEGERS! for c++, 
+ levels(ping.fgrounds$LE_MET_level6) <- metier_names [match(levels(ping.fgrounds$LE_MET_level6), metier_names[,1]), 2]
 
+  
+ 
 
  # (optional) load outputs from glm and then remove here potential few records without any info
  # from avai to make the input .dat files very robust for Cpp...
- load(file.path(general$main.path, "popsspe", paste("betas_DEN_DEU_SWE_INTEGER_",general$case_study ,".RData", sep='')) )
+ load(file.path(general$main.path, "popsspe", paste("betas",general$case_study,"_INTEGER_",general$case_study,".RData", sep='')) )
+ nrow( ping.fgrounds)
  ping.fgrounds                <- ping.fgrounds[ping.fgrounds$VE_REF %in% unique(all.betas.vid$VE_REF),]
  ping.fgrounds                <- ping.fgrounds[ping.fgrounds$LE_MET_level6 %in% unique(all.betas.met$LE_MET_level6),]
  ping.fgrounds$VE_REF         <- factor(ping.fgrounds$VE_REF)
  ping.fgrounds$LE_MET_level6  <- factor(ping.fgrounds$LE_MET_level6)
+ nrow( ping.fgrounds)
 
 
  # add quarters, and then semesters
@@ -180,7 +224,7 @@
  colnames(x.agg) <- c("VE_REF", "quarter", "pt_graph",nm[idx.col])
 
 
-# AGGREGATE PER VE_REF, PER METIER
+ # AGGREGATE PER VE_REF, PER METIER
  nm                       <- names(ping.fgrounds)
  idx.col.e                <- grep('LE_EFF_VMS', nm)
  ping.fgrounds$LE_EFF_VMS <- as.numeric(as.character(ping.fgrounds$LE_EFF_VMS))
