@@ -1,26 +1,35 @@
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!OBTAIN A PRICE PER STOCK PER CAT PER QUARTER!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!ON HARBOUR NODES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
 
 
+ ## POP SPE
+ ## IBM parametrisation
+ ## Francois Bastardie (DTU-Aqua)
+ ## outputs: mainly .dat files to be used for the IBM simulations
+
+# GENERAL SETTINGS
   general <- list()
-  general$main.path      <- file.path("C:","displace-project.org","repository", "ibm_vessels_param")
-  general$main.path.code <- file.path("C:","displace-project.org","repository", "ibm_vessels_param_R")
- 
-  #general$igraph <- 4 # for the Canadian paper
-  #general$case_study <- "canadian_paper"
-  #general$case_study_countries <- c("DNK", "GER") # for the Canadian paper
-  #general$a.year <- "2010"
-  #general$a.country <- "DNK"
-  
-  #general$igraph <- 6
-  #general$case_study <- "baltic_only"
-  #general$case_study_countries <- "DNK" # for the Baltic only
-  #general$a.year <- "2010"
-  #general$a.country <- "DNK"
-  
+  general$main.path             <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_raw")
+  general$main.path.code        <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
+  general$main_path_input       <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input")
+
   general$igraph                <- 11
   general$case_study            <- "baltic_only"
-  general$case_study_countries  <- c("DEN", "DEU", "SWE") # for the Baltic only
+  general$case_study_countries  <- c("DEN", "SWE", "DEU")    # for the Baltic only
   general$a.year                <- "2012"
-  general$a.country             <- "DEN"      
+  general$a.country             <- "DEN"
+  #general$a.country             <- "DEU"
+  #general$a.country             <- "SWE"
+
+
+  general$igraph                <- 56
+  general$case_study            <- "myfish"
+  general$case_study_countries  <- c("DEN")    # for the Baltic only
+  general$a.year                <- "2012"
+  general$a.country             <- "DEN"
 
 
 
@@ -45,13 +54,14 @@
 
   # read data---------------------------------
   #prices       <- read.table(file=file.path('C:','Users','fba','Dropbox','ibm_vessels_param_cutting_edge',
-  prices       <- read.table(file=file.path("C:","displace-project.org","repository", "ibm_vessels_param",
+  prices       <- read.table(file=file.path(general$main.path,
                             paste("price_data2.csv",sep='')), header=TRUE, sep=",")
   prices$date2       <- strptime(  paste(prices$date) ,  "%e/%m/%Y" )
   # transform into euros
   if(general$a.year=="2010") prices$price <- prices$price * 0.13437 # convert DKK in euro in 2010
   if(general$a.year=="2012") prices$price <- prices$price * 0.1345 # convert DKK in euro in 2012
 
+  # all info is good so keep price info also for myfish app
   prices_swe             <- read.table(file=file.path("C:","displace-project.org","repository", "ibm_vessels_param",
                             paste("SWE_DISPLACE_price_info.txt",sep='')), header=TRUE, sep="\t")
   prices_swe$date2       <-  strptime( prices_swe$date  ,  "%Y-%m-%d" )
@@ -75,7 +85,7 @@
  prices$day2        <-   format(strptime(  paste( prices$date2) , tz='GMT',  "%Y-%m-%d" ), "%j")
  prices$month       <-   format(strptime(  paste( prices$date2) , tz='GMT',  "%Y-%m-%d" ), "%m")
  prices$year        <-   format(strptime(  paste( prices$date2) , tz='GMT',  "%Y-%m-%d" ), "%Y")
- prices$quarter     <- quarters(prices$date2)
+ prices$quarter     <-   quarters(prices$date2)
 
 
  # subset for the year
@@ -185,10 +195,10 @@
     table_harb_and_idx_node  <- table_harb_and_idx_node[!duplicated(table_harb_and_idx_node$SI_HARB,table_harb_and_idx_node$pt_graph),]
    
    } else{
-     load(file.path(general$main.path, "merged_tables", general$case_study,
-              paste("ping.harbours.","DNK",".",
-               general$a.year,".igraph",general$igraph,".RData",sep='')) )   # get combined ping.harbours
-   
+    load(file.path(general$main.path, "merged_tables", general$case_study,
+               paste("ping.harbours.",general$a.country,".",general$a.year,".igraph",
+                general$igraph,".RData",sep='')))
+
      table_harb_and_idx_node <-
       ping.harbours[!duplicated(ping.harbours$SI_HARB,ping.harbours$pt_graph),
                                    c("SI_HARB", "pt_graph", "SI_LATI", "SI_LONG")]
@@ -247,21 +257,24 @@ prices <-orderBy(~stock+pt_graph+month+day, data=prices)
 #-------------------------------------------------------------------------------
 # export for a multimap in c++ (average price per quarter) pop/cat--------------
 # 
-av_prices_per_harbour_per_quarter <- aggregate( prices$price, 
-     list( prices$stock,  prices$size_sorting, prices$pt_graph,  prices$quarter), mean, na.rm=TRUE)
+av_prices_per_harbour_per_quarter            <- aggregate( prices$price, 
+                                                         list( prices$stock,  prices$size_sorting, prices$pt_graph,  prices$quarter), 
+                                                         mean, na.rm=TRUE)
 colnames(av_prices_per_harbour_per_quarter ) <-  c('stock', 'size_sorting', 'pt_graph', 'quarter', 'price')
 
 
 # apply all.combi
-all.combi            <- expand.grid(pt_graph= unique(table_harb_and_idx_node$pt_graph), 
-                                   stock=unique(av_prices_per_harbour_per_quarter$stock), 
-                                   size_sorting=unique(av_prices_per_harbour_per_quarter$size_sorting), 
-                                    quarter=c("Q1","Q2","Q3","Q4"))
-av_prices_per_harbour_per_quarter               <- merge(all.combi, av_prices_per_harbour_per_quarter, all=TRUE)
+all.combi                                    <- expand.grid(
+                                                            pt_graph= unique(table_harb_and_idx_node$pt_graph), 
+                                                            stock=unique(av_prices_per_harbour_per_quarter$stock), 
+                                                            size_sorting=unique(av_prices_per_harbour_per_quarter$size_sorting), 
+                                                            quarter=c("Q1","Q2","Q3","Q4")
+                                                            )
+av_prices_per_harbour_per_quarter            <- merge(all.combi, av_prices_per_harbour_per_quarter, all=TRUE)
  #=> NA if no historic landings for this stock this cat in this harb...
 
-av_prices_per_quarter <- aggregate( prices$price, 
-     list( prices$stock,  prices$size_sorting,  prices$quarter), mean, na.rm=TRUE)
+av_prices_per_quarter            <-  aggregate( prices$price, 
+                                                list( prices$stock,  prices$size_sorting,  prices$quarter), mean, na.rm=TRUE)
 colnames(av_prices_per_quarter ) <-  c('stock', 'size_sorting',  'quarter', 'price')
 
 
