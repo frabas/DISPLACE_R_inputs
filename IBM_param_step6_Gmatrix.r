@@ -343,13 +343,12 @@ for(x in 1:length(pa$Ks)){
   # init number per size group   comes in Thousands!
   if(stock %in% levels(number$stock)){
     if(nrow(multiplier_for_biolsce)!=0){
-    number1        <- number       [number$stock %in% stock, 2:12]     * multiplier_for_biolsce[sce, "biolsce_biolsce_init_pops"]        #age 0-10    
+    number1        <- number       [number$stock %in% stock, 2:12]     * multiplier_for_biolsce[sce, "biolsce_init_pops"]        #age 0-10    
     } else{
     number1        <- number       [number$stock %in% stock, 2:12]       
     }
     number1_yplus1 <- number_yplus1[number_yplus1$stock %in% stock, 2:12]     #age 0-10    
                                     
-     
     number1[is.na(number1)]               <- 0
     number1_yplus1[is.na(number1_yplus1)] <- 0
     pops        <-matrix(0,15,11)

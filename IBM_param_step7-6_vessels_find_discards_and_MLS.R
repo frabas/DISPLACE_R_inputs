@@ -199,7 +199,9 @@
 # pop parameters
  pa <- read.csv(file=file.path(general$main.path,
                   paste("IBM_datainput_stockdata_", general$case_study,".csv", sep='')),
-                    sep=';', header=TRUE)
+                    sep=',', header=TRUE)
+  ## CAUTION WITH THE NB OF POPS HERE!!!!                  
+                    
 
  filename_met_Q1 <- file.path(general$main.path, "metiersspe",
                   paste("metierspe_mls_cat_semester1.dat", sep=''))
