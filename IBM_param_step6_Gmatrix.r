@@ -64,9 +64,9 @@ if(case_study=="myfish"){
 # pop parameters
  pa <- read.csv(file=file.path(main.path,
                   paste("IBM_datainput_stockdata_",case_study,".csv", sep='')), 
-                    sep=';', header=TRUE)
-
-                                                            
+                    sep=',', header=TRUE)
+ ## CAUTION POP ORDER SHOULD BE CONSISTENT WITH : 
+ # pop_names                   <- read.table(file.path(general$main.path, "popsspe",paste("pop_names_",general$case_study,".txt", sep='')))  ## CAUTION: circularity for pop_names
 
 
 ################################
