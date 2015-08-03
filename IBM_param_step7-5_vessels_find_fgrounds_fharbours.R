@@ -223,6 +223,10 @@
  x.agg           <- data.frame( x.agg)
  colnames(x.agg) <- c("VE_REF", "quarter", "pt_graph",nm[idx.col])
 
+ # crucial to be consistent with cpues on node
+ library(doBy)
+ x.agg                    <- orderBy(~VE_REF +quarter +pt_graph, data=x.agg)
+
 
  # AGGREGATE PER VE_REF, PER METIER
  nm                       <- names(ping.fgrounds)
@@ -236,6 +240,12 @@
  x.agg.met                <- DT[,eval(eq1),by=list(VE_REF, LE_MET_level6, quarter, pt_graph)]
  x.agg.met                <- data.frame( x.agg.met)
  colnames(x.agg.met)      <- c("VE_REF", "LE_MET_level6", "quarter", "pt_graph", nm[idx.col])
+
+ # crucial to be consistent with cpues on node
+ library(doBy)
+ x.agg.met                <- orderBy(~VE_REF +quarter +pt_graph, data=x.agg.met)
+
+
 
  ####-------
  for (a.quarter in c("Q1","Q2","Q3","Q4")){
