@@ -278,6 +278,7 @@
    ## check
    cpues_gamma[cpues_gamma$VE_REF=="DNK000006040" & cpues_gamma$mapped_stk_code=="11", ]
    cpues_gamma[cpues_gamma$VE_REF=="DNK000007161", ]
+   cpues_gamma[cpues_gamma$VE_REF=="DNK000041435", ]
 
 
 

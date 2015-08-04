@@ -380,7 +380,7 @@ for(x in 1:length(pa$Ks)){
 
   #init weight per size group
   if(!is.na(aa)){
-    weight<-aa*(l+5)^bb/1000       #length-weight in cm-g from fishbase, here divided by 1000 ->> cm-kg
+    weight<-aa*(l+(a_size_group_bin_in_cm/2))^bb/1000       #length-weight in cm-g from fishbase, here divided by 1000 ->> cm-kg
    } else{
     weight<- rep(0, 14)
    }
@@ -389,24 +389,24 @@ for(x in 1:length(pa$Ks)){
  
 
   #build size transition matrix G
-  incr<-inc[,-c(1)]                  #remove first column, growth from previous to present size                          
-  increment<-c(incr)                  #vectorize
-  leng<-indlength[,-c(21)]            #remove last column , to combine length with growth increment to next size group                       
-  len<-c(leng)                        #vectorize
+  incr        <- inc[,-c(1)]                     # remove first column, growth from previous to present size                          
+  increment   <- c(incr)                         # vectorize
+  leng        <- indlength[,-c(21)]              # remove last column , to combine length with growth increment to next size group                       
+  len         <- c(leng)                         # vectorize
          
-  values<-mat.or.vec(length(len),4)                                           
-  values[,1]<-as.numeric(as.character(len))
-  values[,4]<-as.numeric(as.character(increment))   
+  values      <- mat.or.vec(length(len),4)                                           
+  values[,1]  <-as.numeric(as.character(len))
+  values[,4]  <- as.numeric(as.character(increment))   
     
-  val<-cut(values[,1],breaks=l) #put into size bins                  
-  values[,2]<-val 
+  val         <- cut(values[,1],breaks=l) # put into size bins                  
+  values[,2]  <- val 
   levels(val)
-  levels(val)<-l               #change labels of size bins
-  values[,3]<-as.numeric(as.character(val))   #create vector of lower bounds in 10cm intervals
+  levels(val) <- l                              # change labels of size bins
+  values[,3]  <- as.numeric(as.character(val))   # create vector of lower bounds in 10cm intervals
 
 
-  n<-length(l)-1
-  G<-matrix(0,(n),(n))
+  n <- length(l)-1
+  G <- matrix(0,(n),(n))
 
   for(b in 1:n){
     for(a in 1:n){
@@ -417,7 +417,7 @@ for(x in 1:length(pa$Ks)){
         }else{             
         mea<-mean(value[,4]) 
         vari<-var(value[,4])
-        fun<-function(x) dnorm(x,mean=(l[b]+5+mea),sd=sqrt(vari))
+        fun<-function(x) dnorm(x,mean=(l[b]+(a_size_group_bin_in_cm/2)+mea),sd=sqrt(vari))
         G[a,b]<-integrate(fun,l[a],l[a+1])$value
         }
       }
@@ -434,7 +434,7 @@ for(x in 1:length(pa$Ks)){
 
 
   #build size distribution vector L
-  surv<-round(exp(-(0.12*27*(l+0.5)^(-1))),4)      #length dependent mortality vector using the lower bound length (+1 to ignore 0) to get survival
+  surv<-round(exp(-(0.12*27*(l+(a_size_group_bin_in_cm/2))^(-1))),4)      #length dependent mortality vector using the lower bound length (+1 to ignore 0) to get survival
   mort<-round((1-surv),4)
   
   if(nrow(multiplier_for_biolsce)!=0){
@@ -447,10 +447,10 @@ for(x in 1:length(pa$Ks)){
 
 
   #need a first row to describe recruitment for stable size distribution from SSB
-  fec<- d*(l+5)^(e)          #   fecundity 
+  fec<- d*(l+(a_size_group_bin_in_cm/2))^(e)          #   fecundity 
   fec[is.na(fec)]<-0
-  fec<-round(fec,2)
-  mat<-1/(1+exp(-0.2*(l+5-l50)))  #maturity ogive
+  fec <- round(fec,2)
+  mat <- 1/(1+exp(-0.2*(l+(a_size_group_bin_in_cm/2)-l50)))  #maturity ogive
   mat[is.na(mat)]<-0
   mat<-round(mat,4)
   mat[1]<-0
