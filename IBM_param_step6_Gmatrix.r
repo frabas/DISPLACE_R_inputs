@@ -69,6 +69,14 @@ if(case_study=="myfish"){
  # pop_names                   <- read.table(file.path(general$main.path, "popsspe",paste("pop_names_",general$case_study,".txt", sep='')))  ## CAUTION: circularity for pop_names
 
 
+# some test to obtain the same SSB as in WGBFAS
+#pa[ pa$pop.to.keeps=="COD.2224", "Linfs"] <- 100
+#pa[ pa$pop.to.keeps=="COD.2224", "Ks"]    <- 0.18
+#pa[ pa$pop.to.keeps=="COD.2224", "l50s"]  <- 30
+#pa[ pa$pop.to.keeps=="COD.2224", "bb"]    <- 3.16
+#pa[ pa$pop.to.keeps=="COD.2224", "aa"]    <- 0.007
+
+
 ################################
 ################################
 ################################
@@ -219,6 +227,7 @@ for (sce in sces){
  
 ##### FOR-LOOP OVER POP ############
 for(x in 1:length(pa$Ks)){
+#for(x in c(11,12)){
   if(!is.na(pa$index_pops[x])){
  
   # species-specific parameters
@@ -458,8 +467,11 @@ for(x in 1:length(pa$Ks)){
   mat <- cbind (pa$index_pops[x], mat)
   write.table(mat[1:14,], file=file.path(main.path,"popsspe",paste("init_maturity_per_szgroup_biolsce",sce,".dat",sep='')), append=TRUE, sep=" ", col.names=FALSE, row.names=FALSE) 
 
-
-
+  #browser()
+  # check SSB
+  sum(init_pops)
+  sum(number1)
+  print(sum(init_pops[2,1:14]*1000*weight[1:14]*mat[1:14, 2])/1000) # in tons
 
   
   if(!is.na(e)){
