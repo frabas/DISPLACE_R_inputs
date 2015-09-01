@@ -196,7 +196,7 @@ cbind.data.frame (value=as.vector(t(rg_fuelprice)), limit=rep(c("0", "25", "50",
 for(st in 1: length(rg_fishprice)){
 a_stock <- names(rg_fishprice)[st]
 param_ts <- rbind.data.frame( param_ts,
-  cbind.data.frame (value=as.vector(t(rg_fishprice[[a_stock]])), limit=rep(c("0", "25", "50", "75", "max"), length=length(as.vector(t(rg_fishprice[[a_stock]])))),  month=rep(months,each=5), area="all_area",variable="fishprice", a_dim=a_stock, a_min=min(rg_fishprice[[a_stock]]), a_max=max(rg_fishprice[[a_stock]]), a_res=0.1, threshold1=30, threshold2=50, threshold3=NA)
+  cbind.data.frame (value=as.vector(t(rg_fishprice[[a_stock]])), limit=rep(c("0", "25", "50", "75", "max"), length=length(as.vector(t(rg_fishprice[[a_stock]])))),  month=rep(months,each=5), area="all_area",variable="fishprice", a_dim=a_stock, a_min=min(rg_fishprice[[a_stock]]), a_max=max(rg_fishprice[[a_stock]]), a_res=0.1, threshold1= mean(rg_fishprice[[a_stock]][,2]), threshold2=mean(rg_fishprice[[a_stock]][,4]), threshold3=NA)
  )
 }
 
@@ -234,7 +234,7 @@ daily_ts_generator <- function (param_ts, variable="wspeed", area="all_area", a_
     a_res   <- relevant_param [1, "a_res"]
     variable <- seq(a_min,a_max, by=a_res)
   
-   ts_for_a_variable <- NULL
+   ts_for_a_variable <- c(relevant_param [1, "threshold1"], relevant_param [1, "threshold2"], relevant_param [1, "threshold3"])
    nbdays <- c(31, 28,31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
    months <- c('01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12')
    for(m in 1 : length(months)) {
@@ -248,6 +248,7 @@ daily_ts_generator <- function (param_ts, variable="wspeed", area="all_area", a_
    prob_quartile3 <- rep(0.25 /  lg3, each=lg3)
    prob_quartile4 <- rep(0.25 /  lg4, each=lg4)
    prob_quartile5 <- rep(0, each=lg5)
+
    ts_for_a_variable <- c(
           ts_for_a_variable, sample(variable, size=nbdays[m], replace=TRUE, 
                         prob=c(prob_quartile1, prob_quartile2, prob_quartile3, prob_quartile4, prob_quartile5))
@@ -257,23 +258,51 @@ daily_ts_generator <- function (param_ts, variable="wspeed", area="all_area", a_
 }
 
 ts_for_a_variable <- daily_ts_generator(param_ts, variable="wspeed", area="all_area", a_dim=0)
-plot(ts_for_a_variable, type="l")
-abline(h=5, col=2)
-abline(h=10, col=2)
+plot(ts_for_a_variable[-c(1:3)], type="l")
+abline(h=ts_for_a_variable[1], col=2)
+abline(h=ts_for_a_variable[2], col=2)
+abline(h=ts_for_a_variable[3], col=2)
 
  ts_for_a_variable <- daily_ts_generator(param_ts, variable="fuelprice", area="all_area", a_dim=0)
-plot(ts_for_a_variable, type="l")
-abline(h=5, col=2)
-abline(h=10, col=2)
+plot(ts_for_a_variable[-c(1:3)], type="l")
+abline(h=ts_for_a_variable[1], col=2)
+abline(h=ts_for_a_variable[2], col=2)
+abline(h=ts_for_a_variable[3], col=2)
 
 ts_for_a_variable <- daily_ts_generator(param_ts, variable="fishprice", area="all_area", a_dim=10)
-plot(ts_for_a_variable, type="l")
+plot(ts_for_a_variable[-c(1:3)], type="l")
+abline(h=ts_for_a_variable[1], col=2)
+abline(h=ts_for_a_variable[2], col=2)
+abline(h=ts_for_a_variable[3], col=2)
+
+ts_for_a_variable <- daily_ts_generator(param_ts, variable="fishprice", area="all_area", a_dim=11)
+plot(ts_for_a_variable[-c(1:3)], type="l")
+abline(h=ts_for_a_variable[1], col=2)
+abline(h=ts_for_a_variable[2], col=2)
+abline(h=ts_for_a_variable[3], col=2)
+
+
+# the actual ts....
+list.files(path = file.path('C:','Users','fbas','Documents','GitHub','DISPLACE_input', 'timeseries'))
+
+a_ts <- read.table(file=file.path('C:','Users','fbas','Documents','GitHub','DISPLACE_input', 'timeseries', 'wspeed-all_area-0.dat'))
+plot(as.numeric(as.character(a_ts[-c(1:3),1])), type="l")
 abline(h=5, col=2)
 abline(h=10, col=2)
 
-ts_for_a_variable <- daily_ts_generator(param_ts, variable="fishprice", area="all_area", a_dim=11)
-plot(ts_for_a_variable, type="l")
-abline(h=5, col=2)
-abline(h=10, col=2)
+a_ts <- read.table(file=file.path('C:','Users','fbas','Documents','GitHub','DISPLACE_input', 'timeseries', 'fishprice-all_area-0.dat'), header=TRUE)
+plot(as.numeric(as.character(a_ts[-c(1:3),1])), type="l")
+abline(h=a_ts[1,1], col=2)
+abline(h=a_ts[2,1], col=2)
+
+a_ts <- read.table(file=file.path('C:','Users','fbas','Documents','GitHub','DISPLACE_input', 'timeseries', 'fishprice-all_area-10.dat'), header=TRUE)
+plot(as.numeric(as.character(a_ts[-c(1:3),1])), type="l")
+abline(h=a_ts[1,1], col=2)
+abline(h=a_ts[2,1], col=2)
+
+a_ts <- read.table(file=file.path('C:','Users','fbas','Documents','GitHub','DISPLACE_input', 'timeseries', 'fishprice-all_area-11.dat'), header=TRUE)
+plot(as.numeric(as.character(a_ts[-c(1:3),1])), type="l")
+abline(h=a_ts[1,1], col=2)
+abline(h=a_ts[2,1], col=2)
 
 

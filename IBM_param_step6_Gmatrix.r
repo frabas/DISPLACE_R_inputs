@@ -118,7 +118,7 @@ if(case_study=="baltic_only"){
                                           pop=c('SPR.2232', 'HER.3a22', 'COD.2224'))
 
 
-  multiplier_for_biolsce_all_pops <- cbind(sce=1: (nrow(multiplier_for_biolsce_all_pops)/length(unique(multiplier_for_biolsce_all_pops$pop))), multiplier_for_biolsce_all_pops)
+  multiplier_for_biolsce_all_pops <- cbind.data.frame(sce=1: (nrow(multiplier_for_biolsce_all_pops)/length(unique(multiplier_for_biolsce_all_pops$pop))), multiplier_for_biolsce_all_pops)
 
   write.table(multiplier_for_biolsce_all_pops, quote=FALSE,
                  file=file.path(main.path,"popsspe",paste("multiplier_for_biolsce.dat",sep='')), append=FALSE,
@@ -134,6 +134,9 @@ if(case_study=="myfish"){
 
 
   multiplier_for_biolsce_all_pops <- cbind(sce=1: (nrow(multiplier_for_biolsce_all_pops)/length(unique(multiplier_for_biolsce_all_pops$pop))), multiplier_for_biolsce_all_pops)
+
+  # add an extra line to test two-fold migration fluxes
+  multiplier_for_biolsce_all_pops <- rbind(multiplier_for_biolsce_all_pops, c(17, 1, 1.1, 0.97, 1, 1, 1, 0.6, 1, 1, 2, "COD.2532"))
 
   write.table(multiplier_for_biolsce_all_pops, quote=FALSE,
                  file=file.path(main.path,"popsspe",paste("multiplier_for_biolsce",case_study,".dat",sep='')), append=FALSE,
@@ -155,7 +158,8 @@ write.table(hyperstability_param, quote=FALSE,
 
 if(case_study =="canadian_paper") sces <- 1  
 if(case_study =="baltic_only")    sces <- 1:4
-if(case_study =="myfish")         sces <- 1:nrow(multiplier_for_biolsce_all_pops)
+#if(case_study =="myfish")         sces <- 1:nrow(multiplier_for_biolsce_all_pops)
+if(case_study =="myfish")         sces <- 17
 
 
 # overall migration fluxes at 0 by default
@@ -171,7 +175,7 @@ for(x in 1:length(pa$Ks)){
                    row.names=FALSE, col.names=FALSE)
     # => empty mig files per default
 
-   if(multiplier_for_biolsce_all_pops[sce, "biolsce_mig"]==1 && pa$pop.to.keeps[x]=="COD.2532"){ 
+   if(as.numeric(as.character(multiplier_for_biolsce_all_pops[sce, "biolsce_mig"]))>=1 && pa$pop.to.keeps[x]=="COD.2532"){ 
           mig_fluxes     <- matrix(10, nrow=14, ncol=2) # mig toward pop 10 COD.2224 for 14 szgroup
       
           fish_East_to_SD24_2011 	   <- c(0.00000, 	5373.68296, 	15222.38671, 	4815.92611, 	1484.57475, 	673.65356, 	171.55592, 	118.22825, 0) # 0 to 8+, from the East/West cod project 
@@ -181,6 +185,7 @@ for(x in 1:length(pa$Ks)){
           ALK                        <- read.table("C:/Users/fbas/Documents/GitHub/DISPLACE_input/popsspe_balticonly/11spe_percent_age_per_szgroup_biolsce1.dat", header=FALSE, sep=" ") # circular coding because ALK already known!
           prop_migrants_per_length   <-  as.matrix(ALK[,1:9]) %*% prop_migrants_per_age   # lengthgroups x ages [sum to 1 by age]  %*% age => lengthgroups
           mig_fluxes[,2]             <- prop_migrants_per_length
+           mig_fluxes[,2]             <-  mig_fluxes[,2] * as.numeric(as.character(multiplier_for_biolsce_all_pops[sce, "biolsce_mig"]))
           #mig_fluxes[,2] <- 0.1 
           
      write.table(mig_fluxes, quote=FALSE,
@@ -190,7 +195,15 @@ for(x in 1:length(pa$Ks)){
                  file=file.path(main.path,"popsspe",paste(pa$index_pops[x],"overall_migration_fluxes_","semester2","_","biolsce",sce,".dat",sep='')), append=TRUE,
                    row.names=FALSE, col.names=FALSE)
    
-   }
+   }  else{        # caution: potential pbl with  !migration_fluxes.empty() under linux!!
+     e<-NULL
+     write.table(e, quote=FALSE,
+                 file=file.path(main.path,"popsspe",paste(pa$index_pops[x],"overall_migration_fluxes_","semester1","_","biolsce",sce,".dat",sep='')), append=FALSE,
+                   row.names=FALSE, col.names=FALSE)
+     write.table(e, quote=FALSE,
+                 file=file.path(main.path,"popsspe",paste(pa$index_pops[x],"overall_migration_fluxes_","semester2","_","biolsce",sce,".dat",sep='')), append=FALSE,
+                   row.names=FALSE, col.names=FALSE)
+ }
 
 
 }}}
@@ -247,15 +260,15 @@ for(x in 1:length(pa$Ks)){
   multiplier_for_biolsce <- multiplier_for_biolsce_all_pops[multiplier_for_biolsce_all_pops$pop==as.character(stock),]  
   if(nrow(multiplier_for_biolsce)!=0){ # ie in case the pop is found in the sce matrix....
     # species-specific parameters AND sce
-    K               <-K     *multiplier_for_biolsce[sce, "biolsce_Ks"]   
-    Linf            <-Linf  *multiplier_for_biolsce[sce, "biolsce_Linfs"]     
+    K               <-K     *as.numeric(as.character(multiplier_for_biolsce[sce, "biolsce_Ks"]))   
+    Linf            <-Linf  *as.numeric(as.character(multiplier_for_biolsce[sce, "biolsce_Linfs"]))     
     l50             <-l50
-    d               <-d     *multiplier_for_biolsce[sce, "biolsce_fecundity"]       
+    d               <-d     *as.numeric(as.character(multiplier_for_biolsce[sce, "biolsce_fecundity"]))       
     e               <-e
     aa              <-aa   
-    bb              <-bb    *multiplier_for_biolsce[sce, "biolsce_weight"]
-    a_SSB           <-a_SSB *multiplier_for_biolsce[sce, "biolsce_recru"]
-    b_SSB           <-b_SSB *multiplier_for_biolsce[sce, "biolsce_recru"]
+    bb              <-bb    *as.numeric(as.character(multiplier_for_biolsce[sce, "biolsce_weight"]))
+    a_SSB           <-a_SSB *as.numeric(as.character(multiplier_for_biolsce[sce, "biolsce_recru"]))
+    b_SSB           <-b_SSB *as.numeric(as.character(multiplier_for_biolsce[sce, "biolsce_recru"]))
     r_age           <-r_age
   }
    
@@ -352,7 +365,7 @@ for(x in 1:length(pa$Ks)){
   # init number per size group   comes in Thousands!
   if(stock %in% levels(number$stock)){
     if(nrow(multiplier_for_biolsce)!=0){
-    number1        <- number       [number$stock %in% stock, 2:12]     * multiplier_for_biolsce[sce, "biolsce_init_pops"]        #age 0-10    
+    number1        <- number       [number$stock %in% stock, 2:12]     * as.numeric(as.character(multiplier_for_biolsce[sce, "biolsce_init_pops"]))        #age 0-10    
     } else{
     number1        <- number       [number$stock %in% stock, 2:12]       
     }
@@ -447,7 +460,7 @@ for(x in 1:length(pa$Ks)){
   mort<-round((1-surv),4)
   
   if(nrow(multiplier_for_biolsce)!=0){
-     mort <- mort * multiplier_for_biolsce[sce, "biolsce_M"]
+     mort <- mort * as.numeric(as.character(multiplier_for_biolsce[sce, "biolsce_M"]))
   }
   
   ## EXPORT
@@ -469,9 +482,9 @@ for(x in 1:length(pa$Ks)){
 
   #browser()
   # check SSB
-  sum(init_pops)
-  sum(number1)
-  print(sum(init_pops[2,1:14]*1000*weight[1:14]*mat[1:14, 2])/1000) # in tons
+  #sum(init_pops)
+  #sum(number1)
+  #print(sum(init_pops[2,1:14]*1000*weight[1:14]*mat[1:14, 2])/1000) # in tons
 
   
   if(!is.na(e)){
