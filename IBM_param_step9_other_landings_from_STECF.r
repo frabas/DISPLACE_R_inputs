@@ -340,6 +340,11 @@ function (tacsat, string = TRUE)
   compare                          <- cbind.data.frame(not_simu=dd1[names(dd1) %in% sp], simu=dd2[names(dd2) %in% sp]  )
   an                               <- function(x) as.numeric(as.character(x))
   compare$percent_in_simu          <- round(an(compare$simu) /(an(compare$simu)+an(compare$not_simu) )*100 )
+  
+  ##
+  compare$tot <- an(compare$simu)+an(compare$not_simu) # gives the TAC to be put in the pa file for stock parameters step_G_matrix.R  
+  ##
+  
   pop_names                        <- read.table(file.path(general$main.path,  "popsspe",paste("pop_names_",general$case_study,".txt", sep="")))
   compare[as.character(pop_names[,1]),]
   dd        <- cbind.data.frame(as.character(pop_names[,2]), compare[as.character(pop_names[,1]), 'percent_in_simu' ])

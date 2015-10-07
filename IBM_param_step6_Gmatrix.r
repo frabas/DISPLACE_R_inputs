@@ -129,14 +129,21 @@ if(case_study=="baltic_only"){
 # build a matrix of (biological) scenarios
 if(case_study=="myfish"){
   multiplier_for_biolsce_all_pops  <- expand.grid(biolsce_maturity=1, biolsce_M=c(1, 1.1), biolsce_weight=c(1,0.97), biolsce_init_pops=1, biolsce_init_pops=1, 
-                                         biolsce_fecundity=1, biolsce_Linfs=c(1, 0.6), biolsce_Ks=c(1), biolsce_recru=c(1), biolsce_mig=c(0,1), 
+                                         biolsce_fecundity=1, biolsce_Linfs=c(1, 0.9), biolsce_Ks=c(1), biolsce_recru=c(1), biolsce_mig=c(0,1), 
                                           pop=c('COD.2532'))   # see SS3 model settings in ICES WKBALTCOD 2015
 
 
   multiplier_for_biolsce_all_pops <- cbind(sce=1: (nrow(multiplier_for_biolsce_all_pops)/length(unique(multiplier_for_biolsce_all_pops$pop))), multiplier_for_biolsce_all_pops)
 
   # add an extra line to test two-fold migration fluxes
-  multiplier_for_biolsce_all_pops <- rbind(multiplier_for_biolsce_all_pops, c(17, 1, 1.1, 0.97, 1, 1, 1, 0.6, 1, 1, 2, "COD.2532"))
+  multiplier_for_biolsce_all_pops <- rbind(multiplier_for_biolsce_all_pops, c(17, 1, 1.1, 0.97, 1, 1, 1, 0.9, 1, 1, 2, "COD.2532"))
+
+  # add an extra line to test Linfs
+  multiplier_for_biolsce_all_pops <- rbind(multiplier_for_biolsce_all_pops, c(18, 1, 1.0, 1.0, 1, 1, 1, 0.8, 1, 1, 0, "COD.2532"))
+  multiplier_for_biolsce_all_pops <- rbind(multiplier_for_biolsce_all_pops, c(19, 1, 1.1, 0.97, 1, 1, 1, 0.8, 1, 1, 1, "COD.2532"))
+  multiplier_for_biolsce_all_pops <- rbind(multiplier_for_biolsce_all_pops, c(20, 1, 1.1, 0.97, 1, 1, 1, 0.8, 1, 1, 2, "COD.2532"))
+  multiplier_for_biolsce_all_pops <- rbind(multiplier_for_biolsce_all_pops, c(21, 1, 1.0, 1.0, 1, 1, 1, 1, 1, 1, 2, "COD.2532"))
+  multiplier_for_biolsce_all_pops <- rbind(multiplier_for_biolsce_all_pops, c(22, 1, 1.0, 1.0, 1, 1, 1, 0.7, 1, 1, 1, "COD.2532"))
 
   write.table(multiplier_for_biolsce_all_pops, quote=FALSE,
                  file=file.path(main.path,"popsspe",paste("multiplier_for_biolsce",case_study,".dat",sep='')), append=FALSE,
@@ -158,14 +165,16 @@ write.table(hyperstability_param, quote=FALSE,
 
 if(case_study =="canadian_paper") sces <- 1  
 if(case_study =="baltic_only")    sces <- 1:4
-#if(case_study =="myfish")         sces <- 1:nrow(multiplier_for_biolsce_all_pops)
-if(case_study =="myfish")         sces <- 17
+if(case_study =="myfish")         sces <- 1:nrow(multiplier_for_biolsce_all_pops)
+#if(case_study =="myfish")         sces <- c(22)
 
 
 # overall migration fluxes at 0 by default
-for(x in 1:length(pa$Ks)){
+for (sce in sces){
+  write("stock  init_prop_migrants_pops_per_szgroup", file=file.path(main.path,"popsspe",paste("init_prop_migrants_pops_per_szgroup_biolsce",sce,".dat",sep='')), append=FALSE) 
+ 
+  for(x in 1:length(pa$Ks)){
   if(!is.na(pa$index_pops[x])){
-    for (sce in sces){
 
      write.table("# to_pop_num overall_fluxes_of_N_in_proportion_per_size_group", quote=FALSE,
                  file=file.path(main.path,"popsspe",paste(pa$index_pops[x],"overall_migration_fluxes_","semester1","_","biolsce",sce,".dat",sep='')), append=FALSE,
@@ -173,26 +182,36 @@ for(x in 1:length(pa$Ks)){
      write.table("# to_pop_num overall_fluxes_of_N_in_proportion_per_size_group", quote=FALSE,
                  file=file.path(main.path,"popsspe",paste(pa$index_pops[x],"overall_migration_fluxes_","semester2","_","biolsce",sce,".dat",sep='')), append=FALSE,
                    row.names=FALSE, col.names=FALSE)
-    # => empty mig files per default
+  # => empty mig files per default
 
    if(as.numeric(as.character(multiplier_for_biolsce_all_pops[sce, "biolsce_mig"]))>=1 && pa$pop.to.keeps[x]=="COD.2532"){ 
           mig_fluxes     <- matrix(10, nrow=14, ncol=2) # mig toward pop 10 COD.2224 for 14 szgroup
       
           fish_East_to_SD24_2011 	   <- c(0.00000, 	5373.68296, 	15222.38671, 	4815.92611, 	1484.57475, 	673.65356, 	171.55592, 	118.22825, 0) # 0 to 8+, from the East/West cod project 
-          fish_East_2011 	           <- c(0, 0, 254486, 164884, 92503, 40135, 19579, 15054, 11203)  # age 0 to 8+ in thousands in 2013  from 
+          fish_East_2011 	           <- c(0, 0, 254486, 164884, 92503, 40135, 19579, 15054, 11203)  # age 0 to 8+ in thousands in 2011  from WGBFAS 2012
           prop_migrants_per_age      <- fish_East_to_SD24_2011 / fish_East_2011
           prop_migrants_per_age[1:2] <- prop_migrants_per_age[3]  
           ALK                        <- read.table("C:/Users/fbas/Documents/GitHub/DISPLACE_input/popsspe_balticonly/11spe_percent_age_per_szgroup_biolsce1.dat", header=FALSE, sep=" ") # circular coding because ALK already known!
           prop_migrants_per_length   <-  as.matrix(ALK[,1:9]) %*% prop_migrants_per_age   # lengthgroups x ages [sum to 1 by age]  %*% age => lengthgroups
           mig_fluxes[,2]             <- prop_migrants_per_length
-           mig_fluxes[,2]             <-  mig_fluxes[,2] * as.numeric(as.character(multiplier_for_biolsce_all_pops[sce, "biolsce_mig"]))
-          #mig_fluxes[,2] <- 0.1 
+          mig_fluxes[,2]             <-  mig_fluxes[,2] * as.numeric(as.character(multiplier_for_biolsce_all_pops[sce, "biolsce_mig"]))
+   
+          fish_West_2011 	           <- c(72403, 36938, 18637, 23133, 10835, 6057, 2709, 1156,0)  # age 0 to 8+ in thousands in 2011   from WGBFAS 2012
+          prop_migrants_in_West_per_age      <- fish_East_to_SD24_2011 / fish_West_2011
+          prop_migrants_in_West_per_age[9] <- prop_migrants_in_West_per_age[8]  
+          ALK                        <- read.table("C:/Users/fbas/Documents/GitHub/DISPLACE_input/popsspe_balticonly/11spe_percent_age_per_szgroup_biolsce1.dat", header=FALSE, sep=" ") # circular coding because ALK already known!
+          prop_migrants_in_West_per_length   <-  as.matrix(ALK[,1:9]) %*% prop_migrants_in_West_per_age   # lengthgroups x ages [sum to 1 by age]  %*% age => lengthgroups
+       
+   
           
      write.table(mig_fluxes, quote=FALSE,
                  file=file.path(main.path,"popsspe",paste(pa$index_pops[x],"overall_migration_fluxes_","semester1","_","biolsce",sce,".dat",sep='')), append=TRUE,
                    row.names=FALSE, col.names=FALSE)
      write.table(mig_fluxes, quote=FALSE,
                  file=file.path(main.path,"popsspe",paste(pa$index_pops[x],"overall_migration_fluxes_","semester2","_","biolsce",sce,".dat",sep='')), append=TRUE,
+                   row.names=FALSE, col.names=FALSE)
+     write.table(cbind(rep(pa$index_pops[x],14), prop_migrants_in_West_per_length)[1:14,],
+                 file=file.path(main.path,"popsspe",paste("init_prop_migrants_pops_per_szgroup_biolsce",sce,".dat",sep='')), append=TRUE,
                    row.names=FALSE, col.names=FALSE)
    
    }  else{        # caution: potential pbl with  !migration_fluxes.empty() under linux!!
@@ -203,6 +222,11 @@ for(x in 1:length(pa$Ks)){
      write.table(e, quote=FALSE,
                  file=file.path(main.path,"popsspe",paste(pa$index_pops[x],"overall_migration_fluxes_","semester2","_","biolsce",sce,".dat",sep='')), append=FALSE,
                    row.names=FALSE, col.names=FALSE)
+     write.table(cbind(rep(pa$index_pops[x],14), rep(0,14))[1:14,],
+                 file=file.path(main.path,"popsspe",paste("init_prop_migrants_pops_per_szgroup_biolsce",sce,".dat",sep='')), append=TRUE,
+                   row.names=FALSE, col.names=FALSE)
+ 
+ 
  }
 
 
@@ -235,8 +259,8 @@ for (sce in sces){
  write("stock  init_pops_per_szgroup", file=file.path(main.path,"popsspe",paste("init_pops_per_szgroup_2011_biolsce",sce,".dat",sep='')), append=FALSE) 
  write("stock  init_fecundity_per_szgroup", file=file.path(main.path,"popsspe",paste("init_fecundity_per_szgroup_biolsce",sce,".dat",sep='')), append=FALSE) 
  write("stock  init_proprecru_per_szgroup", file=file.path(main.path,"popsspe",paste("init_proprecru_per_szgroup_biolsce",sce,".dat",sep='')), append=FALSE) 
-
-
+ 
+  
  
 ##### FOR-LOOP OVER POP ############
 for(x in 1:length(pa$Ks)){
