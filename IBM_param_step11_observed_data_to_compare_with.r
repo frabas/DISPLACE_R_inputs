@@ -2,9 +2,9 @@
 
  # GENERAL SETTINGS
   general <- list()
-  general$main.path      <- file.path("C:","displace-project.org","repository", "ibm_vessels_param")
-  general$main.path.code <- file.path("C:","displace-project.org","repository", "ibm_vessels_param_R")
- 
+  general$main.path      <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw")
+  general$main.path.code <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_R_inputs")
+                           
   #general$igraph <- 4 # for the Canadian paper
   #general$case_study <- "canadian_paper"
   #general$case_study_countries <- c("DNK", "GER") # for the Canadian paper
@@ -16,12 +16,16 @@
   #general$a.year <- "2010"
   #general$a.country <- "DNK"      
 
-  general$igraph <- 11
-  general$case_study <- "baltic_only"
+  #general$igraph <- 11
+  #general$case_study <- "baltic_only"
+  #general$case_study_countries <- c("DEN", "DEU", "SWE") # for the Baltic only
+  #general$a.year <- "2012"
+ 
+  general$igraph            <- 56
+  general$case_study <- "myfish"
   general$case_study_countries <- c("DEN", "DEU", "SWE") # for the Baltic only
   general$a.year <- "2012"
  
-
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   c.listquote <- function (...)

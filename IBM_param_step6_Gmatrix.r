@@ -144,6 +144,9 @@ if(case_study=="myfish"){
   multiplier_for_biolsce_all_pops <- rbind(multiplier_for_biolsce_all_pops, c(20, 1, 1.1, 0.97, 1, 1, 1, 0.8, 1, 1, 2, "COD.2532"))
   multiplier_for_biolsce_all_pops <- rbind(multiplier_for_biolsce_all_pops, c(21, 1, 1.0, 1.0, 1, 1, 1, 1, 1, 1, 2, "COD.2532"))
   multiplier_for_biolsce_all_pops <- rbind(multiplier_for_biolsce_all_pops, c(22, 1, 1.0, 1.0, 1, 1, 1, 0.7, 1, 1, 1, "COD.2532"))
+  multiplier_for_biolsce_all_pops <- rbind(multiplier_for_biolsce_all_pops, c(23, 1, 1.2, 1.0, 1, 1, 1, 1, 1, 1, 1, "COD.2532"))
+
+ 
 
   write.table(multiplier_for_biolsce_all_pops, quote=FALSE,
                  file=file.path(main.path,"popsspe",paste("multiplier_for_biolsce",case_study,".dat",sep='')), append=FALSE,
@@ -166,7 +169,7 @@ write.table(hyperstability_param, quote=FALSE,
 if(case_study =="canadian_paper") sces <- 1  
 if(case_study =="baltic_only")    sces <- 1:4
 if(case_study =="myfish")         sces <- 1:nrow(multiplier_for_biolsce_all_pops)
-#if(case_study =="myfish")         sces <- c(22)
+if(case_study =="myfish")         sces <- c(23)
 
 
 # overall migration fluxes at 0 by default
@@ -544,10 +547,10 @@ for(x in 1:length(pa$Ks)){
   # initial TAC
   write.table(pa[x,13], 
                 file=file.path(main.path,"popsspe",paste(pa$index_pops[x],"spe_initial_tac.dat",sep='')),
-                  append=FALSE, sep=" ", col.names=FALSE, row.names=FALSE) 
+                  append=FALSE, sep=" ", col.names=FALSE, row.names=FALSE)   # pa$TAC is informed from IBM_step9_other_landings_from_STECF.r
 
- # fbar ages and LTMP F target and Fpercent e.g. f multiplier +/-10%  and TAC range e.g. +/-15%
-  write.table(pa[x,14:18], 
+ # fbar ages and LTMP F target and Fpercent e.g. f multiplier +/-10%  and TAC range e.g. +/-15%  and Btrigger and F-MSY 
+  write.table(pa[x,14:20], 
                 file=file.path(main.path,"popsspe",paste(pa$index_pops[x],"spe_fbar_amin_amax_ftarget_Fpercent_TACpercent.dat",sep='')),
                   append=FALSE, sep=" ", col.names=FALSE, row.names=FALSE) 
 
