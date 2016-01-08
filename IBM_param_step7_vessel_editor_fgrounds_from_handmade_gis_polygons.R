@@ -25,7 +25,6 @@
    general$igraph             <- 56  # caution: should be consistent with existing vessels already built upon a given graph
    do_append                  <- FALSE
    name_gis_file_for_total_effort_per_polygon <- "toteffort_on_fgrounds_handmade_polygons"
-   prop_per_quarter           <- c(Q1=0.4,Q2=0.2,Q3=0.2,Q4=0.2) # should sum to 1
    vesselids                  <- paste("DNK0000", 1:10, sep="") # caution: three first letters give the nationality and should be consistent with  popsspe/XXctrysspe_relative_stability_semesterXX
    metierids                  <- 2:3  # look at /metiersspe
    metierids_frequencies      <- c(0.33,0.66)
@@ -66,8 +65,7 @@
   
    write("# name gis file for total effort per polygon", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
    write(name_gis_file_for_total_effort_per_polygon, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write("# proportion of effort per quarter", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(prop_per_quarter, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(prop_per_quarter), append=TRUE)
+ 
    write("# vesselids", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
    write(vesselids, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(vesselids), append=TRUE)
    write("# metierids", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
@@ -94,7 +92,7 @@
      file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)              
    write(vessel_features, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(vessel_features), append=TRUE)
   
-   write("# percent step in share for TAC (per stock) for these incoming vessels", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
+   write("# percent step in share for TAC (per stock) for these incoming vessels (only used if existing vessels)", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
    write(step_in_share, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(step_in_share), append=TRUE)
    
    write("# vessel effect (per stock) in the catch rate equation ", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
@@ -130,30 +128,29 @@
                                   
    do_append                     <- as.logical(dat[15])
    name_gis_file_for_total_effort_per_polygon <- dat[17]
-   prop_per_quarter              <- as.numeric(my_split(dat[19]))
    if(length(prop_per_quarter)!=4) stop("Check config file for vessel creator - length(prop_per_quarter)")
    names(prop_per_quarter)       <- paste("Q", 1:4, sep="")
-   vesselids                     <- as.character(my_split(dat[21]))
-   metierids                     <- as.numeric(my_split(dat[23]))
-   metierids_frequencies         <- as.numeric(my_split(dat[25]))
+   vesselids                     <- as.character(my_split(dat[19]))
+   metierids                     <- as.numeric(my_split(dat[21]))
+   metierids_frequencies         <- as.numeric(my_split(dat[23]))
    if(length(metierids)!=length(metierids_frequencies)) stop("Check config file for vessel creator - length(metierids)")
-   visited_ports                 <- as.character(my_split(dat[27]))
-   visited_ports_frequencies     <- as.numeric(my_split(dat[29]))
+   visited_ports                 <- as.character(my_split(dat[25]))
+   visited_ports_frequencies     <- as.numeric(my_split(dat[27]))
    if(length(visited_ports)!=length(visited_ports_frequencies)) stop("Check config file for vessel creator - length(visited_ports)")
-   nb_stocks                     <- as.numeric(my_split(dat[31]))
-   fixed_cpue_per_stock          <- as.numeric(my_split(dat[33]))
+   nb_stocks                     <- as.numeric(my_split(dat[29]))
+   fixed_cpue_per_stock          <- as.numeric(my_split(dat[31]))
    if(length(fixed_cpue_per_stock)!=nb_stocks) stop("Check config file for vessel creator - length(fixed_cpue_per_stock)")
-   gshape_cpue_per_stock         <- as.numeric(my_split(dat[35]))
+   gshape_cpue_per_stock         <- as.numeric(my_split(dat[33]))
    if(length(gshape_cpue_per_stock)!=nb_stocks) stop("Check config file for vessel creator - length(gshape_cpue_per_stock)")
-   gscale_cpue_per_stock         <- as.numeric(my_split(dat[37]))
+   gscale_cpue_per_stock         <- as.numeric(my_split(dat[35]))
    if(length(gscale_cpue_per_stock)!=nb_stocks) stop("Check config file for vessel creator - length(gscale_cpue_per_stock)")
-   vessel_features               <- as.numeric(my_split(dat[40]))
-   step_in_share                 <- as.numeric(my_split(dat[42]))
+   vessel_features               <- as.numeric(my_split(dat[38]))
+   step_in_share                 <- as.numeric(my_split(dat[40]))
    if(length(step_in_share)!=nb_stocks) stop("Check config file for vessel creator - length(step_in_share)")
-   vesselsspe_betas              <- as.numeric(my_split(dat[44]))
+   vesselsspe_betas              <- as.numeric(my_split(dat[42]))
    if(length(vesselsspe_betas)!=nb_stocks) stop("Check config file for vessel creator - length(vesselsspe_betas)")
-   create_file_for_fuel_price_per_vessel_size   <-  as.logical(dat[46])
-   some_fuel_price_per_vessel_size              <-   as.numeric(my_split(dat[48]))
+   create_file_for_fuel_price_per_vessel_size   <-  as.logical(dat[44])
+   some_fuel_price_per_vessel_size              <-   as.numeric(my_split(dat[46]))
    
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
@@ -237,7 +234,7 @@
  library(rgdal)
  handmade_WGS84 <- spTransform(handmade2, CRS("+proj=longlat +datum=WGS84"))    # convert to longlat
 
- names(handmade_WGS84)  # "Id"         "feffort_h"  "avcpue_kgh" "dep_harb"  
+ names(handmade_WGS84)  # "Id"         "feffort_h"  
 
  plot(handmade_WGS84,  add=TRUE, border=handmade_WGS84$feffort_h)
 
@@ -262,17 +259,20 @@
 
 # WORKFLOW 2 - QUARTER-BASED----------- 
  fgrounds <- NULL
- for (a.quarter in c("Q1","Q2","Q3","Q4")){
+ an <- function(x) as.numeric(as.character(x))
+for (a.quarter in c("Q1","Q2","Q3","Q4")){
 
     # dispatch the feffort among nodes by dividing feffort_h per the number of included graph nodes
     fgrounds_this_quarter                   <- coord[coord [,"handmade"]!= 0,]
     fgrounds_this_quarter                   <- cbind.data.frame(fgrounds_this_quarter, quarter=a.quarter, feffort_h=factor(fgrounds_this_quarter [,"handmade"])) # init
-    levels(fgrounds_this_quarter$feffort_h) <- handmade_WGS84$feffort_h * prop_per_quarter[a.quarter]  / table(fgrounds_this_quarter$feffort_h)
-
+    levels(fgrounds_this_quarter$feffort_h) <- handmade_WGS84$feffort_h  / table(fgrounds_this_quarter$feffort_h)
+    fgrounds_this_quarter$feffort_h         <- an(fgrounds_this_quarter$feffort_h) /sum(an(fgrounds_this_quarter$feffort_h))
+     #=> scale to 1 to obtain a proba of visit per node
+    
     # retrieve cpue and harbour info from the GIS layer (NOT USED, prefer the config file instead)
     #fgrounds_this_quarter                   <- cbind.data.frame(fgrounds_this_quarter, av_cpue_kgh=factor(fgrounds_this_quarter [,"handmade"])) # init
     #levels(fgrounds_this_quarter$av_cpue_kgh) <- handmade_WGS84$avcpue_kgh
-    #fgrounds_this_quarter                   <- cbind.data.frame(fgrounds_this_quarter, dep_harb=factor(fgrounds_this_quarter [,"handmade"])) # init
+    #fgrounds_this_quarter                   <- cbind.data.frame(1fgrounds_this_quarter, dep_harb=factor(fgrounds_this_quarter [,"handmade"])) # init
     #levels(fgrounds_this_quarter$dep_harb) <- handmade_WGS84$dep_harb
 
  
