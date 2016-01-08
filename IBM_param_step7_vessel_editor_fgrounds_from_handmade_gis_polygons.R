@@ -22,11 +22,11 @@
    }
 
    general$namefolderinput    <- "myfish"
-   general$igraph             <- 11
+   general$igraph             <- 56  # caution: should be consistent with existing vessels already built upon a given graph
    do_append                  <- FALSE
-   name_gis_file_for_total_effort_per_polygon <- "fgrounds_handmade_polygons"
+   name_gis_file_for_total_effort_per_polygon <- "toteffort_on_fgrounds_handmade_polygons"
    prop_per_quarter           <- c(Q1=0.4,Q2=0.2,Q3=0.2,Q4=0.2) # should sum to 1
-   vesselids                  <- paste("XXX0000", 1:10, sep="")
+   vesselids                  <- paste("DNK0000", 1:10, sep="") # caution: three first letters give the nationality and should be consistent with  popsspe/XXctrysspe_relative_stability_semesterXX
    metierids                  <- 2:3  # look at /metiersspe
    metierids_frequencies      <- c(0.33,0.66)
    visited_ports              <- c("Brake", "Bremerhaven") 
@@ -42,8 +42,8 @@
    some_fuel_price_per_vessel_size <- c(0.54430,0.5398,0.5149,0.4897,0.4859)
     
    # create a config file
-   write("# config file for the vessel editor", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"))
-   write("# --------------", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
+   write("# config file for the vessel editor: adding some vessel(s)", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"))
+   write("# (the shortestPaths libary will have to be re-created for the graph)", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
    write("# --------------", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
   
    write("# input folder for config file", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
@@ -214,13 +214,16 @@
 #-------------------------------------------------------------------------------
 
  # in ArcGIS 10:
- # create a blank shapefile in ArcCatalog by right click the folder and select New > shapefile
- # go to ArcMap and add the shape file with File>Add Data
+ # create a blank shapefile in ArcCatalog by right click the folder and select New > shapefile (Feature Type: Polygon)
+ # go to ArcMap and add the shape file with File>Add Data...choose a file name that will be put in the config file as well (see name_gis_file_for_total_effort_per_polygon)
+ # (optional) open a coastline shape file e.g. in DISPLACE_input_raw\shp
+ # (optional) open an informative XY layer e.g. grounds for cod from VMS analysis e.g. in DISPLACE_input_raw
  # Open the Editor toolbar from Custumize > toolbars> Editor
- # create polygons by selecting the polygon layr in Create Features dialog and choosing the Polygon Construction tools, click once to start the polygon, etc. and right click and Finish sketch
+ # create (non-intersecting) polygons by selecting the polygon layr in Create Features dialog and choosing the Polygon Construction tools, click once to start the polygon, etc. and right click and Finish sketch...save and stop editing
  # define the projection
  # add a Field in menu TOC Open Attribute Table and click on Options button in the Table Frame and choose Add field... e.g. "feffort_h"
- # ...then go to the Editor toolbar >start editing and double click on a polygon to edit the feffort_h value
+ # ...then go to the Editor toolbar >start editing and double click on a polygon to edit the feffort_h value...save and stop editing
+ 
 
 
  library(maptools)
@@ -547,7 +550,7 @@
  # WORKFLOW 2 - ADDITIONAL FILE(S)----------- 
  if(create_file_for_fuel_price_per_vessel_size){ 
   fuel_price_per_vessel_size <- data.frame(
-                                        vsize=c(1:4),
+                                        vsize=c(0:4),
                                         fuelprice_euro= some_fuel_price_per_vessel_size
                                         )
     # save .dat files
@@ -558,6 +561,11 @@
 
  }
  
- 
+cat("Remenber that because some new fgrounds are created \n you will have (in DISPLACE GUI) to derive a new graph with a new shortestPath library (say 57 by loading the graph 56 and then create the shortestPaths) \n and also create a new baseline.dat /simusspe with the right missing port idx (say 9979) (absence of the right index for the port makes the ui crash)\n") 
+
+
+
+
+
  
  
