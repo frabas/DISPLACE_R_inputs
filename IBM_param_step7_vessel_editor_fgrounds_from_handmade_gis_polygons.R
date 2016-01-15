@@ -39,10 +39,11 @@
    vesselsspe_betas           <- rnorm(nb_stocks, 3, 5) # i.e. vessel effect in the catch rate equation 
    create_file_for_fuel_price_per_vessel_size <- TRUE
    some_fuel_price_per_vessel_size <- c(0.54430,0.5398,0.5149,0.4897,0.4859)
+   step_in_share_credits      <- 20 # i.e. 20 % of the credits will be booked for these new vessels
     
    # create a config file
    write("# config file for the vessel editor: adding some vessel(s)", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"))
-   write("# (the shortestPaths libary will have to be re-created for the graph)", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
+   write("# (the shortestPaths library will have to be re-created for the graph)", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
    write("# --------------", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
   
    write("# input folder for config file", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
@@ -102,6 +103,9 @@
    write(create_file_for_fuel_price_per_vessel_size, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(create_file_for_fuel_price_per_vessel_size), append=TRUE)
    write("# some fuel price per vessel size (Euro per litre) ", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
    write(some_fuel_price_per_vessel_size, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(some_fuel_price_per_vessel_size), append=TRUE)
+  
+   write("# i% fishing credits taken from incomers (for RTI management) ", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
+   write(step_in_share_credits, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(step_in_share_credits), append=TRUE)
    
    }
 
@@ -151,7 +155,9 @@
    if(length(vesselsspe_betas)!=nb_stocks) stop("Check config file for vessel creator - length(vesselsspe_betas)")
    create_file_for_fuel_price_per_vessel_size   <-  as.logical(dat[44])
    some_fuel_price_per_vessel_size              <-   as.numeric(my_split(dat[46]))
-   
+   step_in_share_credits                        <-   as.numeric(dat[48])
+
+
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #-----utils---------------------------------------------------------------------
@@ -258,6 +264,8 @@
   points(coord[,1], coord[,2], col=coord[,"handmade"]+1)  # check
 
 # WORKFLOW 2 - QUARTER-BASED----------- 
+# however, note that the seasonnality of the spatial and total effort application 
+# is not parameterize but is instead an emerging feature from the model.
  fgrounds <- NULL
  an <- function(x) as.numeric(as.character(x))
 for (a.quarter in c("Q1","Q2","Q3","Q4")){
@@ -561,6 +569,37 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
 
  }
  
+
+# fishing credits allocation taken from the pool
+  share_of_fishing_credits <- cbind.data.frame(vesselids,  100/length(vesselids))
+
+  if(do_append){ # need to re-compute the percent for ALL vessels i.e. existing and incomers depending on step_in_share
+      existing <- read.table(file.path(general$main.path.param, "vesselsspe",
+             paste("initial_fishing_credits_per_vid.dat",sep='')), header=TRUE)
+      existing[,2] <-  an(existing[,2])* (100-rep(step_in_share_credits, length(unique(existing[,1])) ))/100
+   
+      if(any(share_of_fishing_credits[,1] %in% existing[,1])) stop("Check incomers vesselids...already there!")
+      
+      share_of_fishing_credits[,2] <- share_of_fishing_credits[,2]  * (rep(step_in_share_credits, length(vesselids) ))/100
+   
+      fishing_credits <- rbind.data.frame(existing, share_of_fishing_credits)
+  
+   } else{
+     fishing_credits            <- cbind.data.frame(vesselids, an(share_of_fishing_credits[,2])*10000 )
+     colnames(fishing_credits)  <- c("VE_REF", "annual_fishing_credits_per_vid")
+     fishing_credits$annual_fishing_credits_per_vid <- format(fishing_credits$annual_fishing_credits_per_vid, scientific = FALSE)
+   }
+
+
+# save .dat files
+       write.table(fishing_credits,
+           file=file.path(general$main.path.param, "vesselsspe",
+             paste("initial_fishing_credits_per_vid.dat",sep='')),
+               col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, quote=FALSE, append=do_append, sep = " ")  
+
+
+
+
 cat("Remenber that because some new fgrounds are created \n you will have (in DISPLACE GUI) to derive a new graph with a new shortestPath library (say 57 by loading the graph 56 and then create the shortestPaths) \n and also create a new baseline.dat /simusspe with the right missing port idx (say 9979) (absence of the right index for the port makes the ui crash)\n") 
 
 
