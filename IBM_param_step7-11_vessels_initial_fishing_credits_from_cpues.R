@@ -229,7 +229,7 @@
    initial_fishing_credits_per_vid[initial_fishing_credits_per_vid$cpue<quant["25%"] & initial_fishing_credits_per_vid$cpue!=0, "cpue"] <- quant["25%"]
    initial_fishing_credits_per_vid[initial_fishing_credits_per_vid$cpue>quant["75%"] & initial_fishing_credits_per_vid$cpue!=0, "cpue"] <- quant["75%"]
    cpue_reference                                          <- mean(initial_fishing_credits_per_vid$cpue)
-   initial_fishing_credits_per_vid$needs_for_credits       <- 1/    (initial_fishing_credits_per_vid$cpue /cpue_reference) # you need less credit if your cpue is xx times higher than the average cpue
+   initial_fishing_credits_per_vid$needs_for_credits       <- 1/    (initial_fishing_credits_per_vid$cpue /cpue_reference) # assume that you need less credit if your cpue is xx times higher than the average cpue
    initial_fishing_credits_per_vid[is.infinite(initial_fishing_credits_per_vid$needs_for_credits), "needs_for_credits"]       <- 0 # no need if the vessel is not targetting the explicit pops....
    initial_fishing_credits_per_vid$needs_for_credits_scaled_to_1   <-  initial_fishing_credits_per_vid$needs_for_credits/ sum( initial_fishing_credits_per_vid$needs_for_credits, na.rm=TRUE)
    initial_fishing_credits_per_vid$annual_fishing_credits_per_vid <-  round(initial_fishing_credits_per_vid$needs_for_credits_scaled_to_1 *  total_amount_credited )
@@ -265,7 +265,7 @@
 # save .dat files
        write.table(initial_tariffs_on_nodes,
            file=file.path(general$main.path, "graphsspe",
-             paste("initial_tariffs_on_nodes.dat",sep='')),
+             paste("initial_tariffs_on_nodes_a_graph",general$igraph,".dat",sep='')),
                col.names=TRUE,  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")  
  
   
