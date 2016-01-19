@@ -232,14 +232,14 @@
    initial_fishing_credits_per_vid$needs_for_credits       <- 1/    (initial_fishing_credits_per_vid$cpue /cpue_reference) # assume that you need less credit if your cpue is xx times higher than the average cpue
    initial_fishing_credits_per_vid[is.infinite(initial_fishing_credits_per_vid$needs_for_credits), "needs_for_credits"]       <- 0 # no need if the vessel is not targetting the explicit pops....
    initial_fishing_credits_per_vid$needs_for_credits_scaled_to_1   <-  initial_fishing_credits_per_vid$needs_for_credits/ sum( initial_fishing_credits_per_vid$needs_for_credits, na.rm=TRUE)
-   initial_fishing_credits_per_vid$annual_fishing_credits_per_vid <-  round(initial_fishing_credits_per_vid$needs_for_credits_scaled_to_1 *  total_amount_credited )
+   initial_fishing_credits_per_vid$share_annual_fishing_credits_per_vid <-  initial_fishing_credits_per_vid$needs_for_credits_scaled_to_1 
  
-   initial_fishing_credits_per_vid                         <- initial_fishing_credits_per_vid[, c("VE_REF", "annual_fishing_credits_per_vid")]
+   initial_fishing_credits_per_vid                         <- initial_fishing_credits_per_vid[, c("VE_REF", "share_annual_fishing_credits_per_vid")]
   
 # save .dat files
        write.table(initial_fishing_credits_per_vid,
            file=file.path(general$main.path, "vesselsspe",
-             paste("initial_fishing_credits_per_vid.dat",sep='')),
+             paste("initial_share_fishing_credits_per_vid.dat",sep='')),
                col.names=TRUE,  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")  
   
   
@@ -254,7 +254,16 @@
    initial_tariffs_on_nodes                         <- x.agg2.long [x.agg2.long$mapped_stk_code %in% explicit_pops, ]
    initial_tariffs_on_nodes                         <- aggregate(initial_tariffs_on_nodes$cpue_kghour, list(initial_tariffs_on_nodes$pt_graph), sum, na.rm=TRUE)
    colnames(initial_tariffs_on_nodes)               <- c("pt_graph", "cpue")
-   initial_tariffs_on_nodes$tariff_per_day          <- initial_tariffs_on_nodes$cpue / cpue_reference
+ 
+   # smooth
+   quant                                                   <- quantile(initial_tariffs_on_nodes$cpue[initial_tariffs_on_nodes$cpue!=0])
+   # need to bound in an interval to avoid outlier effect on cpue
+   initial_tariffs_on_nodes[initial_tariffs_on_nodes$cpue<quant["25%"] & initial_tariffs_on_nodes$cpue!=0, "cpue"] <- quant["25%"]
+   initial_tariffs_on_nodes[initial_tariffs_on_nodes$cpue>quant["75%"] & initial_tariffs_on_nodes$cpue!=0, "cpue"] <- quant["75%"]
+ 
+   cpue_reference2                                          <- mean(initial_tariffs_on_nodes$cpue)
+  
+   initial_tariffs_on_nodes$tariff_per_day          <- initial_tariffs_on_nodes$cpue / cpue_reference2
    initial_tariffs_on_nodes$tariff_per_day          <- cut (initial_tariffs_on_nodes$tariff_per_day , breaks= arbitrary_categories) 
    any(is.na(  initial_tariffs_on_nodes$tariff_per_day  )) # check
    levels(initial_tariffs_on_nodes$tariff_per_day)  <- corresponding_tariffs
