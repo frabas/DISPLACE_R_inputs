@@ -31,7 +31,7 @@
 
   general$igraph                <- 56
   general$case_study            <- "myfish"
-  general$case_study_countries  <- c("DEN")    # for the Baltic only
+  general$case_study_countries  <- c("DEN")    # for the myfish app
   general$a.year                <- "2012"
   general$a.country             <- "DEN"
   # mkdir
@@ -62,8 +62,8 @@
 
  # load avai built using get_spatial_avai_keys_on_igraph_nodes_from_surveys_per_size_group.r
   load(file.path(general$main.path, "avai",
-        paste("lst_avai_igraph",general$igraph,"_",years,"_",method,"_",threshold,".RData",sep=""))) ##!! 2012 !!##
-                       # HERE WE use lst_avai_2008_2012.RData instead of 2012 only.
+        paste("lst_avai_igraph",general$igraph,"_",years,"_",method,"_",threshold,".RData",sep=""))) 
+                       # HERE WE use several years for smoothing the spatial distribution 
 
  # load outputs from glm  to get the pop to keep
  load(file.path(general$main.path, "popsspe", paste("betas",general$case_study,"_INTEGER_",general$case_study,".RData", sep='')) )
@@ -154,7 +154,7 @@
        the_avai[, szgroups_with_all_0_avai+1] <-  the_avai[, paste(sp_name,".nb_indiv.",closer_szgroup, sep='') ]
 
     # then, reshape for c++
-    full_avai2               <- cbind(rep(as.numeric(as.character(avai[,4])), each=14), c(t(the_avai)))   # CAUTION 14 szgroup
+    full_avai2               <- cbind(rep(as.numeric(as.character(avai[,4])), each=14), c(t(the_avai)))   # CAUTION HARDCODING 14 szgroup
 
 
 

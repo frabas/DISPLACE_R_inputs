@@ -2,7 +2,8 @@
 setlocal enabledelayedexpansion
 
 
-
+REM WINDOWS USER: RENAME THIS FILE WITH EXTENSION .bat to MAKE IT WORK
+REM the extension .bat has been removed to avoid unwanted unfortunate double click on it......
 
 
 

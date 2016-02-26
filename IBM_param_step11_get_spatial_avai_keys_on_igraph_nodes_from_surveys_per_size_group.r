@@ -656,7 +656,8 @@ if(nmy=="2012")       load(file.path(general$main_path, "avai",paste("cpue_graph
 
 
 
-
+use_gui <- FALSE
+if(!use_gui){
 
 
 
@@ -840,8 +841,11 @@ save("lst.avai", file = file.path(general$main_path, "avai",
 ## CAUTION the ibts and bits surveys are combinations of hauls from different scientifc vessels
 ## with potentially gear trawl with different selectivity ogives....
 
-} # end for
 
+} # end use_gui
+
+
+} # end for
 
 
 
