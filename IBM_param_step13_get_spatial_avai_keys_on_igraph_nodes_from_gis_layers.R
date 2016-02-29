@@ -15,12 +15,12 @@
    general$igraph             <- 56  # caution: should be consistent with existing pops already built upon a given graph
    do_append                  <- FALSE
    name_gis_file_for_total_abundance_per_polygon <- "totabundance_on_fgrounds_handmade_polygons"
-   popids                     <- paste("pop", 1:10, sep="") 
+   popids                     <- paste( 1:10, sep="") 
    szgroups                   <-  0:13
    selected_szgroups        <-  c(2,5,7,9)
     
    # create a config file
-   write("# config file for the vessel editor: adding some vessel(s)", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), append=FALSE)
+   write("# config file for the vessel editor: adding some vessel(s)", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"))
    write("# (the shortestPaths library will have to be re-created for the graph)", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
    write("# --------------", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
   
@@ -141,17 +141,17 @@
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
- # in ArcGIS 10:
- # create a blank shapefile in ArcCatalog by right click the folder and select New > shapefile (Feature Type: Polygon)
- # go to ArcMap and add the shape file with File>Add Data...choose a file name that will be put in the config file as well (see name_gis_file_for_total_effort_per_polygon)
- # (optional) open a coastline shape file e.g. in DISPLACE_input_raw\shp
+ # in ArcGIS 10.1:
+ # Create a blank shapefile in ArcCatalog by right click the folder and select New > shapefile (Feature Type: Polygon)
+ # Go to ArcMap and add the shape file with File>Add Data...choose a file name that will be put in the config file as well (see name_gis_file_for_total_effort_per_polygon)
+ # (optional) open a coastline shape file e.g. in DISPLACE_input_raw\shp (if cannot see anything appearing then click right in the tree and Zoom to layer)
  # (optional) open an informative XY layer e.g. grounds for cod from VMS analysis e.g. in DISPLACE_input_raw
- # Open the Editor toolbar from Custumize > toolbars> Editor
- # create (non-intersecting) polygons by selecting the polygon layr in Create Features dialog and choosing the Polygon Construction tools, click once to start the polygon, etc. and right click and Finish sketch...save and stop editing
- # define the projection
- # add a Field in menu TOC Open Attribute Table and click on Options button in the Table Frame and choose Add field... e.g. "abundance"
- # ...then go to the Editor toolbar >start editing and double click on a polygon to edit the feffort_h value...save and stop editing
- 
+ # Open the Editor toolbar from Custumize > toolbars> Editor, then start editing
+ # Create (non-intersecting) polygons by selecting the polygon layr in Create Features dialog and choosing the Polygon Construction tools, click once to start the polygon, etc. and right click and Finish sketch...save and stop editing
+ # Define the projection in ArcToolbox>Data Management Tools>Define Projection
+ # Add a Field in menu TOC Open Attribute Table and click on Options button in the Table Frame and choose Add field... e.g. "abundance"
+ # ...then go to the Editor toolbar >start editing and double click on a polygon to edit the 'abundance' value...save and stop editing
+ # and voilà!
 
 
  library(maptools)
@@ -208,8 +208,8 @@ for (a.semester in c("S1", "S2")){
  
  # duplicate per size group (i.e. assuming the same parameterisation for all the pops)
  avai_allszgroups <- NULL
- for(sid in sizegroupids){
-  avai_allszgroups <- rbind.data.frame(avai_allszgroups, cbind(avai, sizegroupids=sid))
+ for(sid in szgroups){
+  avai_allszgroups <- rbind.data.frame(avai_allszgroups, cbind(avai, szgroups=sid))
  }
 
 # duplicate per pop id  (i.e. assuming the same parameterisation for all the pops)
@@ -229,29 +229,34 @@ for (a.semester in c("S1", "S2")){
  
   ####-------
  an <- function(x) as.numeric(as.character(x))
- for (a.semester in c("S1", "S2")){
+ for (a.semester in c("1", "2")){
 
     #-----------
-    x        <- avai_allszgroups_allpops[avai_allszgroups_allpops$semester==a.semester,]
-    x$vids   <- factor( x$popids )
-    tot      <- tapply(an(x$abundance), x$popids, sum, na.rm=TRUE  )
-    x$tot    <- tot[match(x$popids, names(tot))] # map
-    x$freq   <- round(an(x$abundance) /  x$tot,4)
-
+    x        <- avai_allszgroups_allpops[avai_allszgroups_allpops$semester==paste("S",a.semester, sep=''),]
+    x$popids   <- factor( x$pids )
+    
+    x<- orderBy(~pt_graph, data=x)
+    
+    x$abundance <- round(x$abundance, 8)
+    
+    # a check
+    tapply(an(x$abundance), list(x$pids, x$szgroups), sum, na.rm=TRUE  ) # should be full of 1
+  
     # save .dat files
     x$pt_graph <-  x$pt_graph - 1 ##!!! OFFSET FOR C++ !!!##
-        popsspe_avai_semester <- x[,c('popids','pt_graph')]
+       popsspe_avai_semester          <- x[,c('pids','pt_graph', 'abundance')]
+       popsspe_avai_semester_this_pop <- x[x$szgroups %in% selected_szgroups, c('pids','pt_graph', 'abundance')]
        
-       for(pid in unique(popsspe_avai_semester[,c('popids'])){
-         write.table(popsspe_avai_semester_this_pop,
-            file=file.path(general$main.path.param, "popsspe",
+       for(pid in unique(popsspe_avai_semester[,c('pids')])){
+         write.table(popsspe_avai_semester_this_pop[,c('pt_graph', 'abundance')],  # the szgroup dim is implicit....
+            file=file.path(general$main.path.param, "popsspe", "static_avai", 
               paste(pid, "spe_full_avai_szgroup_nodes_semester",gsub("Q","",a.semester),".dat",sep='')),
                   col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
     
       }
-       for(pid in unique(popsspe_avai_semester[,c('popids'])){
-         write.table(popsspe_avai_semester_this_pop[popsspe_avai_semester_this_pop$szgroups %in% selected_size_groups, ],
-            file=file.path(general$main.path.param, "popsspe",
+       for(pid in unique(popsspe_avai_semester[,c('pids')])){
+         write.table(popsspe_avai_semester_this_pop[,c('pt_graph', 'abundance')],     # the szgroup dim is implicit....
+            file=file.path(general$main.path.param, "popsspe", "static_avai",
               paste(pid, "spe_avai_szgroup_nodes_semester",gsub("Q","",a.semester),".dat",sep='')),
                   col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
     

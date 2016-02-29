@@ -74,9 +74,9 @@
    write("# metierids_frequencies", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
    write(metierids_frequencies, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(metierids_frequencies), append=TRUE)
    write("# visited_ports (look at the names in harbours.dat in /harboursspe)", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(visited_ports, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(visited_port), append=TRUE)
+   write(visited_ports, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(visited_ports), append=TRUE)
    write("# visited_ports_frequencies", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(visited_ports_frequencies, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(visited_port_frequency), append=TRUE)
+   write(visited_ports_frequencies, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(visited_ports_frequencies), append=TRUE)
    write("# nb fish or shellfish stocks (should be consistent with /popsspe)", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
   
    write(nb_stocks, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(nb_stocks), append=TRUE)
