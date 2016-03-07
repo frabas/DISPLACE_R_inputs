@@ -6,22 +6,39 @@
    general <- list()
    if(.Platform$OS.type == "windows") {
      general$main.path             <- file.path("C:","DISPLACE_outputs")
+     general$application           <- "adriatic" # ...or myfish
      general$main.path.param       <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw")
-     general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis")
+     general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
      general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input")
    }
 
+   
+   if(general$application=="myfish"){
    general$namefolderinput    <- "myfish"
    general$igraph             <- 56  # caution: should be consistent with existing pops already built upon a given graph
    do_append                  <- FALSE
    name_gis_file_for_total_abundance_per_polygon <- "totabundance_on_fgrounds_handmade_polygons"
-   popids                     <- paste( 1:10, sep="") 
-   szgroups                   <-  0:13
+   popids                     <- paste( 0:3, sep="")  # e.g. 3 stocks
+   szgroups                   <-  0:13              # 14 size groups
    selected_szgroups        <-  c(2,5,7,9)
-    
-   # create a config file
+   }
+   
+   if(general$application=="adriatic"){
+   general$namefolderinput    <- "adriatic"
+   general$igraph             <- 1002  # caution: should be consistent with existing pops already built upon a given graph
+   do_append                  <- FALSE
+   name_gis_file_for_total_abundance_per_polygon <- "adriatic_totabundance_on_fgrounds_handmade_polygons"
+   popids                     <- paste(0:13, sep="")  # e.g. 13 stocks
+   szgroups                   <-  0:13          # 14 size groups
+   selected_szgroups        <-  c(2,5,7,9)
+   }
+   
+   
+    # create a config file
+   namefile <- file.path(general$main.path.param.gis, paste("pops_creator_args_",general$namefolderinput, ".dat", sep=''))
+  
    write("# config file for the vessel editor: adding some vessel(s)", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"))
-   write("# (the shortestPaths library will have to be re-created for the graph)", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
+   write("# (the shortestPaths library will have to be re-created for the graph)", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
    write("# --------------", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
   
    write("# input folder for config file", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)

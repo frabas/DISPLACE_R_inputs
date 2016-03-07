@@ -4,35 +4,33 @@
  
    # GENERAL SETTINGS
    general <- list()
-   if(.Platform$OS.type == "unix") {}
-     general$main.path         <- file.path("~","ibm_vessels","DISPLACE_outputs")
-     #general$main.path.igraph  <- file.path("~","ibm_vessels","DISPLACE_input_raw", "igraph")
-     general$main.path.param   <- file.path("~","ibm_vessels","DISPLACE_input_raw")
-     general$main.path.ibm     <- file.path("~","ibm_vessels","DISPLACE_input")
-     #  do not forget to install the R packages on the qrsh interactive node linux platform, i.e. R > install.packages("data.table"), etc.
-     # (and possibly kill the current jobs on HPC with the command qselect -u $USER | xargs qdel)
-     # submit the shell to HPC with the command qsub ./IBM_process_output_for_loglike.sh
-
    if(.Platform$OS.type == "windows") {
-     general$main.path         <- file.path("C:","DISPLACE_outputs")
-     #general$main.path.igraph  <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw", "igraph")
-     general$main.path.param   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw")
-     general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis")
-     general$main.path.ibm     <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input")
+     general$main.path             <- file.path("C:","DISPLACE_outputs")
+     general$application           <- "adriatic" # ...or myfish
+     general$main.path.param       <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw")
+     general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+     general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input")
    }
-
+   
+  
+   if(general$application=="myfish"){
    general$namefolderinput    <- "myfish"
    general$igraph             <- 56  # caution: should be consistent with existing vessels already built upon a given graph
    do_append                  <- FALSE
-   name_gis_file_for_total_effort_per_polygon <- "toteffort_on_fgrounds_handmade_polygons"
+   name_gis_file_for_fishing_effort_per_polygon <- "toteffort_on_fgrounds_handmade_polygons"
+   name_gis_layer_field                         <- "feffort_h"                     # giving absolute effort in polygon
+   is_gis_layer_field_relative_numbers          <- FALSE                           # if relative effort categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
+   xfold_gis_layer_field      <- c(1, 1, 1, 1, 1)  # [not used if is_gis_layer_field_relative_numbers is FALSE] 
    vesselids                  <- paste("DNK0000", 1:10, sep="") # caution: three first letters give the nationality and should be consistent with  popsspe/XXctrysspe_relative_stability_semesterXX
+   vessel_range_km            <- 250
    metierids                  <- 2:3  # look at /metiersspe
    metierids_frequencies      <- c(0.33,0.66)
    visited_ports              <- c("Brake", "Bremerhaven") 
+   name_file_ports            <- "harbours_on_AdriaticSea.dat" 
    visited_ports_frequencies  <- c(0.8,0.2)
    nb_stocks                  <- 38  # 0 to 37 in c++
-   fixed_cpue_per_stock       <- rep(100, nb_stocks)
-   gshape_cpue_per_stock      <- rep(100, nb_stocks)   # for Gamma on each node
+   fixed_cpue_per_stock       <- rep(100, nb_stocks)   # kg catch per hour
+   gshape_cpue_per_stock      <- rep(100, nb_stocks)   # for Gamma on each node   e.g. rgamma(1000, shape=100, scale = 2) -> kg per hour
    gscale_cpue_per_stock      <- rep(2, nb_stocks)     # for Gamma on each node
    vessel_features            <- c(15.47,34.42,15,129,23662,4095,7,0.4485,336.7618,18,1,1.1,1.1,0.2) # vessels will be all the same
    step_in_share              <- rep(20, nb_stocks) # i.e. 20 % of each TAC per stock will be booked for these new vessels
@@ -40,72 +38,136 @@
    create_file_for_fuel_price_per_vessel_size <- TRUE
    some_fuel_price_per_vessel_size <- c(0.54430,0.5398,0.5149,0.4897,0.4859)
    step_in_share_credits      <- 20 # i.e. 20 % of the credits will be booked for these new vessels
+   }
+   
+   if(general$application=="adriatic") {
+   general$namefolderinput    <- "adriatic"
+   spp                        <- c("Engraulis encrasicolus", "Illex coindetii", "Parapenaeus longirostris", "Penaeus kerathurus", "Merlangius merlangus", "Eledone cirrosa", "Merluccius merluccius",
+                                   "Pagellus erythrinus", "Squilla mantis", "Sardina pilchardus", "Nephrops norvegicus", "Sepia officinalis", "Solea solea", "Mullus barbatus")
+   general$igraph             <- 1002  # caution: should be consistent with existing vessels already built upon a given graph
+   do_append                  <- FALSE
+   #name_gis_file_for_fishing_effort_per_polygon <- "adriatic_toteffort_on_fgrounds_handmade_polygons"
+   #name_gis_layer_field                         <- "feffort_h"                     # giving absolute effort in polygon
+   #is_gis_layer_field_relative_numbers          <- FALSE                           # if relative effort categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
+   #xfold_gis_layer_field      <- c(1, 1, 1, 1, 1)  # [not used if is_gis_layer_field_relative_numbers is FALSE] 
+   name_gis_file_for_fishing_effort_per_polygon <- "ssc12241"
+   name_gis_layer_field                         <- "GRIDCODE"                     # giving releative effort ditribtion e.g. in 5 categories: 1 to 5 with 1 high occurence
+   is_gis_layer_field_relative_numbers          <- TRUE                           # if relative effort categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
+   xfold_gis_layer_field      <- c(10000, 1000, 100, 10, 1)     # giving relative importance of the 5 categories e.g. visting an area of cat 1 is 10000 times more probable than for cat 5
+   vesselids                  <- paste("ITA0000", 1:10, sep="") # caution: three first letters give the nationality and should be consistent with  popsspe/XXctrysspe_relative_stability_semesterXX
+   vessel_range_km            <- 250
+   metierids                  <- 2:3  # look at /metiersspe
+   metierids_frequencies      <- c(0.33,0.66)
+   visited_ports              <- c("ANCONA", "RIMINI")   # should exist in harbour.dat!
+   name_file_ports            <- "harbours_adriatic.dat" 
+   visited_ports_frequencies  <- c(0.8,0.2)
+   nb_stocks                  <- length(spp)  # from 0 in c++
+   fixed_cpue_per_stock       <- rep(100, nb_stocks)
+   gshape_cpue_per_stock      <- rep(100, nb_stocks)   # for Gamma on each node
+   gscale_cpue_per_stock      <- rep(2, nb_stocks)     # for Gamma on each node
+   vessel_features            <- c(15.47,34.42,15,129,23662,4095,7,0.4485,336.7618,18,1,1.1,1.1,0.2) # vessels will be all the same
+   step_in_share              <- rep(100, nb_stocks) # i.e. 100 % of each TAC per stock will be booked for these new vessels
+   vesselsspe_betas           <- rnorm(nb_stocks, 3, 5) # i.e. vessel effect in the catch rate equation 
+   create_file_for_fuel_price_per_vessel_size <- TRUE
+   some_fuel_price_per_vessel_size <- c(0.54430,0.5398,0.5149,0.4897,0.4859)
+   step_in_share_credits      <- 100 # i.e. 100 % of the credits will be booked for these new vessels
+   }
+   
+   
+   
     
    # create a config file
-   write("# config file for the vessel editor: adding some vessel(s)", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"))
-   write("# (the shortestPaths library will have to be re-created for the graph)", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write("# --------------", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-  
-   write("# input folder for config file", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(general$main.path.param.gis, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-  
-   write("# output folder for parameterisation file", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(general$main.path.param, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-  
-   write("# input folder for DISPLACE", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(general$main.path.ibm, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)  
-  
-   write("# name of the application", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(general$namefolderinput, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)  
-  
-   write("# name of the graph for this application", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(general$igraph, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)  
+   namefile <- file.path(general$main.path.param.gis, paste("vessels_creator_args_",general$namefolderinput, ".dat", sep=''))
    
-   write("# append to existing vessel files", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(do_append, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
+   write("# config file for the vessel editor: adding some vessel(s)", file=namefile)
+   write("# (the shortestPaths library will have to be re-created for the graph)", file=namefile, ncolumns=1, append=TRUE)
+   write("# --------------", file=namefile, ncolumns=1, append=TRUE)
   
-   write("# name gis file for total effort per polygon", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(name_gis_file_for_total_effort_per_polygon, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
+   write("# input folder for config file", file=namefile, ncolumns=1, append=TRUE)
+   write(general$main.path.param.gis, file=namefile, ncolumns=1, append=TRUE)
+  
+   write("# output folder for parameterisation file", file=namefile, ncolumns=1, append=TRUE)
+   write(general$main.path.param, file=namefile, ncolumns=1, append=TRUE)
+  
+   write("# input folder for DISPLACE", file=namefile, ncolumns=1, append=TRUE)
+   write(general$main.path.ibm, file=namefile, ncolumns=1, append=TRUE)
+  
+   write("# name of the application",file=namefile, ncolumns=1, append=TRUE)
+   write(general$namefolderinput, file=namefile, ncolumns=1, append=TRUE)
+  
+   write("# name of the graph for this application", file=namefile, ncolumns=1, append=TRUE)
+   write(general$igraph,file=namefile, ncolumns=1, append=TRUE)
+   
+   write("# append to existing vessel files", file=namefile, ncolumns=1, append=TRUE)
+   write(do_append,file=namefile, ncolumns=1, append=TRUE)
+  
+   write("# name gis file for total effort per polygon",file=namefile, ncolumns=1, append=TRUE)
+   write(name_gis_file_for_fishing_effort_per_polygon, file=namefile, ncolumns=1, append=TRUE)
  
-   write("# vesselids", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(vesselids, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(vesselids), append=TRUE)
-   write("# metierids", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(metierids, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(metierids), append=TRUE)
-   write("# metierids_frequencies", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(metierids_frequencies, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(metierids_frequencies), append=TRUE)
-   write("# visited_ports (look at the names in harbours.dat in /harboursspe)", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(visited_ports, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(visited_ports), append=TRUE)
-   write("# visited_ports_frequencies", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(visited_ports_frequencies, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(visited_ports_frequencies), append=TRUE)
-   write("# nb fish or shellfish stocks (should be consistent with /popsspe)", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
+   write("# name_gis_layer_field",file=namefile, ncolumns=1, append=TRUE)
+   write(name_gis_layer_field, file=namefile, ncolumns=1, append=TRUE)
+ 
+   write("# is_gis_layer_field_relative_numbers",file=namefile, ncolumns=1, append=TRUE)
+   write(is_gis_layer_field_relative_numbers, file=namefile, ncolumns=1, append=TRUE)
+ 
+   write("# xfold_gis_layer_field",file=namefile, ncolumns=1, append=TRUE)
+   write(xfold_gis_layer_field, file=namefile, ncolumns=length(xfold_gis_layer_field), append=TRUE)
+ 
+   write("# vesselids", file=namefile, ncolumns=1, append=TRUE)
+   write(vesselids, file=namefile, ncolumns=length(vesselids), append=TRUE)
+ 
+   write("# vessel_range_km", file=namefile, ncolumns=1, append=TRUE)
+   write(vessel_range_km, file=namefile, ncolumns=1, append=TRUE)
+     
+   write("# metierids", file=namefile, ncolumns=1, append=TRUE)
+   write(metierids, file=namefile, ncolumns=length(metierids), append=TRUE)
+   
+   write("# metierids_frequencies", file=namefile, ncolumns=1, append=TRUE)
+   write(metierids_frequencies, file=namefile, ncolumns=length(metierids_frequencies), append=TRUE)
+   
+   write("# visited_ports (look at the names in harbours.dat in /harboursspe)", file=namefile, ncolumns=1, append=TRUE)
+   write(visited_ports, file=namefile, ncolumns=length(visited_ports), append=TRUE)
+   
+   write("# visited_ports_frequencies", file=namefile, ncolumns=1, append=TRUE)
+   write(visited_ports_frequencies, file=namefile, ncolumns=length(visited_ports_frequencies), append=TRUE)
+   
+   write("# name_file_ports", file=namefile, ncolumns=1, append=TRUE)
+   write(name_file_ports, file=namefile, ncolumns=1, append=TRUE)
+   
+   
+   write("# nb fish or shellfish stocks (should be consistent with /popsspe)",file=namefile, ncolumns=1, append=TRUE)
+   write(nb_stocks, file=namefile, ncolumns=length(nb_stocks), append=TRUE)
   
-   write(nb_stocks, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(nb_stocks), append=TRUE)
-   write("# fixed cpue per stock on fgrounds(plan B)", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(fixed_cpue_per_stock, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(fixed_cpue_per_stock), append=TRUE)
-   write("# Gamma (shape parameter) cpue per stock on fgrounds (plan A but for implicit stocks or out of range nodes)", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(gshape_cpue_per_stock, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(gshape_cpue_per_stock), append=TRUE)
-   write("# Gamma (scale parameter) cpue per stock on fgrounds(plan A but for implicit stocks or out of range nodes)", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(gscale_cpue_per_stock, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(gscale_cpue_per_stock), append=TRUE)
+   write("# fixed cpue per stock on fgrounds(plan B)", file=namefile, ncolumns=1, append=TRUE)
+   write(fixed_cpue_per_stock, file=namefile, ncolumns=length(fixed_cpue_per_stock), append=TRUE)
+  
+   write("# Gamma (shape parameter) cpue per stock on fgrounds (plan A but for implicit stocks or out of range nodes)", file=namefile, ncolumns=1, append=TRUE)
+   write(gshape_cpue_per_stock, file=namefile, ncolumns=length(gshape_cpue_per_stock), append=TRUE)
+  
+   write("# Gamma (scale parameter) cpue per stock on fgrounds(plan A but for implicit stocks or out of range nodes)", file=namefile, ncolumns=1, append=TRUE)
+   write(gscale_cpue_per_stock, file=namefile, ncolumns=length(gscale_cpue_per_stock), append=TRUE)
   
    write("# vessel features (speed, fuelconsrate, length, kW, carrying_capacity, tank_capacity, nb_pings_per_trip, shape_in_btw, scale_in_btw, av.trip.duration)",
-     file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
+   file=namefile, ncolumns=1, append=TRUE)
+  
    write("#  mult_fuelcons_when_steaming, mult_fuelcons_when_fishing, mult_fuelcons_when_returning, mult_fuelcons_when_inactive) ",
-     file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)              
-   write(vessel_features, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(vessel_features), append=TRUE)
+     file=namefile, ncolumns=1, append=TRUE)         
+   write(vessel_features, file=namefile, ncolumns=length(vessel_features), append=TRUE)
   
-   write("# percent step in share for TAC (per stock) for these incoming vessels (only used if existing vessels)", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(step_in_share, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(step_in_share), append=TRUE)
+   write("# percent step in share for TAC (per stock) for these incoming vessels (only used if existing vessels)",file=namefile, ncolumns=1, append=TRUE)
+   write(step_in_share, file=namefile, ncolumns=length(step_in_share), append=TRUE)
    
-   write("# vessel effect (per stock) in the catch rate equation ", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(vesselsspe_betas, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(step_in_share), append=TRUE)
+   write("# vessel effect (per stock) in the catch rate equation ", file=namefile, ncolumns=1, append=TRUE)
+   write(vesselsspe_betas, file=namefile, ncolumns=length(step_in_share), append=TRUE)
   
-   write("# create the file for fuel price per vessel size  ", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(create_file_for_fuel_price_per_vessel_size, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(create_file_for_fuel_price_per_vessel_size), append=TRUE)
-   write("# some fuel price per vessel size (Euro per litre) ", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(some_fuel_price_per_vessel_size, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(some_fuel_price_per_vessel_size), append=TRUE)
+   write("# create the file for fuel price per vessel size  ",file=namefile, ncolumns=1, append=TRUE)
+   write(create_file_for_fuel_price_per_vessel_size, file=namefile, ncolumns=length(create_file_for_fuel_price_per_vessel_size), append=TRUE)
   
-   write("# i% fishing credits taken from incomers (for RTI management) ", file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(step_in_share_credits, file=file.path(general$main.path.param.gis, "vessels_creator_args.dat"), ncolumns=length(step_in_share_credits), append=TRUE)
+   write("# some fuel price per vessel size (Euro per litre) ",file=namefile, ncolumns=1, append=TRUE)
+   write(some_fuel_price_per_vessel_size, file=namefile, ncolumns=length(some_fuel_price_per_vessel_size), append=TRUE)
+  
+   write("# i% fishing credits taken from incomers (for RTI management) ", file=namefile, ncolumns=1, append=TRUE)
+   write(step_in_share_credits, file=namefile, ncolumns=length(step_in_share_credits), append=TRUE)
    
    }
 
@@ -117,9 +179,22 @@
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
-   
-   path <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis") # where is the config file?
-   dat  <- readLines(file.path(path, "vessels_creator_args.dat"))
+  # create the fgrounds files for DISPLACE
+ # TWO WORKFLOWS ON A VESSEL EDITOR:
+ # 1 - create from a XY VMS-based data (e.g. all.merged)
+ # 2 - create from a GIS shape layer with attributes 
+
+ 
+ 
+ # WORKFLOW 1 -
+
+ #....go to IBM_param_input_step7
+
+ # WORKFLOW 2  
+   namefolderinput  <- "adriatic" # FOR EXAMPLE....
+   path             <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", namefolderinput) # where is the config file?
+   namefile         <- paste("vessels_creator_args_",namefolderinput, ".dat", sep='')
+   dat              <- readLines(file.path(path, namefile))
    
    my_split <- function(x) unlist(strsplit(x, " "))
    
@@ -131,31 +206,34 @@
    general$igraph                <- as.numeric(dat[13])  
                                   
    do_append                     <- as.logical(dat[15])
-   name_gis_file_for_total_effort_per_polygon <- dat[17]
-   if(length(prop_per_quarter)!=4) stop("Check config file for vessel creator - length(prop_per_quarter)")
-   names(prop_per_quarter)       <- paste("Q", 1:4, sep="")
-   vesselids                     <- as.character(my_split(dat[19]))
-   metierids                     <- as.numeric(my_split(dat[21]))
-   metierids_frequencies         <- as.numeric(my_split(dat[23]))
+   name_gis_file_for_fishing_effort_per_polygon <- dat[17]
+   name_gis_layer_field                        <- dat[19]
+   is_gis_layer_field_relative_numbers         <- dat[21]
+   xfold_gis_layer_field                        <- as.numeric(my_split(dat[23]))  
+   vesselids                     <- as.character(my_split(dat[25]))
+   vessel_range_km               <- as.numeric(dat[27])
+   metierids                     <- as.numeric(my_split(dat[29]))
+   metierids_frequencies         <- as.numeric(my_split(dat[31]))
    if(length(metierids)!=length(metierids_frequencies)) stop("Check config file for vessel creator - length(metierids)")
-   visited_ports                 <- as.character(my_split(dat[25]))
-   visited_ports_frequencies     <- as.numeric(my_split(dat[27]))
+   visited_ports                 <- as.character(my_split(dat[33]))
+   visited_ports_frequencies     <- as.numeric(my_split(dat[35]))
    if(length(visited_ports)!=length(visited_ports_frequencies)) stop("Check config file for vessel creator - length(visited_ports)")
-   nb_stocks                     <- as.numeric(my_split(dat[29]))
-   fixed_cpue_per_stock          <- as.numeric(my_split(dat[31]))
+   name_file_ports               <-  dat[37]
+   nb_stocks                     <- as.numeric(my_split(dat[39]))
+   fixed_cpue_per_stock          <- as.numeric(my_split(dat[41]))
    if(length(fixed_cpue_per_stock)!=nb_stocks) stop("Check config file for vessel creator - length(fixed_cpue_per_stock)")
-   gshape_cpue_per_stock         <- as.numeric(my_split(dat[33]))
+   gshape_cpue_per_stock         <- as.numeric(my_split(dat[43]))
    if(length(gshape_cpue_per_stock)!=nb_stocks) stop("Check config file for vessel creator - length(gshape_cpue_per_stock)")
-   gscale_cpue_per_stock         <- as.numeric(my_split(dat[35]))
+   gscale_cpue_per_stock         <- as.numeric(my_split(dat[45]))
    if(length(gscale_cpue_per_stock)!=nb_stocks) stop("Check config file for vessel creator - length(gscale_cpue_per_stock)")
-   vessel_features               <- as.numeric(my_split(dat[38]))
-   step_in_share                 <- as.numeric(my_split(dat[40]))
+   vessel_features               <- as.numeric(my_split(dat[48]))
+   step_in_share                 <- as.numeric(my_split(dat[50]))
    if(length(step_in_share)!=nb_stocks) stop("Check config file for vessel creator - length(step_in_share)")
-   vesselsspe_betas              <- as.numeric(my_split(dat[42]))
+   vesselsspe_betas              <- as.numeric(my_split(dat[52]))
    if(length(vesselsspe_betas)!=nb_stocks) stop("Check config file for vessel creator - length(vesselsspe_betas)")
-   create_file_for_fuel_price_per_vessel_size   <-  as.logical(dat[44])
-   some_fuel_price_per_vessel_size              <-   as.numeric(my_split(dat[46]))
-   step_in_share_credits                        <-   as.numeric(dat[48])
+   create_file_for_fuel_price_per_vessel_size   <-  as.logical(dat[54])
+   some_fuel_price_per_vessel_size              <-   as.numeric(my_split(dat[56]))
+   step_in_share_credits                        <-   as.numeric(dat[58])
 
 
 #-------------------------------------------------------------------------------
@@ -188,6 +266,23 @@
      }
  return(coord)
  }
+ 
+getPolyAroundACoord <- function(dat, a_dist_m){ 
+  lst <- list()
+    for(i in 1: nrow(dat)){
+      x <- dat[i,'coords.x1'] + a_dist_m * cos(seq(1,360, by=5)*pi/180)
+      y <- dat[i,'coords.x2'] + a_dist_m * sin(seq(1,360, by=5)*pi/180)
+      assign(paste("poly", i, sep=""), 
+        Polygon(cbind(  c(x,x[1]),
+                   c(y, y[1])
+                    )))
+      assign  (paste("Poly", i, sep=""),  Polygons(list(get(paste("poly", i, sep=""))), ID=paste(dat[i, "ID"])) )
+      lst[[i]] <- get(paste("Poly", i, sep=""))
+     }            
+  return(lst)
+  }   
+  
+
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
@@ -211,14 +306,49 @@
   segments(coord[graph[,1]+1,1], coord[graph[,1]+1,2], coord[graph[,2]+1,1], coord[graph[,2]+1,2], col=4) # CAUTION: +1, because c++ to R
 
 
+  #-------------------------------------------------------------------------------
+  #-------------------------------------------------------------------------------
+  # GET ALL THE NODES IN THE RANGE OF THE VESSEL SPECIFIC HARBOURS
+  
+  harbours <- read.table(file.path(general$main.path.param.gis, name_file_ports), sep=";")     
+  harbours <- harbours[visited_ports,]
+  harbours <- cbind.data.frame(harbours, ID=1:nrow(harbours))
+  # convert to UTM
+  library(sp)
+  library(rgdal)
+  SP       <- SpatialPoints(cbind(as.numeric(as.character(harbours[,'x'])), as.numeric(as.character(harbours[,'y']))),
+                       proj4string=CRS("+proj=longlat +ellps=WGS84"))
+  UTMzone  <- 34                     
+  harbours <- cbind.data.frame(harbours,
+                 spTransform(SP, CRS(paste("+proj=utm +zone=",UTMzone," +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0", sep=''))))    # convert to UTM
 
+  
+  lst             <- getPolyAroundACoord(harbours, a_dist_m=200000)     
+  sp              <- SpatialPolygons(lst, 1:nrow(harbours))
+  plot(sp)
+  projection(sp)  <- CRS(paste("+proj=utm +zone=",UTMzone," +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0", sep='') )
+   # transform back to decimal longlat
+  sp            <- spTransform(sp, CRS("+proj=longlat +ellps=WGS84"))
 
+  spo             <- SpatialPoints(coordinates(data.frame(CELL_LONG=coord[,1],
+                                             CELL_LATI=coord[,2])))
+  projection(spo) <-  CRS("+proj=longlat +ellps=WGS84")
+  idx                           <- over(spo,sp) 
+  coord       <- cbind.data.frame(coord, poly=names(sp)[idx])
+
+  #...then only keep the nodes inside the range of these particular vessels
+  coord <- coord[!is.na(coord$poly),]
+  points(coord[, c(1,2)], col=3) 
+   
+  
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
+ # IF (CREATING A SHAPE FILE FROM SCRATCH)
+ # {
  # in ArcGIS 10:
  # create a blank shapefile in ArcCatalog by right click the folder and select New > shapefile (Feature Type: Polygon)
- # go to ArcMap and add the shape file with File>Add Data...choose a file name that will be put in the config file as well (see name_gis_file_for_total_effort_per_polygon)
+ # go to ArcMap and add the shape file with File>Add Data...choose a file name that will be put in the config file as well (see name_gis_file_for_fishing_effort_per_polygon)
  # (optional) open a coastline shape file e.g. in DISPLACE_input_raw\shp
  # (optional) open an informative XY layer e.g. grounds for cod from VMS analysis e.g. in DISPLACE_input_raw
  # Open the Editor toolbar from Custumize > toolbars> Editor
@@ -226,13 +356,16 @@
  # define the projection
  # add a Field in menu TOC Open Attribute Table and click on Options button in the Table Frame and choose Add field... e.g. "feffort_h"
  # ...then go to the Editor toolbar >start editing and double click on a polygon to edit the feffort_h value...save and stop editing
- 
+ # }
+ # {
+ # ELSE USE INFO FROM PARTNERS
+ # }
 
 
  library(maptools)
- handmade            <- readShapePoly(file.path(general$main.path.param.gis, name_gis_file_for_total_effort_per_polygon))  # build in ArcGIS 10.1
+ handmade            <- readShapePoly(file.path(general$main.path.param.gis, name_gis_file_for_fishing_effort_per_polygon))  # build in ArcGIS 10.1
  library(rgdal)
- handmade2           <- readOGR(file.path(general$main.path.param.gis), name_gis_file_for_total_effort_per_polygon) #  Projection info in a .prj associated with the shp should be imported automagically.
+ handmade2           <- readOGR(file.path(general$main.path.param.gis), name_gis_file_for_fishing_effort_per_polygon) #  Projection info in a .prj associated with the shp should be imported automagically.
 
  # How can I get the proj4 string from a shapefile .prj file? http://gis.stackexchange.com/questions/55196/how-can-i-get-the-proj4-string-or-epsg-code-from-a-shapefile-prj-file
 
@@ -240,24 +373,19 @@
  library(rgdal)
  handmade_WGS84 <- spTransform(handmade2, CRS("+proj=longlat +datum=WGS84"))    # convert to longlat
 
- names(handmade_WGS84)  # "Id"         "feffort_h"  
+ names(handmade_WGS84)  # "Id"         name_gis_layer_field  
 
- plot(handmade_WGS84,  add=TRUE, border=handmade_WGS84$feffort_h)
+ plot(handmade_WGS84,  add=TRUE, border=handmade_WGS84[,name_gis_layer_field])
 
+ handmade_WGS84 <- as.data.frame(handmade_WGS84)
 
- # create the fgrounds files for DISPLACE
- # TWO WORKFLOWS ON A VESSEL EDITOR:
- # 1 - create from a XY VMS-based data (e.g. all.merged)
- # 2 - create from a GIS shape layer with attributes e.g. feffort_h, mean_cpue, dep_harb
-
+ # caution:
+ handmade_WGS84$xfold         <- factor(handmade_WGS84[,name_gis_layer_field]) # init
+ levels(handmade_WGS84$xfold) <- xfold_gis_layer_field
  
- 
- # WORKFLOW 1 -
-
- #....go to IBM_param_input_step7
+ #
 
 
- # WORKFLOW 2 -
 
  # test coord for polygon inclusion
   coord <-  detectingCoordInPolygonsFromSH (handmade_WGS84, coord, name_column="handmade")
@@ -270,19 +398,12 @@
  an <- function(x) as.numeric(as.character(x))
 for (a.quarter in c("Q1","Q2","Q3","Q4")){
 
-    # dispatch the feffort among nodes by dividing feffort_h per the number of included graph nodes
-    fgrounds_this_quarter                   <- coord[coord [,"handmade"]!= 0,]
-    fgrounds_this_quarter                   <- cbind.data.frame(fgrounds_this_quarter, quarter=a.quarter, feffort_h=factor(fgrounds_this_quarter [,"handmade"])) # init
-    levels(fgrounds_this_quarter$feffort_h) <- handmade_WGS84$feffort_h  / table(fgrounds_this_quarter$feffort_h)
+    # dispatch the feffort among nodes by dividing proba in area per the number of included graph nodes
+    fgrounds_this_quarter                   <- coord[coord [,"handmade"]!= 0,]  
+    fgrounds_this_quarter                   <- cbind.data.frame(fgrounds_this_quarter, quarter=a.quarter, id=factor(fgrounds_this_quarter [,"handmade"])) # init
+    levels(fgrounds_this_quarter$feffort_h) <- handmade_WGS84[,name_gis_layer_field] * handmade_WGS84[,xfold]  / table(fgrounds_this_quarter$id)
     fgrounds_this_quarter$feffort_h         <- an(fgrounds_this_quarter$feffort_h) /sum(an(fgrounds_this_quarter$feffort_h))
      #=> scale to 1 to obtain a proba of visit per node
-    
-    # retrieve cpue and harbour info from the GIS layer (NOT USED, prefer the config file instead)
-    #fgrounds_this_quarter                   <- cbind.data.frame(fgrounds_this_quarter, av_cpue_kgh=factor(fgrounds_this_quarter [,"handmade"])) # init
-    #levels(fgrounds_this_quarter$av_cpue_kgh) <- handmade_WGS84$avcpue_kgh
-    #fgrounds_this_quarter                   <- cbind.data.frame(1fgrounds_this_quarter, dep_harb=factor(fgrounds_this_quarter [,"handmade"])) # init
-    #levels(fgrounds_this_quarter$dep_harb) <- handmade_WGS84$dep_harb
-
  
     fgrounds <- rbind.data.frame(fgrounds, fgrounds_this_quarter)
  }
