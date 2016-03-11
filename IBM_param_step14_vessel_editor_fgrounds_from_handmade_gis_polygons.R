@@ -44,7 +44,7 @@
    general$namefolderinput    <- "adriatic"
    spp                        <- c("Engraulis encrasicolus", "Illex coindetii", "Parapenaeus longirostris", "Penaeus kerathurus", "Merlangius merlangus", "Eledone cirrosa", "Merluccius merluccius",
                                    "Pagellus erythrinus", "Squilla mantis", "Sardina pilchardus", "Nephrops norvegicus", "Sepia officinalis", "Solea solea", "Mullus barbatus")
-   general$igraph             <- 1002  # caution: should be consistent with existing vessels already built upon a given graph
+   general$igraph             <- 1  # caution: should be consistent with existing vessels already built upon a given graph
    do_append                  <- FALSE
    #name_gis_file_for_fishing_effort_per_polygon <- "adriatic_toteffort_on_fgrounds_handmade_polygons"
    #name_gis_layer_field                         <- "feffort_h"                     # giving absolute effort in polygon
@@ -55,7 +55,7 @@
    is_gis_layer_field_relative_numbers          <- TRUE                           # if relative effort categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
    xfold_gis_layer_field      <- c(10000, 1000, 100, 10, 1)     # giving relative importance of the 5 categories e.g. visting an area of cat 1 is 10000 times more probable than for cat 5
    vesselids                  <- paste("ITA0000", 1:10, sep="") # caution: three first letters give the nationality and should be consistent with  popsspe/XXctrysspe_relative_stability_semesterXX
-   vessel_range_km            <- 250
+   vessel_range_km            <- 75
    metierids                  <- 2:3  # look at /metiersspe
    metierids_frequencies      <- c(0.33,0.66)
    visited_ports              <- c("ANCONA", "RIMINI")   # should exist in harbour.dat!
@@ -318,14 +318,20 @@ getPolyAroundACoord <- function(dat, a_dist_m){
   library(rgdal)
   SP       <- SpatialPoints(cbind(as.numeric(as.character(harbours[,'x'])), as.numeric(as.character(harbours[,'y']))),
                        proj4string=CRS("+proj=longlat +ellps=WGS84"))
-  UTMzone  <- 34                     
+  UTMzone  <- 33                     
   harbours <- cbind.data.frame(harbours,
                  spTransform(SP, CRS(paste("+proj=utm +zone=",UTMzone," +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0", sep=''))))    # convert to UTM
 
   
-  lst             <- getPolyAroundACoord(harbours, a_dist_m=200000)     
+  lst             <- getPolyAroundACoord(harbours, a_dist_m= vessel_range_km * 1000)     
   sp              <- SpatialPolygons(lst, 1:nrow(harbours))
   plot(sp)
+
+  
+  library(rgdal)
+  library(maptools)
+  library(raster)
+
   projection(sp)  <- CRS(paste("+proj=utm +zone=",UTMzone," +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0", sep='') )
    # transform back to decimal longlat
   sp            <- spTransform(sp, CRS("+proj=longlat +ellps=WGS84"))
@@ -338,6 +344,9 @@ getPolyAroundACoord <- function(dat, a_dist_m){
 
   #...then only keep the nodes inside the range of these particular vessels
   coord <- coord[!is.na(coord$poly),]
+  
+  # check
+  plot(sp)
   points(coord[, c(1,2)], col=3) 
    
   
@@ -375,34 +384,50 @@ getPolyAroundACoord <- function(dat, a_dist_m){
 
  names(handmade_WGS84)  # "Id"         name_gis_layer_field  
 
- plot(handmade_WGS84,  add=TRUE, border=handmade_WGS84[,name_gis_layer_field])
-
- handmade_WGS84 <- as.data.frame(handmade_WGS84)
-
- # caution:
- handmade_WGS84$xfold         <- factor(handmade_WGS84[,name_gis_layer_field]) # init
- levels(handmade_WGS84$xfold) <- xfold_gis_layer_field
- 
- #
-
+ plot(handmade_WGS84,  add=TRUE, border=as.data.frame(handmade_WGS84)[,name_gis_layer_field])
 
 
  # test coord for polygon inclusion
-  coord <-  detectingCoordInPolygonsFromSH (handmade_WGS84, coord, name_column="handmade")
-  points(coord[,1], coord[,2], col=coord[,"handmade"]+1)  # check
+  coord <-  detectingCoordInPolygonsFromSH (handmade_WGS84, coord, name_column="poly_id")
+  points(coord[,1], coord[,2], col=as.numeric(coord[,name_gis_layer_field])+1)  # check
 
+
+ handmade_WGS84_df <- as.data.frame(handmade_WGS84)
+
+ # caution:
+ handmade_WGS84_df$xfold         <- factor(handmade_WGS84_df[,name_gis_layer_field]) # init
+ levels(handmade_WGS84_df$xfold) <- xfold_gis_layer_field
+ handmade_WGS84_df$xfold         <-   as.character(handmade_WGS84_df$xfold)
+ handmade_WGS84_df               <- rbind.data.frame( c(ID=0, 0, min(xfold_gis_layer_field)/2), handmade_WGS84_df)   # add an ID 0 for not included coord points AND ASSUME SOME ACTIVITY IN IT
+ handmade_WGS84_df$xfold         <-   as.factor(handmade_WGS84_df$xfold)
+ 
+ # then merge to coord  (caution: 'poly' give the polygon in the harbour range; 'poly_id' give the polygon id from the handmade_WGS84 shape file) 
+ coord<- merge(coord, handmade_WGS84_df, by.x="poly_id", by.y="ID")
+
+ 
+ # check
+ plot(sp)
+ plot(handmade_WGS84,  add=TRUE, border=as.data.frame(handmade_WGS84)[,name_gis_layer_field])
+ coord$color <-  factor(coord[,name_gis_layer_field]) #init   
+ levels(coord$color) <- 1:length(levels(coord$color))
+ points(coord[, "x"], coord[, "y"], col=  coord[,"color"])
+ 
+ 
+ 
 # WORKFLOW 2 - QUARTER-BASED----------- 
 # however, note that the seasonnality of the spatial and total effort application 
-# is not parameterize but is instead an emerging feature from the model.
+# is not parameterized but is instead an emerging feature from the model.
  fgrounds <- NULL
  an <- function(x) as.numeric(as.character(x))
 for (a.quarter in c("Q1","Q2","Q3","Q4")){
 
     # dispatch the feffort among nodes by dividing proba in area per the number of included graph nodes
-    fgrounds_this_quarter                   <- coord[coord [,"handmade"]!= 0,]  
-    fgrounds_this_quarter                   <- cbind.data.frame(fgrounds_this_quarter, quarter=a.quarter, id=factor(fgrounds_this_quarter [,"handmade"])) # init
-    levels(fgrounds_this_quarter$feffort_h) <- handmade_WGS84[,name_gis_layer_field] * handmade_WGS84[,xfold]  / table(fgrounds_this_quarter$id)
-    fgrounds_this_quarter$feffort_h         <- an(fgrounds_this_quarter$feffort_h) /sum(an(fgrounds_this_quarter$feffort_h))
+    fgrounds_this_quarter                                <- coord 
+    fgrounds_this_quarter                                <- cbind.data.frame(fgrounds_this_quarter, quarter=a.quarter) # init
+    fgrounds_this_quarter$nb_nodes_in_this_cat           <- factor(fgrounds_this_quarter[,name_gis_layer_field]) # init
+    levels(fgrounds_this_quarter$nb_nodes_in_this_cat )  <- table(fgrounds_this_quarter[,name_gis_layer_field])
+    fgrounds_this_quarter$effort_on_node                 <- an(fgrounds_this_quarter[,name_gis_layer_field]) * an(fgrounds_this_quarter[,'xfold'])  /   an(fgrounds_this_quarter$nb_nodes_in_this_cat)
+    fgrounds_this_quarter$freq_feffort                   <- an(fgrounds_this_quarter$effort_on_node) /sum(an(fgrounds_this_quarter$effort_on_node))
      #=> scale to 1 to obtain a proba of visit per node
  
     fgrounds <- rbind.data.frame(fgrounds, fgrounds_this_quarter)
@@ -429,17 +454,11 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
  # vesselsspe_freq_harbours_quarter
 
   ####-------
+ x <- fgrounds_allvessels_allmet
  an <- function(x) as.numeric(as.character(x))
  for (a.quarter in c("Q1","Q2","Q3","Q4")){
 
-    #-----------
-    # vesselsspe_fgrounds_quarter[xx].dat
-    # vesselsspe_freq_fgrounds_quarter[xx].dat
-    x        <- fgrounds_allvessels[fgrounds_allvessels$quarter==a.quarter,]
-    x$vids   <- factor( x$vids )
-    tot      <- tapply(an(x$feffort_h), x$vids, sum, na.rm=TRUE  )
-    x$tot    <- tot[match(x$vids, names(tot))] # map
-    x$freq   <- round(an(x$feffort_h) /  x$tot,4)
+    x$freq   <- round(an(x$freq_feffort) ,6)
 
     # save .dat files
     x$pt_graph <-  x$pt_graph - 1 ##!!! OFFSET FOR C++ !!!##
