@@ -20,17 +20,23 @@
    name_gis_file_for_total_abundance_per_polygon <- "totabundance_on_fgrounds_handmade_polygons"
    popids                     <- paste( 0:3, sep="")  # e.g. 3 stocks
    szgroups                   <-  0:13              # 14 size groups
-   selected_szgroups        <-  c(2,5,7,9)
+   selected_szgroups          <-  c(2,5,7,9)
+   name_gis_layer_field       <- "abundance"    # e.g. giving absolute abundance in polygon
+   is_gis_layer_field_relative_numbers          <- FALSE   # if relative categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
+   xfold_gis_layer_field      <- c(1, 1, 1, 1, 1)  # [not used if is_gis_layer_field_relative_numbers is FALSE] 
    }
    
    if(general$application=="adriatic"){
    general$namefolderinput    <- "adriatic"
-   general$igraph             <- 1002  # caution: should be consistent with existing pops already built upon a given graph
+   general$igraph             <- 1  # caution: should be consistent with existing pops already built upon a given graph
    do_append                  <- FALSE
    name_gis_file_for_total_abundance_per_polygon <- "adriatic_totabundance_on_fgrounds_handmade_polygons"
    popids                     <- paste(0:13, sep="")  # e.g. 13 stocks
    szgroups                   <-  0:13          # 14 size groups
-   selected_szgroups        <-  c(2,5,7,9)
+   selected_szgroups          <-  c(2,5,7,9)
+   name_gis_layer_field       <- "abundance"    # e.g. giving absolute abundance in polygon
+   is_gis_layer_field_relative_numbers          <- FALSE   # if relative categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
+   xfold_gis_layer_field      <- c(1, 1, 1, 1, 1)  # [not used if is_gis_layer_field_relative_numbers is FALSE] 
    }
    
    
@@ -62,6 +68,15 @@
    write("# name gis file for total abundance per polygon", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
    write(name_gis_file_for_total_abundance_per_polygon, file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
  
+   write("# name_gis_layer_field",file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
+   write(name_gis_layer_field, file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
+ 
+   write("# is_gis_layer_field_relative_numbers",file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
+   write(is_gis_layer_field_relative_numbers, file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
+ 
+   write("# xfold_gis_layer_field",file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
+   write(xfold_gis_layer_field, file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=length(xfold_gis_layer_field), append=TRUE)
+  
    write("# popids", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
    write(popids, file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=length(popids), append=TRUE)
    
@@ -82,23 +97,27 @@
 #-------------------------------------------------------------------------------
 
    
+   application           <- "adriatic" # ...or myfish etc.
    path <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis") # where is the config file?
-   dat  <- readLines(file.path(path, "pops_creator_args.dat"))
+   dat  <- readLines(file.path(path, application, "pops_creator_args.dat"))
    
    my_split <- function(x) unlist(strsplit(x, " "))
    
    general <- list()
-   general$main.path.param.gis   <- as.character(dat[3])
-   general$main.path.param       <- as.character(dat[5])
-   general$main.path.ibm         <- as.character(dat[7])                                      
-   general$namefolderinput       <- as.character(dat[9])  
-   general$igraph                <- as.numeric(dat[11])  
+   general$main.path.param.gis   <- as.character(dat[5])
+   general$main.path.param       <- as.character(dat[7])
+   general$main.path.ibm         <- as.character(dat[9])                                      
+   general$namefolderinput       <- as.character(dat[11])  
+   general$igraph                <- as.numeric(dat[13])  
                                   
-   do_append                     <- as.logical(dat[13])
-   name_gis_file_for_total_abundance_per_polygon <- dat[15]
-   popids                     <- as.character(my_split(dat[17]))
-   szgroups                   <- as.character(my_split(dat[19]))
-   selected_szgroups          <-  as.character(my_split(dat[21]))
+   do_append                     <- as.logical(dat[15])
+   name_gis_file_for_total_abundance_per_polygon <- dat[17]
+   name_gis_layer_field                        <- dat[19]
+   is_gis_layer_field_relative_numbers         <- dat[21]
+   xfold_gis_layer_field                        <- as.numeric(my_split(dat[23]))  
+   popids                     <- as.character(my_split(dat[25]))
+   szgroups                   <- as.character(my_split(dat[27]))
+   selected_szgroups          <-  as.character(my_split(dat[29]))
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
@@ -182,9 +201,35 @@
  library(rgdal)
  handmade_WGS84 <- spTransform(handmade2, CRS("+proj=longlat +datum=WGS84"))    # convert to longlat
 
- names(handmade_WGS84)  # "Id"         "abundance"  
+ names(handmade_WGS84)  # "ID"         name_gis_layer_field  
+ 
+ plot(handmade_WGS84,  add=TRUE, border=as.data.frame(handmade_WGS84)[,name_gis_layer_field])
 
- plot(handmade_WGS84,  add=TRUE, border=handmade_WGS84$abundance)
+
+ # test coord for polygon inclusion
+  coord <-  detectingCoordInPolygonsFromSH (handmade_WGS84, coord, name_column="poly_id")
+  points(coord[,1], coord[,2], col=as.numeric(coord[,"poly_id"])+1)  # check
+
+
+   handmade_WGS84_df <- as.data.frame(handmade_WGS84)
+
+ # caution:
+ handmade_WGS84_df$xfold         <- factor(handmade_WGS84_df[,name_gis_layer_field]) # init
+ levels(handmade_WGS84_df$xfold) <- xfold_gis_layer_field
+ handmade_WGS84_df$xfold         <-   as.character(handmade_WGS84_df$xfold)
+ handmade_WGS84_df               <- rbind.data.frame( c(ID=0, 0, min(xfold_gis_layer_field)/2), handmade_WGS84_df)   # add an ID 0 for not included coord points AND ASSUME SOME ACTIVITY IN IT
+ handmade_WGS84_df$xfold         <-   as.factor(handmade_WGS84_df$xfold)
+ 
+ # then merge to coord  (caution: 'poly' give the polygon in the harbour range; 'poly_id' give the polygon id from the handmade_WGS84 shape file) 
+ coord<- merge(coord, handmade_WGS84_df, by.x="poly_id", by.y="ID")
+
+ 
+ # check
+ plot(handmade_WGS84,  add=TRUE, border=as.data.frame(handmade_WGS84)[,name_gis_layer_field])
+ coord$color <-  factor(coord[,name_gis_layer_field]) #init   
+ levels(coord$color) <- 1:length(levels(coord$color))
+ points(coord[, "x"], coord[, "y"], col=  coord[,"color"])
+
 
 
  # create the fgrounds files for DISPLACE
@@ -199,23 +244,21 @@
  #....go to step 11 "Obtain the spatial distribution of the fish/shellfish population e.g. from surveys"
 
 
- # WORKFLOW 2 -
-
- # test coord for polygon inclusion
-  coord <-  detectingCoordInPolygonsFromSH (handmade_WGS84, coord, name_column="handmade")
-  points(coord[,1], coord[,2], col=coord[,"handmade"]+1)  # check
 
 # WORKFLOW 2 - SEMESTER-BASED----------- 
 # however, note that the seasonnality of the spatial and total effort application 
 # is not parameterize but is instead an emerging feature from the model.
+ library(doBy)
  avai <- NULL
  an <- function(x) as.numeric(as.character(x))
 for (a.semester in c("S1", "S2")){
 
     # dispatch the abundance among nodes by dividing 'abundance' per the number of included graph nodes
-    abundance_this_semester                   <- coord[coord [,"handmade"]!= 0,]
-    abundance_this_semester                   <- cbind.data.frame(abundance_this_semester, semester=a.semester, abundance=factor(abundance_this_semester [,"handmade"])) # init
-    levels(abundance_this_semester$abundance) <- handmade_WGS84$abundance  / table(abundance_this_semester$abundance)
+    abundance_this_semester                   <- coord[coord [,name_gis_layer_field]!= 0,]
+    abundance_this_semester                   <- cbind.data.frame(abundance_this_semester, semester=a.semester, 
+                                                  abundance= factor( an(abundance_this_semester [,name_gis_layer_field]) * an(abundance_this_semester [,"xfold"])    )) # init
+    abundance_this_semester$abundance         <- factor(abundance_this_semester$abundance)
+    levels(abundance_this_semester$abundance) <- an(levels(abundance_this_semester$abundance))  / table(abundance_this_semester$abundance)
     abundance_this_semester$abundance         <- an(abundance_this_semester$abundance) /sum(an(abundance_this_semester$abundance))
      #=> scale to 1 to obtain a avai per node
     
