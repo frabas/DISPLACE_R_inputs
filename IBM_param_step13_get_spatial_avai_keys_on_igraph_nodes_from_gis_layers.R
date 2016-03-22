@@ -28,10 +28,10 @@
    
    if(general$application=="adriatic"){
    general$namefolderinput    <- "adriatic"
-   general$igraph             <- 1  # caution: should be consistent with existing pops already built upon a given graph
+   general$igraph             <- 0  # caution: should be consistent with existing pops already built upon a given graph
    do_append                  <- FALSE
    name_gis_file_for_total_abundance_per_polygon <- "adriatic_totabundance_on_fgrounds_handmade_polygons"
-   popids                     <- paste(0:13, sep="")  # e.g. 13 stocks
+   popids                     <- paste(0:13, sep="")  # e.g. 14 stocks
    szgroups                   <-  0:13          # 14 size groups
    selected_szgroups          <-  c(2,5,7,9)
    name_gis_layer_field       <- "abundance"    # e.g. giving absolute abundance in polygon
@@ -305,9 +305,10 @@ for (a.semester in c("S1", "S2")){
     # save .dat files
     x$pt_graph <-  x$pt_graph - 1 ##!!! OFFSET FOR C++ !!!##
        popsspe_avai_semester          <- x[,c('pids','pt_graph', 'abundance')]
-       popsspe_avai_semester_this_pop <- x[x$szgroups %in% selected_szgroups, c('pids','pt_graph', 'abundance')]
+       popsspe_avai_semester_no_sz    <- popsspe_avai_semester[!duplicated(data.frame(popsspe_avai_semester$pids, popsspe_avai_semester$pt_graph)),]
        
        for(pid in unique(popsspe_avai_semester[,c('pids')])){
+         popsspe_avai_semester_this_pop <- x[x$pids==pid, c('pids','pt_graph', 'abundance')]
          write.table(popsspe_avai_semester_this_pop[,c('pt_graph', 'abundance')],  # the szgroup dim is implicit....
             file=file.path(general$main.path.param, "popsspe", "static_avai", 
               paste(pid, "spe_full_avai_szgroup_nodes_semester",gsub("Q","",a.semester),".dat",sep='')),
@@ -315,14 +316,30 @@ for (a.semester in c("S1", "S2")){
     
       }
        for(pid in unique(popsspe_avai_semester[,c('pids')])){
-         write.table(popsspe_avai_semester_this_pop[,c('pt_graph', 'abundance')],     # the szgroup dim is implicit....
+         popsspe_avai_semester_this_pop_these_sz <- x[x$pids==pid & x$szgroups %in% selected_szgroups, c('pids','pt_graph', 'abundance')]
+         write.table(popsspe_avai_semester_this_pop_these_sz[,c('pt_graph', 'abundance')],     # the szgroup dim is implicit....
             file=file.path(general$main.path.param, "popsspe", "static_avai",
               paste(pid, "spe_avai_szgroup_nodes_semester",gsub("Q","",a.semester),".dat",sep='')),
                   col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
     
       }
+      
+      
+      # stock presence/absence distribution
+      distrib <- popsspe_avai_semester_no_sz[,c('pids', 'pt_graph')]
+      distrib <- orderBy(~pids, data=distrib)
+      write.table(distrib,     # the szgroup dimension is removed....
+            file=file.path(general$main.path.param, "popsspe", "static_avai",
+              paste("lst_idx_nodes_per_pop_semester",gsub("Q","",a.semester),".dat",sep='')),
+                  col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
+
+      
    #-----------
 
 
 } 
  
+ 
+ 
+  ####-------
+  

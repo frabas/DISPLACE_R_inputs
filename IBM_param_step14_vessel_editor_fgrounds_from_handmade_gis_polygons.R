@@ -44,7 +44,7 @@
    general$namefolderinput    <- "adriatic"
    spp                        <- c("Engraulis encrasicolus", "Illex coindetii", "Parapenaeus longirostris", "Penaeus kerathurus", "Merlangius merlangus", "Eledone cirrosa", "Merluccius merluccius",
                                    "Pagellus erythrinus", "Squilla mantis", "Sardina pilchardus", "Nephrops norvegicus", "Sepia officinalis", "Solea solea", "Mullus barbatus")
-   general$igraph             <- 1  # caution: should be consistent with existing vessels already built upon a given graph
+   general$igraph             <- 0  # caution: should be consistent with existing vessels already built upon a given graph
    do_append                  <- FALSE
    #name_gis_file_for_fishing_effort_per_polygon <- "adriatic_toteffort_on_fgrounds_handmade_polygons"
    #name_gis_layer_field                         <- "feffort_h"                     # giving absolute effort in polygon
@@ -389,7 +389,7 @@ getPolyAroundACoord <- function(dat, a_dist_m){
 
  # test coord for polygon inclusion
   coord <-  detectingCoordInPolygonsFromSH (handmade_WGS84, coord, name_column="poly_id")
-  points(coord[,1], coord[,2], col=as.numeric(coord[,name_gis_layer_field])+1)  # check
+  points(coord[,1], coord[,2], col=as.numeric(coord["poly_id"])+1)  # check
 
 
  handmade_WGS84_df <- as.data.frame(handmade_WGS84)
@@ -438,6 +438,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
  for(vid in vesselids){
   fgrounds_allvessels <- rbind.data.frame(fgrounds_allvessels, cbind(fgrounds, vids=vid))
  }
+  fgrounds_allvessels        <- fgrounds_allvessels[fgrounds_allvessels$freq_feffort!=0,] # remove if 0
 
  # duplicate per metier id (i.e. assuming the same relative effort distribution per polygon for all the metierids)
  fgrounds_allvessels_allmet <- NULL
@@ -454,12 +455,12 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
  # vesselsspe_freq_harbours_quarter
 
   ####-------
- x <- fgrounds_allvessels_allmet
  an <- function(x) as.numeric(as.character(x))
  for (a.quarter in c("Q1","Q2","Q3","Q4")){
 
+    x        <- fgrounds_allvessels[ fgrounds_allvessels$quarter==a.quarter,]
     x$freq   <- round(an(x$freq_feffort) ,6)
-
+   
     # save .dat files
     x$pt_graph <-  x$pt_graph - 1 ##!!! OFFSET FOR C++ !!!##
         vesselsspe_fgrounds_quarter <- x[,c('vids','pt_graph')]
