@@ -77,7 +77,7 @@
    
     
    # create a config file
-   namefile <- file.path(general$main.path.param.gis, paste("vessels_creator_args_",general$namefolderinput, ".dat", sep=''))
+   namefile <- file.path(general$main.path.param.gis, paste("vessels_creator_args_",general$namefolderinput, "_set1.dat", sep=''))
    
    write("# config file for the vessel editor: adding some vessel(s)", file=namefile)
    write("# (the shortestPaths library will have to be re-created for the graph)", file=namefile, ncolumns=1, append=TRUE)
@@ -179,7 +179,7 @@
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
-  # create the fgrounds files for DISPLACE
+  # create the fgrounds files etc. for DISPLACE
  # TWO WORKFLOWS ON A VESSEL EDITOR:
  # 1 - create from a XY VMS-based data (e.g. all.merged)
  # 2 - create from a GIS shape layer with attributes 
@@ -188,12 +188,23 @@
  
  # WORKFLOW 1 -
 
- #....go to IBM_param_input_step7
+ #....look at the critical_path.png picture 
 
- # WORKFLOW 2  
+ 
+ 
+ # WORKFLOW 2 - a shortcut for creating vessels from a GIS layer giving the absolute or relative fishing effort, plus extra infos. 
    namefolderinput  <- "adriatic" # FOR EXAMPLE....
    path             <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", namefolderinput) # where is the config file?
-   namefile         <- paste("vessels_creator_args_",namefolderinput, ".dat", sep='')
+   
+   # create from different set of vessels, for example:
+   namefiles <- c(
+     paste("vessels_creator_args_",namefolderinput, "_set1.dat", sep=''),
+     paste("vessels_creator_args_",namefolderinput, "_set2.dat", sep='')  # vessels from set 2 are to be appended to the existing files (caution: put append at TRUE in the file), etc.
+   )
+  
+ for (namefile in namefiles){ # LOOP OVER CONFIG FILES
+  
+  
    dat              <- readLines(file.path(path, namefile))
    
    my_split <- function(x) unlist(strsplit(x, " "))
@@ -389,7 +400,7 @@ getPolyAroundACoord <- function(dat, a_dist_m){
 
  # test coord for polygon inclusion
   coord <-  detectingCoordInPolygonsFromSH (handmade_WGS84, coord, name_column="poly_id")
-  points(coord[,1], coord[,2], col=as.numeric(coord["poly_id"])+1)  # check
+  points(coord[,1], coord[,2], col=as.numeric(coord[,"poly_id"])+1)  # check
 
 
  handmade_WGS84_df <- as.data.frame(handmade_WGS84)
@@ -404,6 +415,8 @@ getPolyAroundACoord <- function(dat, a_dist_m){
  # then merge to coord  (caution: 'poly' give the polygon in the harbour range; 'poly_id' give the polygon id from the handmade_WGS84 shape file) 
  coord<- merge(coord, handmade_WGS84_df, by.x="poly_id", by.y="ID")
 
+ 
+ 
  
  # check
  plot(sp)
@@ -676,7 +689,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
        write.table(vesselsspe_percent_tacs_per_pop,
            file=file.path(general$main.path.param, "vesselsspe",
              paste("vesselsspe_percent_tacs_per_pop_semester",a.semester,".dat",sep='')),
-               col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, quote=FALSE, append=do_append, sep = " ")
+               col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")
    #-----------
    
    
@@ -723,6 +736,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
       
       share_of_fishing_credits[,2] <- share_of_fishing_credits[,2]  * (rep(step_in_share_credits, length(vesselids) ))/100
    
+      colnames(share_of_fishing_credits) <- colnames(existing)
       fishing_credits <- rbind.data.frame(existing, share_of_fishing_credits)
   
    } else{
@@ -736,10 +750,10 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
        write.table(fishing_credits,
            file=file.path(general$main.path.param, "vesselsspe",
              paste("initial_fishing_credits_per_vid.dat",sep='')),
-               col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, quote=FALSE, append=do_append, sep = " ")  
+               col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")  
 
 
-
+} # END LOOP OVER CONFIG FILES
 
 cat("Remenber that because some new fgrounds are created \n you will have (in DISPLACE GUI) to derive a new graph with a new shortestPath library (say 57 by loading the graph 56 and then create the shortestPaths) \n and also create a new baseline.dat /simusspe with the right missing port idx (say 9979) (absence of the right index for the port makes the ui crash)\n") 
 
