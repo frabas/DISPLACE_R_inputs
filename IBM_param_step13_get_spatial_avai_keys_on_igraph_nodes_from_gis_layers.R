@@ -19,7 +19,7 @@
    do_append                  <- FALSE
    name_gis_file_for_total_abundance_per_polygon <- "totabundance_on_fgrounds_handmade_polygons"
    popids                     <- paste( 0:3, sep="")  # e.g. 3 stocks
-   szgroups                   <-  0:13              # 14 size groups
+   szgroups                   <-  "0 1 2 3 4 5 6 7 8 9 10 11 12 13"              # 14 size groups
    selected_szgroups          <-  c(2,5,7,9)
    name_gis_layer_field       <- "abundance"    # e.g. giving absolute abundance in polygon
    is_gis_layer_field_relative_numbers          <- FALSE   # if relative categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
@@ -28,63 +28,65 @@
    
    if(general$application=="adriatic"){
    general$namefolderinput    <- "adriatic"
-   general$igraph             <- 0  # caution: should be consistent with existing pops already built upon a given graph
+   general$igraph             <- 1  # caution: should be consistent with existing pops already built upon a given graph
    do_append                  <- FALSE
-   name_gis_file_for_total_abundance_per_polygon <- "adriatic_totabundance_on_fgrounds_handmade_polygons"
-   popids                     <- paste(0:13, sep="")  # e.g. 14 stocks
-   szgroups                   <-  0:13          # 14 size groups
+   name_gis_file_for_total_abundance_per_polygon <- c("mulluscut_small", "mulluscut_medium", "mulluscut_large")
+   popids                     <- 0 # stock name
+   szgroups                   <-  "0 1 2 3 4_5 6 7 8 9_10 11 12 13"  # should correspond to some gis files      # 14 size groups
    selected_szgroups          <-  c(2,5,7,9)
-   name_gis_layer_field       <- "abundance"    # e.g. giving absolute abundance in polygon
+   name_gis_layer_field       <- "KG"    # e.g. giving occurences in polygon
    is_gis_layer_field_relative_numbers          <- FALSE   # if relative categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
    xfold_gis_layer_field      <- c(1, 1, 1, 1, 1)  # [not used if is_gis_layer_field_relative_numbers is FALSE] 
    }
    
    
     # create a config file
-   namefile <- file.path(general$main.path.param.gis, paste("pops_creator_args_",general$namefolderinput, ".dat", sep=''))
-  
-   write("# config file for the vessel editor: adding some vessel(s)", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"))
-   write("# (the shortestPaths library will have to be re-created for the graph)", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
-   write("# --------------", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
-  
-   write("# input folder for config file", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(general$main.path.param.gis, file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
-  
-   write("# output folder for parameterisation file", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(general$main.path.param, file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
-  
-   write("# input folder for DISPLACE", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(general$main.path.ibm, file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)  
-  
-   write("# name of the application", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(general$namefolderinput, file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)  
-  
-   write("# name of the graph for this application", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(general$igraph, file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)  
    
-   write("# append to existing pop files", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(do_append, file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
+   a_comment <- popids
+   namefile  <- file.path(general$main.path.param.gis, paste(a_comment, "pops_creator_args_", general$namefolderinput, ".dat", sep=''))
   
-   write("# name gis file for total abundance per polygon", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(name_gis_file_for_total_abundance_per_polygon, file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
- 
-   write("# name_gis_layer_field",file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(name_gis_layer_field, file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
- 
-   write("# is_gis_layer_field_relative_numbers",file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(is_gis_layer_field_relative_numbers, file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
- 
-   write("# xfold_gis_layer_field",file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(xfold_gis_layer_field, file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=length(xfold_gis_layer_field), append=TRUE)
+   write("# config file for the vessel editor: adding some vessel(s)", file=namefile)
+   write("# (the shortestPaths library will have to be re-created for the graph)", file=namefile, ncolumns=1, append=TRUE)
+   write("# --------------", file=namefile, ncolumns=1, append=TRUE)
   
-   write("# popids", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(popids, file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=length(popids), append=TRUE)
+   write("# input folder for config file", file=namefile, ncolumns=1, append=TRUE)
+   write(general$main.path.param.gis, file=namefile, ncolumns=1, append=TRUE)
+  
+   write("# output folder for parameterisation file", file=namefile, ncolumns=1, append=TRUE)
+   write(general$main.path.param, file=namefile, ncolumns=1, append=TRUE)
+  
+   write("# input folder for DISPLACE", file=namefile, ncolumns=1, append=TRUE)
+   write(general$main.path.ibm, file=namefile, ncolumns=1, append=TRUE)  
+  
+   write("# name of the application", file=namefile, ncolumns=1, append=TRUE)
+   write(general$namefolderinput, file=namefile, ncolumns=1, append=TRUE)  
+  
+   write("# name of the graph for this application", file=namefile, ncolumns=1, append=TRUE)
+   write(general$igraph, file=namefile, ncolumns=1, append=TRUE)  
    
-   write("# all size groups", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(szgroups, file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=length(szgroups), append=TRUE)
+   write("# append to existing pop files", file=namefile, ncolumns=1, append=TRUE)
+   write(do_append, file=namefile, ncolumns=1, append=TRUE)
+  
+   write("# name gis file for total abundance per polygon", file=namefile, ncolumns=length(name_gis_file_for_total_abundance_per_polygon), append=TRUE)
+   write(name_gis_file_for_total_abundance_per_polygon, file=namefile, ncolumns=length(name_gis_file_for_total_abundance_per_polygon), append=TRUE)
+ 
+   write("# name_gis_layer_field",file=namefile, ncolumns=1, append=TRUE)
+   write(name_gis_layer_field, file=namefile, ncolumns=1, append=TRUE)
+ 
+   write("# is_gis_layer_field_relative_numbers",file=namefile, ncolumns=1, append=TRUE)
+   write(is_gis_layer_field_relative_numbers, file=namefile, ncolumns=1, append=TRUE)
+ 
+   write("# xfold_gis_layer_field",file=namefile, ncolumns=1, append=TRUE)
+   write(xfold_gis_layer_field, file=namefile, ncolumns=length(xfold_gis_layer_field), append=TRUE)
+  
+   write("# popids", file=namefile, ncolumns=1, append=TRUE)
+   write(popids, file=namefile, ncolumns=length(popids), append=TRUE)
    
-   write("# selected size groups", file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=1, append=TRUE)
-   write(selected_szgroups, file=file.path(general$main.path.param.gis, "pops_creator_args.dat"), ncolumns=length(selected_szgroups), append=TRUE)
+   write("# all size groups", file=namefile, ncolumns=1, append=TRUE)
+   write(szgroups, file=namefile, ncolumns=length(szgroups), append=TRUE)
+   
+   write("# selected size groups", file=namefile, ncolumns=1, append=TRUE)
+   write(selected_szgroups, file=namefile, ncolumns=length(selected_szgroups), append=TRUE)
    
    }
 
@@ -98,10 +100,12 @@
 
    
    application           <- "adriatic" # ...or myfish etc.
+   popids                <- 0 # stock 0
    path <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis") # where is the config file?
-   dat  <- readLines(file.path(path, application, "pops_creator_args.dat"))
+   dat  <- readLines(file.path(path, application, paste(popids, "pops_creator_args_",application,".dat", sep="")))
    
    my_split <- function(x) unlist(strsplit(x, " "))
+   my_split2 <- function(x) unlist(strsplit(x, "_"))
    
    general <- list()
    general$main.path.param.gis   <- as.character(dat[5])
@@ -111,13 +115,23 @@
    general$igraph                <- as.numeric(dat[13])  
                                   
    do_append                     <- as.logical(dat[15])
-   name_gis_file_for_total_abundance_per_polygon <- dat[17]
+   name_gis_file_for_total_abundance_per_polygon <- my_split(dat[17])
    name_gis_layer_field                        <- dat[19]
    is_gis_layer_field_relative_numbers         <- dat[21]
    xfold_gis_layer_field                        <- as.numeric(my_split(dat[23]))  
    popids                     <- as.character(my_split(dat[25]))
-   szgroups                   <- as.character(my_split(dat[27]))
+   if(length(my_split2(dat[27]))>1){
+    szgroups                   <- sapply(my_split2(dat[27]), my_split) # return a list()
+   }else{
+    szgroups                   <- list(as.character(my_split(dat[27])))  # return a list()
+    }
    selected_szgroups          <-  as.character(my_split(dat[29]))
+
+   # quick check
+   if(length(name_gis_file_for_total_abundance_per_polygon) != length(szgroups)) stop("Need for same number of GIS layers and sets of size groups....")
+
+
+
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
@@ -155,6 +169,11 @@
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
+ avai_allszgroups <- NULL
+ for (ly in 1: length(name_gis_file_for_total_abundance_per_polygon)){
+
+
+
  # load the graph
   #load(file.path(general$main.path.igraph, paste(general$igraph, "_graphibm.RData",sep=''))) # built from the R code
   coord <- read.table(file=file.path(general$main.path.ibm, "graphsspe",
@@ -189,48 +208,56 @@
  # ...then go to the Editor toolbar >start editing and double click on a polygon to edit the 'abundance' value...save and stop editing
  # and voilà!
 
-
- library(maptools)
- handmade            <- readShapePoly(file.path(general$main.path.param.gis, name_gis_file_for_total_abundance_per_polygon))  # build in ArcGIS 10.1
- library(rgdal)
- handmade2           <- readOGR(file.path(general$main.path.param.gis), name_gis_file_for_total_abundance_per_polygon) #  Projection info in a .prj associated with the shp should be imported automagically.
-
- # How can I get the proj4 string from a shapefile .prj file? http://gis.stackexchange.com/questions/55196/how-can-i-get-the-proj4-string-or-epsg-code-from-a-shapefile-prj-file
-
- library(sp)
- library(rgdal)
- handmade_WGS84 <- spTransform(handmade2, CRS("+proj=longlat +datum=WGS84"))    # convert to longlat
-
- names(handmade_WGS84)  # "ID"         name_gis_layer_field  
+    
+    library(maptools)
+    handmade            <- readShapePoly(file.path(general$main.path.param.gis, "POPULATIONS", name_gis_file_for_total_abundance_per_polygon[ly] ) , proj4string=CRS("+proj=longlat +datum=WGS84"))  # build in ArcGIS 10.1
+    
+    if(FALSE){ # in case not latlong but projected data instead.....
+    library(rgdal)
+    handmade2           <- readOGR(file.path(general$main.path.param.gis, "POPULATIONS", name_gis_file_for_total_abundance_per_polygon[ly] )) #  Projection info in a .prj associated with the shp should be imported automagically.
+   # How can I get the proj4 string from a shapefile .prj file? http://gis.stackexchange.com/questions/55196/how-can-i-get-the-proj4-string-or-epsg-code-from-a-shapefile-prj-file
+    library(sp)
+    library(rgdal)
+    handmade_WGS84 <- spTransform(handmade2, CRS("+proj=longlat +datum=WGS84"))    # convert to longlat
+    }
+    
+    names(handmade_WGS84)  # "ID"         name_gis_layer_field  
  
- plot(handmade_WGS84,  add=TRUE, border=as.data.frame(handmade_WGS84)[,name_gis_layer_field])
+    plot(handmade_WGS84,  add=TRUE, border=as.data.frame(handmade_WGS84)[,name_gis_layer_field])
 
 
- # test coord for polygon inclusion
-  coord <-  detectingCoordInPolygonsFromSH (handmade_WGS84, coord, name_column="poly_id")
-  points(coord[,1], coord[,2], col=as.numeric(coord[,"poly_id"])+1)  # check
+    # test coord for polygon inclusion
+    coord <-  detectingCoordInPolygonsFromSH (handmade_WGS84, coord, name_column="poly_id")
+    points(coord[,1], coord[,2], col=as.numeric(coord[,"poly_id"])+1)  # check
 
 
-   handmade_WGS84_df <- as.data.frame(handmade_WGS84)
+    handmade_WGS84_df <- as.data.frame(handmade_WGS84)
 
- # caution:
- handmade_WGS84_df$xfold         <- factor(handmade_WGS84_df[,name_gis_layer_field]) # init
- levels(handmade_WGS84_df$xfold) <- xfold_gis_layer_field
- handmade_WGS84_df$xfold         <-   as.character(handmade_WGS84_df$xfold)
- handmade_WGS84_df               <- rbind.data.frame( c(ID=0, 0, min(xfold_gis_layer_field)/2), handmade_WGS84_df)   # add an ID 0 for not included coord points AND ASSUME SOME ACTIVITY IN IT
- handmade_WGS84_df$xfold         <-   as.factor(handmade_WGS84_df$xfold)
+    # caution:
+    handmade_WGS84_df$xfold         <- factor(handmade_WGS84_df[,name_gis_layer_field]) # init
+    levels(handmade_WGS84_df$xfold) <- xfold_gis_layer_field
+   # handmade_WGS84_df$xfold         <-   as.character(handmade_WGS84_df$xfold)
+   # handmade_WGS84_df               <- rbind.data.frame( c(ID=0, 0, min(xfold_gis_layer_field)/2), handmade_WGS84_df)   # add an ID 0 for not included coord points AND ASSUME SOME ACTIVITY IN IT
+   # handmade_WGS84_df$xfold         <-   as.factor(handmade_WGS84_df$xfold)
  
- # then merge to coord  (caution: 'poly' give the polygon in the harbour range; 'poly_id' give the polygon id from the handmade_WGS84 shape file) 
- coord<- merge(coord, handmade_WGS84_df, by.x="poly_id", by.y="ID")
+    # then merge to coord  (caution: 'poly' give the polygon in the harbour range; 'poly_id' give the polygon id from the handmade_WGS84 shape file) 
+    coord<- merge(coord, handmade_WGS84_df, by.x="poly_id", by.y="ID")
 
  
- # check
- plot(handmade_WGS84,  add=TRUE, border=as.data.frame(handmade_WGS84)[,name_gis_layer_field])
- coord$color <-  factor(coord[,name_gis_layer_field]) #init   
- levels(coord$color) <- 1:length(levels(coord$color))
- points(coord[, "x"], coord[, "y"], col=  coord[,"color"])
+    # check
+    plot(handmade_WGS84,  add=TRUE, border=as.data.frame(handmade_WGS84)[,name_gis_layer_field])
+    coord$color <-  factor(coord[,name_gis_layer_field]) #init   
+    levels(coord$color) <- 1:length(levels(coord$color))
+    points(coord[, "x"], coord[, "y"], col=  coord[,"color"])
 
 
+    # small fix for adriatic wchich provide facotr instead of numeric....
+    if(general$namefolderinput=="adriatic"){
+        levels(coord[,name_gis_layer_field]) <- c(0, 5, 25, 250, 75)
+        coord[,name_gis_layer_field]         <- as.numeric(as.character(coord[,name_gis_layer_field]))
+    }
+    
+ 
 
  # create the fgrounds files for DISPLACE
  # TWO WORKFLOWS ON A POPULATION EDITOR:
@@ -267,8 +294,7 @@ for (a.semester in c("S1", "S2")){
  }
  
  # duplicate per size group (i.e. assuming the same parameterisation for all the pops)
- avai_allszgroups <- NULL
- for(sid in szgroups){
+ for(sid in szgroups[[ly]]){
   avai_allszgroups <- rbind.data.frame(avai_allszgroups, cbind(avai, szgroups=sid))
  }
 
@@ -279,6 +305,14 @@ for (a.semester in c("S1", "S2")){
  }
 
  
+
+
+ } # end loop over sets of size group
+
+
+
+
+
 
  # create the c++ input files  (CAUTION if also active Workflow 1 then need to append to the existing files...)
  # i.e.
