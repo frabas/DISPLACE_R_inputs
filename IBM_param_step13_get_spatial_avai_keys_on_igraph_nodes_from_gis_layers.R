@@ -26,20 +26,58 @@
    xfold_gis_layer_field      <- c(1, 1, 1, 1, 1)  # [not used if is_gis_layer_field_relative_numbers is FALSE] 
    }
    
-   if(general$application=="adriatic"){
+   if(general$application=="adriatic" && hake){
    general$namefolderinput    <- "adriatic"
    general$igraph             <- 1  # caution: should be consistent with existing pops already built upon a given graph
    do_append                  <- FALSE
-   name_gis_file_for_total_abundance_per_polygon <- c("mulluscut_small", "mulluscut_medium", "mulluscut_large")
-   popids                     <- 0 # stock name
-   szgroups                   <-  "0 1 2 3 4_5 6 7 8 9_10 11 12 13"  # should correspond to some gis files      # 14 size groups
+   name_gis_file_for_total_abundance_per_polygon <- c("hake/hake_small", "hake/hake_medium", "hake/hake_large")   # Solea solea in 3 size categories
+   popids                     <- 0 # stock name 0:Hake, 1:Sole, 2: Mullet, 3: Mantis
+   szgroups                   <-  "0 1 2 3 4 5 6_7 8 9 10_11 12 13"  # for 0:Hake, 1:Sole,  # should correspond to some gis files      # 14 size groups
    selected_szgroups          <-  c(2,5,7,9)
-   name_gis_layer_field       <- "KG"    # e.g. giving occurences in polygon
+   name_gis_layer_field       <- "KG_KM2"    # e.g. giving occurences in polygon
+   is_gis_layer_field_relative_numbers          <- FALSE   # if relative categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
+   xfold_gis_layer_field      <- c(1, 1, 1, 1, 1)  # [not used if is_gis_layer_field_relative_numbers is FALSE] 
+   }
+
+   if(general$application=="adriatic" && sole){
+   general$namefolderinput    <- "adriatic"
+   general$igraph             <- 1  # caution: should be consistent with existing pops already built upon a given graph
+   do_append                  <- TRUE
+   name_gis_file_for_total_abundance_per_polygon <- c("sole/Sole_small", "sole/Sole_medium", "sole/Sole_large")   # Solea solea in 3 size categories
+   popids                     <- 1 # stock name 0:Hake, 1:Sole, 2: Mullet, 3: Mantis
+   szgroups                   <-  "0 1 2 3 4 5 6_7 8 9 10_11 12 13"  # for 0:Hake, 1:Sole,  # should correspond to some gis files      # 14 size groups
+   selected_szgroups          <-  c(2,5,7,9)
+   name_gis_layer_field       <- "KG_KM2"    # e.g. giving occurences in polygon
    is_gis_layer_field_relative_numbers          <- FALSE   # if relative categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
    xfold_gis_layer_field      <- c(1, 1, 1, 1, 1)  # [not used if is_gis_layer_field_relative_numbers is FALSE] 
    }
    
+   if(general$application=="adriatic" && redmullet){
+   general$namefolderinput    <- "adriatic"
+   general$igraph             <- 1  # caution: should be consistent with existing pops already built upon a given graph
+   do_append                  <- TRUE
+   name_gis_file_for_total_abundance_per_polygon <- c("redmullet/mullet_small", "redmullet/mullet_medium", "redmullet/mullet_large")   # Solea solea in 3 size categories
+   popids                     <- 2 # stock name 0:Hake, 1:Sole, 2: Mullet, 3: Mantis
+   szgroups                   <-  "0 1 2 3_4 5_6 7 8 9 10 11 12 13"  # for 0:Hake, 1:Sole,  # should correspond to some gis files      # 14 size groups
+   selected_szgroups          <-  c(2,5,7,9)
+   name_gis_layer_field       <- "KG_KM2"    # e.g. giving occurences in polygon
+   is_gis_layer_field_relative_numbers          <- FALSE   # if relative categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
+   xfold_gis_layer_field      <- c(1, 1, 1, 1, 1)  # [not used if is_gis_layer_field_relative_numbers is FALSE] 
+   }
    
+   if(general$application=="adriatic" && spottailmantisshrimp){
+   general$namefolderinput    <- "adriatic"
+   general$igraph             <- 1  # caution: should be consistent with existing pops already built upon a given graph
+   do_append                  <- TRUE
+   name_gis_file_for_total_abundance_per_polygon <- c("spottailmantisshrimp/spottailmantis_small", "spottailmantisshrimp/spottailmantis_medium", "spottailmantisshrimp/spottailmantis_large")   # Solea solea in 3 size categories
+   popids                     <- 3 # stock name 0:Hake, 1:Sole, 2: Mullet, 3: Mantis
+   szgroups                   <-  "0 1 2 3 4 5 6 7 8_9 10 11_12 13"  # for 0:Hake, 1:Sole,  # should correspond to some gis files      # 14 size groups
+   selected_szgroups          <-  c(2,5,7,9)
+   name_gis_layer_field       <- "KG_KM2"    # e.g. giving occurences in polygon
+   is_gis_layer_field_relative_numbers          <- FALSE   # if relative categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
+   xfold_gis_layer_field      <- c(1, 1, 1, 1, 1)  # [not used if is_gis_layer_field_relative_numbers is FALSE] 
+   }
+ 
     # create a config file
    
    a_comment <- popids
@@ -100,7 +138,11 @@
 
    
    application           <- "adriatic" # ...or myfish etc.
-   popids                <- 0 # stock 0
+   #!#¤!#!#!#!#
+   #!#¤!#!#!#!#
+   popids                <- 3 # stock 0 to 3
+   #!#¤!#!#!#!#
+   #!#¤!#!#!#!#
    path <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis") # where is the config file?
    dat  <- readLines(file.path(path, application, paste(popids, "pops_creator_args_",application,".dat", sep="")))
    
@@ -139,10 +181,15 @@
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
  # loop over the SpatialPoly
+
+ # loop over the SpatialPoly
  detectingCoordInPolygonsFromSH <- function (sh, coord, name_column="poly"){
 
      coord <- eval(parse(text=paste("cbind(coord, ",name_column,"= 0)", sep='')))
      dd                   <- sapply(slot(sh, "polygons"), function(x) lapply(slot(x, "Polygons"), function(x) x@coords)) # tricky there...
+     
+     ids <- sapply(slot(sh, "polygons"),  function (x) x@ID)
+     
      library(sp)
      for(iLand in 1:length(dd)){
       if(length(dd)>1){
@@ -151,12 +198,12 @@
           # Points on land are 1 or 2 and not is 0
           er <- try({res   <- point.in.polygon(coord[,1],coord[,2],dd[[iLand]][[i]][,1],dd[[iLand]][[i]][,2])}, silent=TRUE)
           if(class(er)=="try-error") res   <- point.in.polygon(coord[,1],coord[,2],dd[[iLand]][,1],dd[[iLand]][,2])
-          coord[which(res!=0), name_column] <- iLand
+          coord[which(res!=0), name_column] <- ids[iLand]
        }
       } else{
           er <- try({res   <- point.in.polygon(coord[,1],coord[,2],dd[[1]][,1],dd[[1]][,2])}, silent=TRUE)
           if(class(er)=="try-error") res   <- point.in.polygon(coord[,1],coord[,2],dd[[1]][,1],dd[[1]][,2])
-          coord[which(res!=0), name_column] <- iLand
+          coord[which(res!=0), name_column] <- ids[iLand]
 
       }
 
@@ -210,7 +257,7 @@
 
     
     library(maptools)
-    handmade            <- readShapePoly(file.path(general$main.path.param.gis, "POPULATIONS", name_gis_file_for_total_abundance_per_polygon[ly] ) , proj4string=CRS("+proj=longlat +datum=WGS84"))  # build in ArcGIS 10.1
+    handmade_WGS84            <- readShapePoly(file.path(general$main.path.param.gis, "POPULATIONS", name_gis_file_for_total_abundance_per_polygon[ly] ) , proj4string=CRS("+proj=longlat +datum=WGS84"))  # build in ArcGIS 10.1
     
     if(FALSE){ # in case not latlong but projected data instead.....
     library(rgdal)
@@ -232,7 +279,11 @@
 
 
     handmade_WGS84_df <- as.data.frame(handmade_WGS84)
-
+    
+    # debug...
+    handmade_WGS84_df$ID <- as.character(handmade_WGS84_df$ID)
+    handmade_WGS84_df$ID <- 1:length(handmade_WGS84_df$ID)
+    
     # caution:
     handmade_WGS84_df$xfold         <- factor(handmade_WGS84_df[,name_gis_layer_field]) # init
     levels(handmade_WGS84_df$xfold) <- xfold_gis_layer_field
@@ -245,17 +296,21 @@
 
  
     # check
-    plot(handmade_WGS84,  add=TRUE, border=as.data.frame(handmade_WGS84)[,name_gis_layer_field])
+    plot(handmade_WGS84,  add=FALSE, border=as.data.frame(handmade_WGS84)[,name_gis_layer_field])
     coord$color <-  factor(coord[,name_gis_layer_field]) #init   
     levels(coord$color) <- 1:length(levels(coord$color))
-    points(coord[, "x"], coord[, "y"], col=  coord[,"color"])
+    points(as.numeric(as.character(coord[, "x"])), as.numeric(as.character(coord[, "y"])), col=  as.numeric(coord[,"color"]))
 
 
-    # small fix for adriatic wchich provide facotr instead of numeric....
-    if(general$namefolderinput=="adriatic"){
-        levels(coord[,name_gis_layer_field]) <- c(0, 5, 25, 250, 75)
-        coord[,name_gis_layer_field]         <- as.numeric(as.character(coord[,name_gis_layer_field]))
-    }
+  ## small fix for adriatic wchich provide facotr instead of numeric....
+  #  if(general$namefolderinput=="adriatic" & popids==0){ # hake
+  #      levels(coord[,name_gis_layer_field]) <- c(0, 5, 12.5, 37.5, 75)
+  #      coord[,name_gis_layer_field]         <- as.numeric(as.character(coord[,name_gis_layer_field]))
+  #  }
+  #  if(general$namefolderinput=="adriatic" & popids==1){ # sole
+  #      levels(coord[,name_gis_layer_field]) <- c(0, 15, 45, 80, 100)
+  #      coord[,name_gis_layer_field]         <- as.numeric(as.character(coord[,name_gis_layer_field]))
+  #  }
     
  
 
@@ -298,11 +353,6 @@ for (a.semester in c("S1", "S2")){
   avai_allszgroups <- rbind.data.frame(avai_allszgroups, cbind(avai, szgroups=sid))
  }
 
-# duplicate per pop id  (i.e. assuming the same parameterisation for all the pops)
- avai_allszgroups_allpops <- NULL
- for(pid in popids){
-  avai_allszgroups_allpops <- rbind.data.frame(avai_allszgroups_allpops, cbind(avai_allszgroups, pids=pid))
- }
 
  
 
@@ -310,7 +360,20 @@ for (a.semester in c("S1", "S2")){
  } # end loop over sets of size group
 
 
+ 
+ # caution: fill in the gap
+  all_combi <- expand.grid(pt_graph=unique(avai_allszgroups$pt_graph), szgroups=0:13, semester=c("S1", "S2"))
+  avai_allszgroups <- merge(avai_allszgroups,  all_combi, all=TRUE)
+  avai_allszgroups$abundance <- replace(avai_allszgroups$abundance, is.na (avai_allszgroups$abundance), 0.00000001)                                                                       
 
+
+
+
+  # duplicate per pop id  (i.e. assuming the same parameterisation for all the pops)
+ avai_allszgroups_allpops <- NULL
+ for(pid in popids){
+  avai_allszgroups_allpops <- rbind.data.frame(avai_allszgroups_allpops, cbind(avai_allszgroups, pids=pid))
+ }
 
 
 
@@ -323,13 +386,13 @@ for (a.semester in c("S1", "S2")){
  
   ####-------
  an <- function(x) as.numeric(as.character(x))
+ options(scipen=999)
  for (a.semester in c("1", "2")){
 
     #-----------
     x        <- avai_allszgroups_allpops[avai_allszgroups_allpops$semester==paste("S",a.semester, sep=''),]
     x$popids   <- factor( x$pids )
     
-    x<- orderBy(~pt_graph, data=x)
     
     x$abundance <- round(x$abundance, 8)
     
@@ -337,7 +400,9 @@ for (a.semester in c("S1", "S2")){
     tapply(an(x$abundance), list(x$pids, x$szgroups), sum, na.rm=TRUE  ) # should be full of 1
   
     # save .dat files
-    x$pt_graph <-  x$pt_graph - 1 ##!!! OFFSET FOR C++ !!!##
+    x$pt_graph <-  as.numeric(as.character(x$pt_graph)) - 1 ##!!! OFFSET FOR C++ !!!##
+    x<- orderBy(~pt_graph, data=x)
+   
        popsspe_avai_semester          <- x[,c('pids','pt_graph', 'abundance')]
        popsspe_avai_semester_no_sz    <- popsspe_avai_semester[!duplicated(data.frame(popsspe_avai_semester$pids, popsspe_avai_semester$pt_graph)),]
        
@@ -346,7 +411,7 @@ for (a.semester in c("S1", "S2")){
          write.table(popsspe_avai_semester_this_pop[,c('pt_graph', 'abundance')],  # the szgroup dim is implicit....
             file=file.path(general$main.path.param, "popsspe", "static_avai", 
               paste(pid, "spe_full_avai_szgroup_nodes_semester",gsub("Q","",a.semester),".dat",sep='')),
-                  col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
+                  col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
     
       }
        for(pid in unique(popsspe_avai_semester[,c('pids')])){
@@ -354,7 +419,7 @@ for (a.semester in c("S1", "S2")){
          write.table(popsspe_avai_semester_this_pop_these_sz[,c('pt_graph', 'abundance')],     # the szgroup dim is implicit....
             file=file.path(general$main.path.param, "popsspe", "static_avai",
               paste(pid, "spe_avai_szgroup_nodes_semester",gsub("Q","",a.semester),".dat",sep='')),
-                  col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
+                  col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
     
       }
       

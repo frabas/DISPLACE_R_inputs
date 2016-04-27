@@ -38,46 +38,91 @@
    create_file_for_fuel_price_per_vessel_size <- TRUE
    some_fuel_price_per_vessel_size <- c(0.54430,0.5398,0.5149,0.4897,0.4859)
    step_in_share_credits      <- 20 # i.e. 20 % of the credits will be booked for these new vessels
+   
+   # create a config file
+   namefile <- file.path(general$main.path.param.gis, paste("vessels_creator_args_",general$namefolderinput, "_myfish_trawlers.dat", sep=''))
    }
    
-   if(general$application=="adriatic") {
+   if(general$application=="adriatic" & trawl) {
    general$namefolderinput    <- "adriatic"
-   spp                        <- c("Engraulis encrasicolus", "Illex coindetii", "Parapenaeus longirostris", "Penaeus kerathurus", "Merlangius merlangus", "Eledone cirrosa", "Merluccius merluccius",
-                                   "Pagellus erythrinus", "Squilla mantis", "Sardina pilchardus", "Nephrops norvegicus", "Sepia officinalis", "Solea solea", "Mullus barbatus")
-   general$igraph             <- 0  # caution: should be consistent with existing vessels already built upon a given graph
+   #spp                        <- c("Engraulis encrasicolus", "Illex coindetii", "Parapenaeus longirostris", "Penaeus kerathurus", "Merlangius merlangus", "Eledone cirrosa", "Merluccius merluccius",
+   #                                "Pagellus erythrinus", "Squilla mantis", "Sardina pilchardus", "Nephrops norvegicus", "Sepia officinalis", "Solea solea", "Mullus barbatus")
+   spp                        <- c("Merluccius merluccius", "Solea solea", "Mullus barbatus", "Squilla mantis")
+   general$igraph             <- 1  # caution: should be consistent with existing vessels already built upon a given graph
    do_append                  <- FALSE
    #name_gis_file_for_fishing_effort_per_polygon <- "adriatic_toteffort_on_fgrounds_handmade_polygons"
    #name_gis_layer_field                         <- "feffort_h"                     # giving absolute effort in polygon
    #is_gis_layer_field_relative_numbers          <- FALSE                           # if relative effort categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
    #xfold_gis_layer_field      <- c(1, 1, 1, 1, 1)  # [not used if is_gis_layer_field_relative_numbers is FALSE] 
-   name_gis_file_for_fishing_effort_per_polygon <- "ssc12241"
-   name_gis_layer_field                         <- "GRIDCODE"                     # giving releative effort ditribtion e.g. in 5 categories: 1 to 5 with 1 high occurence
+   name_gis_file_for_fishing_effort_per_polygon <- "GSA 17_18_grid_5km_sel" 
+   name_gis_layer_field                         <- "OTB12" # PTM_12 OTB_13 PTM_13                                     # giving releative effort ditribtion from continuous scale
    is_gis_layer_field_relative_numbers          <- TRUE                           # if relative effort categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
-   xfold_gis_layer_field      <- c(10000, 1000, 100, 10, 1)     # giving relative importance of the 5 categories e.g. visting an area of cat 1 is 10000 times more probable than for cat 5
-   vesselids                  <- paste("ITA0000", 1:10, sep="") # caution: three first letters give the nationality and should be consistent with  popsspe/XXctrysspe_relative_stability_semesterXX
-   vessel_range_km            <- 75
-   metierids                  <- 2:3  # look at /metiersspe
-   metierids_frequencies      <- c(0.33,0.66)
-   visited_ports              <- c("ANCONA", "RIMINI")   # should exist in harbour.dat!
+   xfold_gis_layer_field                        <- 1     # giving relative importance of the 5 categories e.g. visting an area of cat 1 is 10000 times more probable than for cat 5
+   #name_gis_file_for_fishing_effort_per_polygon <-  "ssc0121"
+   #name_gis_layer_field                         <- "GRIDCODE"                     # giving releative effort ditribtion e.g. in 5 categories: 1 to 5 with 1 high occurence
+   #is_gis_layer_field_relative_numbers          <- TRUE                           # if relative effort categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
+   #xfold_gis_layer_field      <- c(10000, 1000, 100, 10, 1)     # giving relative importance of the 5 categories e.g. visting an area of cat 1 is 10000 times more probable than for cat 5
+   vesselids                  <- paste("ITA_ANCONA_TRAWLER", 1:200, sep="") # caution: three first letters give the nationality and should be consistent with  popsspe/XXctrysspe_relative_stability_semesterXX
+   vessel_range_km            <- 60  # trawlers
+   #vessel_range_km            <- 15 # netters
+   metierids                  <- 0             # e.g. c(0,1) # look at /metiersspe.... 0:trawler; 1 gillnetter
+   metierids_frequencies      <- c(1)          # e.g. c(0.2,0.8)
+   visited_ports              <- c("ANCONA")   # e.g. c("ANCONA", "RIMINI") # should exist in harbour.dat!
    name_file_ports            <- "harbours_adriatic.dat" 
-   visited_ports_frequencies  <- c(0.8,0.2)
+   visited_ports_frequencies  <- c(1)          # e.g. c(0.8, 0.2)
    nb_stocks                  <- length(spp)  # from 0 in c++
-   fixed_cpue_per_stock       <- rep(100, nb_stocks)
-   gshape_cpue_per_stock      <- rep(100, nb_stocks)   # for Gamma on each node
-   gscale_cpue_per_stock      <- rep(2, nb_stocks)     # for Gamma on each node
-   vessel_features            <- c(15.47,34.42,15,129,23662,4095,7,0.4485,336.7618,18,1,1.1,1.1,0.2) # vessels will be all the same
+   fixed_cpue_per_stock       <- c(3.62, 9.79, 6.91, 3.13) # kg per hour
+   gshape_cpue_per_stock      <- rep(1, nb_stocks)   # for Gamma on each node
+   gscale_cpue_per_stock      <- c(3.62, 9.79, 6.91, 3.13)    # for Gamma on each node
+   vessel_features            <- c(10, 70 ,22.5, 580, 1500, 25000, 10, 0.4485, 336.7618, 20, 1, 0.9, 1, 0.15) # TRAWLERS vessels will be all the same   c( 'speed', 'fuelconsrate', 'length', 'KW', 'carrying_capacity_model_nls', 'tank_capacity_model_nls', 'nb_pings_per_trip', 'shape', 'scale', 'av.trip.duration','mult_fuelcons_when_steaming', 'mult_fuelcons_when_fishing','mult_fuelcons_when_returning','mult_fuelcons_when_inactive')
+  # vessel_features            <- c(18, 30, 7, 150, 200, 400, 10, 0.4485,336.7618, 8, 1, 0.1,1.1, 0.15) # # NETTERS  vessels will be all the same   c( 'speed', 'fuelconsrate', 'length', 'KW', 'carrying_capacity_model_nls', 'tank_capacity_model_nls', 'nb_pings_per_trip', 'shape', 'scale', 'av.trip.duration','mult_fuelcons_when_steaming', 'mult_fuelcons_when_fishing','mult_fuelcons_when_returning','mult_fuelcons_when_inactive')
    step_in_share              <- rep(100, nb_stocks) # i.e. 100 % of each TAC per stock will be booked for these new vessels
-   vesselsspe_betas           <- rnorm(nb_stocks, 3, 5) # i.e. vessel effect in the catch rate equation 
+   #vesselsspe_betas           <- rep(4.60517, nb_stocks) # i.e. vessel effect in the catch rate equation. if data-poor then inform with ln(average kg per hour) because note that if metier and pop effect at 0 then exp(ln(average kg per hour)) will give a catch rate in kg per hour in DISPLACE do_catch()    -> ln(4.60517) = 100 kg per hour assuming no metier neither pop effect
+   # TRAWLERS
+   vesselsspe_betas           <- c(log(3.62), log(9.79), log(6.91), log(3.13)) # catch rate log(kg per hour) from the Marche region # stock name 0:Hake, 1:Sole, 2: Mullet, 3: Mantis
+   # GILLNETTERS
+   #vesselsspe_betas           <- c(log(0), log(0.74), log(0.01), log(0.34)) # catch rate log(kg per hour) from the Marche region # stock name 0:Hake, 1:Sole, 2: Mullet, 3: Mantis
    create_file_for_fuel_price_per_vessel_size <- TRUE
    some_fuel_price_per_vessel_size <- c(0.54430,0.5398,0.5149,0.4897,0.4859)
    step_in_share_credits      <- 100 # i.e. 100 % of the credits will be booked for these new vessels
+
+   # create a config file
+   namefile <- file.path(general$main.path.param.gis, paste("vessels_creator_args_",general$namefolderinput, "_ancona_trawlers.dat", sep=''))
    }
    
    
-   
-    
+  if(general$application=="adriatic" & net_setters) {
+   general$namefolderinput    <- "adriatic"
+   spp                        <- c("Merluccius merluccius", "Solea solea", "Mullus barbatus", "Squilla mantis")
+   general$igraph             <- 1  # caution: should be consistent with existing vessels already built upon a given graph
+   do_append                  <- TRUE
+   name_gis_file_for_fishing_effort_per_polygon <-  "ssc0121"
+   name_gis_layer_field                         <- "GRIDCODE"                     # giving releative effort ditribtion e.g. in 5 categories: 1 to 5 with 1 high occurence
+   is_gis_layer_field_relative_numbers          <- TRUE                           # if relative effort categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
+   xfold_gis_layer_field      <- c(10000, 1000, 100, 10, 1)     # giving relative importance of the 5 categories e.g. visting an area of cat 1 is 10000 times more probable than for cat 5
+   vesselids                  <- paste("ITA_ANCONA_NETTER", 1:200, sep="") # caution: three first letters give the nationality and should be consistent with  popsspe/XXctrysspe_relative_stability_semesterXX
+   vessel_range_km            <- 15 # netters
+   metierids                  <- 0             # e.g. c(0,1) # look at /metiersspe.... 0:trawler; 1 gillnetter
+   metierids_frequencies      <- c(1)          # e.g. c(0.2,0.8)
+   visited_ports              <- c("ANCONA")   # e.g. c("ANCONA", "RIMINI") # should exist in harbour.dat!
+   name_file_ports            <- "harbours_adriatic.dat" 
+   visited_ports_frequencies  <- c(1)          # e.g. c(0.8, 0.2)
+   nb_stocks                  <- length(spp)  # from 0 in c++
+   fixed_cpue_per_stock       <- c(0, 0.74, 0.01, 0.34) # kg per hour 
+   gshape_cpue_per_stock      <- rep(1, nb_stocks)     # for Gamma on each node
+   gscale_cpue_per_stock      <- c(0, 0.74, 0.01, 0.34)   # for Gamma on each node e.g. hist(rgamma(1000,shape=0.74,scale=1))
+   vessel_features            <- c(18, 30, 7, 150, 200, 400, 10, 0.4485,336.7618, 8, 1, 0.1,1.1, 0.15) # # NETTERS  vessels will be all the same   c( 'speed', 'fuelconsrate', 'length', 'KW', 'carrying_capacity_model_nls', 'tank_capacity_model_nls', 'nb_pings_per_trip', 'shape', 'scale', 'av.trip.duration','mult_fuelcons_when_steaming', 'mult_fuelcons_when_fishing','mult_fuelcons_when_returning','mult_fuelcons_when_inactive')
+   step_in_share              <- rep(100, nb_stocks) # i.e. 100 % of each TAC per stock will be booked for these new vessels
+   vesselsspe_betas           <- c(log(0.01), log(0.74), log(0.01), log(0.34)) # catch rate log(kg per hour) from the Marche region # stock name 0:Hake, 1:Sole, 2: Mullet, 3: Mantis  CAUTION: log(0)=-Inf !
+   create_file_for_fuel_price_per_vessel_size <- TRUE
+   some_fuel_price_per_vessel_size <- c(0.54430,0.5398,0.5149,0.4897,0.4859)
+   step_in_share_credits      <- 100 # i.e. 100 % of the credits will be booked for these new vessels
+
    # create a config file
-   namefile <- file.path(general$main.path.param.gis, paste("vessels_creator_args_",general$namefolderinput, "_set1.dat", sep=''))
+   namefile <- file.path(general$main.path.param.gis, paste("vessels_creator_args_",general$namefolderinput, "_ancona_netters.dat", sep=''))
+   }
+  
+    
    
    write("# config file for the vessel editor: adding some vessel(s)", file=namefile)
    write("# (the shortestPaths library will have to be re-created for the graph)", file=namefile, ncolumns=1, append=TRUE)
@@ -198,8 +243,8 @@
    
    # create from different set of vessels, for example:
    namefiles <- c(
-     paste("vessels_creator_args_",namefolderinput, "_set1.dat", sep=''),
-     paste("vessels_creator_args_",namefolderinput, "_set2.dat", sep='')  # vessels from set 2 are to be appended to the existing files (caution: put append at TRUE in the file), etc.
+     paste("vessels_creator_args_",namefolderinput, "_ancona_trawlers.dat", sep=''),
+     paste("vessels_creator_args_",namefolderinput, "_ancona_netters.dat", sep='')  # vessels from set 2 are to be appended to the existing files (caution: put append at TRUE in the file), etc.
    )
   
  for (namefile in namefiles){ # LOOP OVER CONFIG FILES
@@ -257,6 +302,9 @@
 
      coord <- eval(parse(text=paste("cbind(coord, ",name_column,"= 0)", sep='')))
      dd                   <- sapply(slot(sh, "polygons"), function(x) lapply(slot(x, "Polygons"), function(x) x@coords)) # tricky there...
+     
+     ids <- sapply(slot(sh, "polygons"),  function (x) x@ID)
+     
      library(sp)
      for(iLand in 1:length(dd)){
       if(length(dd)>1){
@@ -265,12 +313,12 @@
           # Points on land are 1 or 2 and not is 0
           er <- try({res   <- point.in.polygon(coord[,1],coord[,2],dd[[iLand]][[i]][,1],dd[[iLand]][[i]][,2])}, silent=TRUE)
           if(class(er)=="try-error") res   <- point.in.polygon(coord[,1],coord[,2],dd[[iLand]][,1],dd[[iLand]][,2])
-          coord[which(res!=0), name_column] <- iLand
+          coord[which(res!=0), name_column] <- ids[iLand]
        }
       } else{
           er <- try({res   <- point.in.polygon(coord[,1],coord[,2],dd[[1]][,1],dd[[1]][,2])}, silent=TRUE)
           if(class(er)=="try-error") res   <- point.in.polygon(coord[,1],coord[,2],dd[[1]][,1],dd[[1]][,2])
-          coord[which(res!=0), name_column] <- iLand
+          coord[which(res!=0), name_column] <- ids[iLand]
 
       }
 
@@ -309,6 +357,8 @@ getPolyAroundACoord <- function(dat, a_dist_m){
   coord <- cbind(coord, 1:nrow(coord))
   colnames(coord) <- c('x', 'y', 'harb', 'pt_graph')
   plot(coord[,1], coord[,2])
+  
+  saved_coord <- coord
 
   graph <- read.table(file=file.path(general$main.path.ibm, "graphsspe",
            paste("graph", general$igraph, ".dat", sep=""))) # build from the c++ gui
@@ -321,7 +371,7 @@ getPolyAroundACoord <- function(dat, a_dist_m){
   #-------------------------------------------------------------------------------
   # GET ALL THE NODES IN THE RANGE OF THE VESSEL SPECIFIC HARBOURS
   
-  harbours <- read.table(file.path(general$main.path.param.gis, name_file_ports), sep=";")     
+  harbours <- read.table(file.path(general$main.path.param.gis, "GRAPH", name_file_ports), sep=";")     
   harbours <- harbours[visited_ports,]
   harbours <- cbind.data.frame(harbours, ID=1:nrow(harbours))
   # convert to UTM
@@ -383,9 +433,9 @@ getPolyAroundACoord <- function(dat, a_dist_m){
 
 
  library(maptools)
- handmade            <- readShapePoly(file.path(general$main.path.param.gis, name_gis_file_for_fishing_effort_per_polygon))  # build in ArcGIS 10.1
+ handmade            <- readShapePoly(file.path(general$main.path.param.gis, "FISHERIES", name_gis_file_for_fishing_effort_per_polygon))  # build in ArcGIS 10.1
  library(rgdal)
- handmade2           <- readOGR(file.path(general$main.path.param.gis), name_gis_file_for_fishing_effort_per_polygon) #  Projection info in a .prj associated with the shp should be imported automagically.
+ handmade2           <- readOGR(file.path(general$main.path.param.gis,  "FISHERIES"), name_gis_file_for_fishing_effort_per_polygon ) #  Projection info in a .prj associated with the shp should be imported automagically.
 
  # How can I get the proj4 string from a shapefile .prj file? http://gis.stackexchange.com/questions/55196/how-can-i-get-the-proj4-string-or-epsg-code-from-a-shapefile-prj-file
 
@@ -400,22 +450,28 @@ getPolyAroundACoord <- function(dat, a_dist_m){
 
  # test coord for polygon inclusion
   coord <-  detectingCoordInPolygonsFromSH (handmade_WGS84, coord, name_column="poly_id")
-  points(coord[,1], coord[,2], col=as.numeric(coord[,"poly_id"])+1)  # check
+  points(coord[,1], coord[,2], col=as.numeric(coord[,"poly_id"])+1, pch=16)  # check
 
 
- handmade_WGS84_df <- as.data.frame(handmade_WGS84)
+ handmade_WGS84_df    <- as.data.frame(handmade_WGS84) # get attributes(handmade_WGS84)$data
+ handmade_WGS84_df$ID <- 1:nrow(handmade_WGS84_df)  # CAUTION! rename ids because not all are kept when as.data.frame
 
  # caution:
+ if(all(xfold_gis_layer_field==1)){
+  # do nothing
+   handmade_WGS84_df$xfold <- 1
+ } else{ 
  handmade_WGS84_df$xfold         <- factor(handmade_WGS84_df[,name_gis_layer_field]) # init
  levels(handmade_WGS84_df$xfold) <- xfold_gis_layer_field
  handmade_WGS84_df$xfold         <-   as.character(handmade_WGS84_df$xfold)
  handmade_WGS84_df               <- rbind.data.frame( c(ID=0, 0, min(xfold_gis_layer_field)/2), handmade_WGS84_df)   # add an ID 0 for not included coord points AND ASSUME SOME ACTIVITY IN IT
  handmade_WGS84_df$xfold         <-   as.factor(handmade_WGS84_df$xfold)
+ }
+ 
  
  # then merge to coord  (caution: 'poly' give the polygon in the harbour range; 'poly_id' give the polygon id from the handmade_WGS84 shape file) 
  coord<- merge(coord, handmade_WGS84_df, by.x="poly_id", by.y="ID")
 
- 
  
  
  # check
@@ -425,6 +481,10 @@ getPolyAroundACoord <- function(dat, a_dist_m){
  levels(coord$color) <- 1:length(levels(coord$color))
  points(coord[, "x"], coord[, "y"], col=  coord[,"color"])
  
+ # or if on contineous scale:
+ par(mfrow=c(1,2))
+ plot(coord[, "x"], coord[, "y"], col= as.numeric( cut(coord[,name_gis_layer_field], breaks=c(-1,100,200, 500, 1000, 2000)) ), pch=16)
+ if("XMIN" %in% colnames(handmade_WGS84_df)) plot(handmade_WGS84_df[, "XMIN"], handmade_WGS84_df[, "YMIN"], col= as.numeric( cut(handmade_WGS84_df[,name_gis_layer_field], breaks=c(-1,100,200, 500, 1000, 2000)) ), pch=16)
  
  
 # WORKFLOW 2 - QUARTER-BASED----------- 
@@ -447,12 +507,13 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
  }
  
  # duplicate per vessel id  (i.e. assuming the same parameterisation for all the vesselids)
+ fgrounds  <- fgrounds[fgrounds$freq_feffort!=0,] # remove if 0
  fgrounds_allvessels <- NULL
  for(vid in vesselids){
+  cat(paste(vid, "\n"))
   fgrounds_allvessels <- rbind.data.frame(fgrounds_allvessels, cbind(fgrounds, vids=vid))
  }
-  fgrounds_allvessels        <- fgrounds_allvessels[fgrounds_allvessels$freq_feffort!=0,] # remove if 0
-
+ 
  # duplicate per metier id (i.e. assuming the same relative effort distribution per polygon for all the metierids)
  fgrounds_allvessels_allmet <- NULL
  for(met in metierids){
@@ -475,7 +536,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
     x$freq   <- round(an(x$freq_feffort) ,6)
    
     # save .dat files
-    x$pt_graph <-  x$pt_graph - 1 ##!!! OFFSET FOR C++ !!!##
+    x$pt_graph <-  as.numeric(as.character(x$pt_graph)) - 1 ##!!! OFFSET FOR C++ !!!##
         vesselsspe_fgrounds_quarter <- x[,c('vids','pt_graph')]
         write.table(vesselsspe_fgrounds_quarter,
             file=file.path(general$main.path.param, "vesselsspe",
@@ -498,7 +559,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
     port_names <- read.table(file=file.path(general$main.path.ibm,
                                 paste("harboursspe_",general$namefolderinput,sep=''),
                                   paste("harbours.dat", sep='')), sep=";")
-    port_names$pt_graph   <- coord[match(port_names$idx.port, coord[,"harb"]), "pt_graph"] 
+    port_names$pt_graph   <- saved_coord[match(port_names$idx.port, saved_coord[,"harb"]), "pt_graph"] 
     
     visited               <- expand.grid( port_names[visited_ports, "pt_graph"], vesselids) # retrieve the corresponding pt_graph 
     visited               <- visited[,2:1]
@@ -508,7 +569,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
     colnames(visited_freq)     <- c('vids','freq')
   
     # save .dat files
-        visited$pt_graph <-  visited$pt_graph - 1 ##!!! FOR C++ !!!##
+        visited$pt_graph <-  as.numeric(as.character(visited$pt_graph)) - 1 ##!!! FOR C++ !!!##
         write.table(visited,
             file=file.path(general$main.path.param, "vesselsspe",
               paste("vesselsspe_harbours_quarter",gsub("Q","",a.quarter),".dat",sep='')),
