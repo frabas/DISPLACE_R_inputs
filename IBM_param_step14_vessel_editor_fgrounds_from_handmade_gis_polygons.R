@@ -54,7 +54,7 @@
    vessel_specifications <- cbind.data.frame(vessel_specifications, id=1:nrow(vessel_specifications))
    
    nb_agent_per_vessels <- 2  # caution: super-individuals to reduce the total nb of vessels to be simulated
-   vessel_specifications[i, "N..of.vessels"] <- ceiling(vessel_specifications[i, "N..of.vessels"])/nb_agent_per_vessels
+   vessel_specifications[, "N..of.vessels"] <- ceiling(vessel_specifications[, "N..of.vessels"])/nb_agent_per_vessels
    
    # quick check
    if(!"trawl" %in% unique(vessel_specifications[, "metier"]) && !"gillnet" %in% unique(vessel_specifications[, "metier"]) )  stop("Not defined for these metiers...check metier names")
@@ -91,7 +91,7 @@
          cruisespeed                                  <- 10 # knots
          } 
    visited_ports              <- vessel_specifications[i, "Harbor"]   # e.g. c("ANCONA", "RIMINI") # should exist in harbour.dat!
-   if(visited_ports %in% row.names(port_names))  visited_ports <- "ANCONA" ## CAUTION DEBUG: MISSING PORTS IN GRAPH......
+   if(!visited_ports %in% row.names(port_names))  visited_ports <- "ANCONA" ## CAUTION DEBUG: MISSING PORTS IN GRAPH......
    
    name_file_ports            <- "harbours_adriatic.dat" 
    visited_ports_frequencies  <- c(1)          # e.g. c(0.8, 0.2)
@@ -116,8 +116,8 @@
    step_in_share              <- rep(vessel_specifications[i, "N..of.vessels"]/ sum(vessel_specifications[, "N..of.vessels"]), nb_stocks) # i.e. 100 % of each TAC per stock will be booked for these new vessels
    vesselsspe_betas           <- log(vessel_specifications[i, paste(spp, "_kg_h", sep='') ]*nb_agent_per_vessels +0.01 )  # catch rate log(kg per hour) from the Marche region # stock name 0:Hake, 1:Sole, 2: Mullet, 3: Mantis  CAUTION: log(0)=-Inf !
    create_file_for_fuel_price_per_vessel_size <- TRUE
-   some_fuel_price_per_vessel_size <- c(0.4,0.4,0.4,0.4,0.4)  # euro per litre
-   step_in_share_credits      <- vessel_specifications[i, "N..of.vessels"]/ sum(vessel_specifications[, "N..of.vessels"]) # i.e. % of the credits will be booked for these new vessels
+   some_fuel_price_per_vessel_size            <- c(0.4,0.4,0.4,0.4,0.4)  # euro per litre
+   step_in_share_credits                      <- vessel_specifications[i, "N..of.vessels"]/ sum(vessel_specifications[, "N..of.vessels"]) # i.e. % of the credits will be booked for these new vessels
 
    # create a (intermediate) config file
    namefile <- file.path(general$main.path.param.gis, "FISHERIES", "vessels_config_files",
@@ -257,6 +257,7 @@
    dat              <- readLines(file.path(path, namefile))
    
    my_split <- function(x) unlist(strsplit(x, " "))
+   my_split2 <- function(x) unlist(strsplit(x, "_"))
    
    general <- list()
    general$main.path.param.gis   <- as.character(dat[5])
@@ -278,7 +279,7 @@
    metierids                     <- as.numeric(my_split(dat[29]))
    metierids_frequencies         <- as.numeric(my_split(dat[31]))
    if(length(metierids)!=length(metierids_frequencies)) stop("Check config file for vessel creator - length(metierids)")
-   visited_ports                 <- as.character(my_split(dat[33]))
+   visited_ports                 <- as.character(my_split2(dat[33]))
    visited_ports_frequencies     <- as.numeric(my_split(dat[35]))
    if(length(visited_ports)!=length(visited_ports_frequencies)) stop("Check config file for vessel creator - length(visited_ports)")
    name_file_ports               <-  dat[37]
