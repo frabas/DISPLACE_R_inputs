@@ -53,7 +53,7 @@
    vessel_specifications <- read.table(file=file.path(general$main.path.param.gis, "FISHERIES", "vessels_specifications_per_harbour.csv"), sep=",", header=TRUE )
    vessel_specifications <- cbind.data.frame(vessel_specifications, id=1:nrow(vessel_specifications))
    
-   nb_agent_per_vessels <- 2  # caution: super-individuals to reduce the total nb of vessels to be simulated
+   nb_agent_per_vessels <- 3  # caution: super-individuals to reduce the total nb of vessels to be simulated
    vessel_specifications[, "N..of.vessels"] <- ceiling(vessel_specifications[, "N..of.vessels"])/nb_agent_per_vessels
    
    # quick check
@@ -615,7 +615,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
        write.table(vesselsspe_possible_metiers_quarter,
            file=file.path(general$main.path.param, "vesselsspe",
              paste(vid,"_possible_metiers_quarter",gsub("Q","",a.quarter),".dat",sep='')),
-               col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
+               col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
    
        vesselsspe_freq_possible_metiers_quarter <- x.vid[,c('pt_graph', 'met')]
        levels(vesselsspe_freq_possible_metiers_quarter[,'met']) <-   metierids_frequencies
@@ -627,7 +627,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
        write.table(vesselsspe_freq_possible_metiers_quarter,
            file=file.path(general$main.path.param, "vesselsspe",
              paste(vid,"_freq_possible_metiers_quarter",gsub("Q","",a.quarter),".dat",sep='')),
-               col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
+               col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
 
       # check for NAs
       dd<- vesselsspe_possible_metiers_quarter [is.na(vesselsspe_possible_metiers_quarter[,c('met')]) , ]
@@ -659,7 +659,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
        write.table(vesselsspe_gshape_cpue_per_stock_fgrounds_quarter,
            file=file.path(general$main.path.param, "vesselsspe",
              paste(vid,"_gshape_cpue_per_stk_on_nodes_quarter",gsub("Q","",a.quarter),".dat",sep='')),
-               col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
+               col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
     }
    # DNK000XXX_gscale_cpue_per_stk_on_nodes_quarter  # plan A
     #-----------
@@ -679,7 +679,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
        write.table(vesselsspe_gscale_cpue_per_stock_fgrounds_quarter,
            file=file.path(general$main.path.param, "vesselsspe",
              paste(vid,"_gscale_cpue_per_stk_on_nodes_quarter",gsub("Q","",a.quarter),".dat",sep='')),
-               col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
+               col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
     }
     #-----------
  
@@ -704,7 +704,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
        write.table(vesselsspe_fixed_cpues_fgrounds_quarter,
            file=file.path(general$main.path.param, "vesselsspe",
              paste(vid,"_cpue_per_stk_on_nodes_quarter",gsub("Q","",a.quarter),".dat",sep='')),
-               col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
+               col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
     }
    #-----------
  
@@ -790,7 +790,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
        write.table(fuel_price_per_vessel_size,
            file=file.path(general$main.path.param, "vesselsspe",
              paste("fuel_price_per_vessel_size.dat",sep='')),
-               col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, quote=FALSE, append=do_append, sep = " ")  
+               col.names=TRUE,  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")  
 
  }
  
@@ -822,7 +822,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
        write.table(fishing_credits,
            file=file.path(general$main.path.param, "vesselsspe",
              paste("initial_fishing_credits_per_vid.dat",sep='')),
-               col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")  
+               col.names=TRUE,  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")  
 
 
 } # END LOOP OVER CONFIG FILES
