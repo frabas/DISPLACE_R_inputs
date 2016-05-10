@@ -61,9 +61,9 @@ if(case_study=="myfish"){
  }
  
 if(case_study=="adriatic"){
- # pop number per age group 2013 
+ # pop number per age group 2014 
  number <- read.csv(file=file.path(main.path,
-                 "IBM_datainput_abundance_2013_adriatic.csv"),
+                 "IBM_datainput_abundance_2014_adriatic.csv"),
                     sep=",",header=TRUE)     
  
  # pop number per age group 2013 (take the following year after the start year, for validation)
@@ -71,7 +71,7 @@ if(case_study=="adriatic"){
  #                "IBM_datainput_abundance_2013.csv"),
  #                   sep=",",header=TRUE)  ## NOT YET AVAILABLE  !!  
  number_yplus1 <-  number # data not available yet...then temporary!!
- a.year <- 2013
+ a.year <- 2014
  }
  
 

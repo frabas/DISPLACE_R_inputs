@@ -53,10 +53,13 @@
    vessel_specifications <- read.table(file=file.path(general$main.path.param.gis, "FISHERIES", "vessels_specifications_per_harbour.csv"), sep=",", header=TRUE )
    vessel_specifications <- cbind.data.frame(vessel_specifications, id=1:nrow(vessel_specifications))
    
-   nb_agent_per_vessels <- 3  # caution: super-individuals to reduce the total nb of vessels to be simulated
+   nb_agent_per_vessels <- 4  # caution: super-individuals to reduce the total nb of vessels to be simulated
    vessel_specifications[, "N..of.vessels"] <- ceiling(vessel_specifications[, "N..of.vessels"])/nb_agent_per_vessels
    
-   # quick check
+   port_names <- read.table(file=file.path(general$main.path.ibm,
+                                paste("harboursspe_",general$namefolderinput,sep=''),
+                                  paste("harbours.dat", sep='')), sep=";")
+  # quick check
    if(!"trawl" %in% unique(vessel_specifications[, "metier"]) && !"gillnet" %in% unique(vessel_specifications[, "metier"]) )  stop("Not defined for these metiers...check metier names")
    
    for (i in 1 : nrow(vessel_specifications)){
@@ -85,7 +88,7 @@
          is_gis_layer_field_relative_numbers          <- TRUE                           # if relative effort categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
          xfold_gis_layer_field                        <- 1     # giving relative importance of the 5 categories e.g. visting an area of cat 1 is 10000 times more probable than for cat 5
          vesselids                                    <-  paste("ITA_",harbcode,"_TRAWL", 1:nbvids, sep="") # caution: three first letters should be consistent with  popsspe/XXctrysspe_relative_stability_semesterXX
-         vessel_range_km                              <- 60  # trawlers
+         vessel_range_km                              <- 90  # trawlers
          metierids                                    <- 0             # e.g. c(0,1) # look at /metiersspe.... 0:trawler; 1 gillnetter
          metierids_frequencies                        <- c(1)  # pure fishery        # or e.g. c(0.2,0.8)
          cruisespeed                                  <- 10 # knots
@@ -615,7 +618,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
        write.table(vesselsspe_possible_metiers_quarter,
            file=file.path(general$main.path.param, "vesselsspe",
              paste(vid,"_possible_metiers_quarter",gsub("Q","",a.quarter),".dat",sep='')),
-               col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
+               col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
    
        vesselsspe_freq_possible_metiers_quarter <- x.vid[,c('pt_graph', 'met')]
        levels(vesselsspe_freq_possible_metiers_quarter[,'met']) <-   metierids_frequencies
@@ -627,7 +630,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
        write.table(vesselsspe_freq_possible_metiers_quarter,
            file=file.path(general$main.path.param, "vesselsspe",
              paste(vid,"_freq_possible_metiers_quarter",gsub("Q","",a.quarter),".dat",sep='')),
-               col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
+               col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
 
       # check for NAs
       dd<- vesselsspe_possible_metiers_quarter [is.na(vesselsspe_possible_metiers_quarter[,c('met')]) , ]
@@ -659,7 +662,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
        write.table(vesselsspe_gshape_cpue_per_stock_fgrounds_quarter,
            file=file.path(general$main.path.param, "vesselsspe",
              paste(vid,"_gshape_cpue_per_stk_on_nodes_quarter",gsub("Q","",a.quarter),".dat",sep='')),
-               col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
+               col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
     }
    # DNK000XXX_gscale_cpue_per_stk_on_nodes_quarter  # plan A
     #-----------
@@ -679,7 +682,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
        write.table(vesselsspe_gscale_cpue_per_stock_fgrounds_quarter,
            file=file.path(general$main.path.param, "vesselsspe",
              paste(vid,"_gscale_cpue_per_stk_on_nodes_quarter",gsub("Q","",a.quarter),".dat",sep='')),
-               col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
+               col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
     }
     #-----------
  
@@ -704,7 +707,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
        write.table(vesselsspe_fixed_cpues_fgrounds_quarter,
            file=file.path(general$main.path.param, "vesselsspe",
              paste(vid,"_cpue_per_stk_on_nodes_quarter",gsub("Q","",a.quarter),".dat",sep='')),
-               col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
+               col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
     }
    #-----------
  
