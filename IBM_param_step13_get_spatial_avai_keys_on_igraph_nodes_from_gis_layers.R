@@ -364,7 +364,8 @@ for (a.semester in c("S1", "S2")){
  # caution: fill in the gap
   all_combi <- expand.grid(pt_graph=unique(avai_allszgroups$pt_graph), szgroups=0:13, semester=c("S1", "S2"))
   avai_allszgroups <- merge(avai_allszgroups,  all_combi, all=TRUE)
-  avai_allszgroups$abundance <- replace(avai_allszgroups$abundance, is.na (avai_allszgroups$abundance), 0.00000001)                                                                       
+  #avai_allszgroups$abundance <- replace(avai_allszgroups$abundance, is.na (avai_allszgroups$abundance), 0.0000000000001)                                                                       
+  avai_allszgroups$abundance <- replace(avai_allszgroups$abundance, is.na (avai_allszgroups$abundance), 0.0)                                                                       
 
 
 

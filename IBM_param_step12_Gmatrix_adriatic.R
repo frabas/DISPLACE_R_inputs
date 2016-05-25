@@ -58,6 +58,8 @@ if(case_study=="myfish"){
  #                   sep=",",header=TRUE)  ## NOT YET AVAILABLE  !!  
  number_yplus1 <-  number # data not available yet...then temporary!!
  a.year <- 2012
+ quarter_growth <- FALSE ; semester_growth <- TRUE
+ 
  }
  
 if(case_study=="adriatic"){
@@ -72,6 +74,8 @@ if(case_study=="adriatic"){
  #                   sep=",",header=TRUE)  ## NOT YET AVAILABLE  !!  
  number_yplus1 <-  number # data not available yet...then temporary!!
  a.year <- 2014
+
+ quarter_growth <- TRUE ; semester_growth <- FALSE
  }
  
 
@@ -272,8 +276,10 @@ for (sce in sces){
 
 
 
- timesteps   <- 21       # time steps 10 years with 2 semesters each 
- NbPeriods   <- 2        # 2 semesters within the year
+ #timesteps   <- 21       # time steps 10 years with 2 semesters each 
+ #NbPeriods   <- 2        # 2 semesters within the year
+ timesteps   <- 41       # time steps 10 years with 4 quarters each 
+ NbPeriods   <- 4        # 4 quarter within the year
  pop         <- 10000    # number of simulated individuals
 
 
@@ -374,20 +380,35 @@ for(x in 1:length(pa$Ks)){
   #1- build age distribution matrix A                
   #2- build szgroup distribution matrix C                
   A<- matrix(0,length(l),11) # 11 age classes
-  B<- matrix(0,length(l),21) # 21 tsteps
+  if(semester_growth){ B<- matrix(0,length(l),21) } # 21 tsteps
+  if(quarter_growth){ B<- matrix(0,length(l),41) }# 41 tsteps
   C<- matrix(0,length(l),11) # 11 age classes
   for(sz in 1:length(l)){
       B[sz, ] <- apply(S, 2, function(x, sz) {length(x[x==sz])}, sz)   # nb in size groups per age and semesters , age group over ten years
   }
   C[,1:2] <- B[, 1:2]  # keep intact semesters 1 and 2 for the first year  #age 0 from first semester   #age 1 from second semester
+  
+  
+  if(semester_growth){
   count<-2
   for(ij in c(3,5,7,9,11,13,15,17,19)){
       count<-count+1
       C[,count] <- B[, ij] + B[,ij+1]  # add semester 1 and semester 2
   }
+  }
+
+  if(quarter_growth){
+  count<-0
+  for(ij in c(1, 5,9,13,17, 21, 25,29, 33, 36)){
+      count<-count+1
+      C[,count] <- B[, ij] + B[,ij+1] + B[,ij+2] +B[,ij+3]  # add Q 1 and Q 2 and Q3 and Q4
+  }
+  }
+  
   A <- sweep(C, 2, apply(C, 2, sum), FUN="/") # then scale to 1 PER AGE => distribution of age over szgroups
   C <- sweep(C, 1, apply(C, 1, sum), FUN="/") # then scale to 1 PER SZGROUP  => distribution of szgroup over ages
   C <- replace(C, is.na(C), 0)
+  A <- replace(A, is.na(A), 0)
   
   A  <-round(A,7)
   As <-t(A)
