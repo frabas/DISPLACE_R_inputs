@@ -9,7 +9,7 @@
      general$application           <- "adriatic" # ...or myfish
      general$main.path.param       <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw")
      general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
-     general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input")
+     general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_" , general$application, sep=""))
    }
 
    
@@ -30,7 +30,7 @@
    general$namefolderinput    <- "adriatic"
    general$igraph             <- 1  # caution: should be consistent with existing pops already built upon a given graph
    do_append                  <- FALSE
-   name_gis_file_for_total_abundance_per_polygon <- c("hake/hake_small", "hake/hake_medium", "hake/hake_large")   # Solea solea in 3 size categories
+   name_gis_file_for_total_abundance_per_polygon <- c("hake/hake_small_Drawing", "hake/hake_medium_Drawing", "hake/hake_large_Drawing")   # Solea solea in 3 size categories
    popids                     <- 0 # stock name 0:Hake, 1:Sole, 2: Mullet, 3: Mantis
    szgroups                   <-  "0 1 2 3 4 5 6_7 8 9 10_11 12 13"  # for 0:Hake, 1:Sole,  # should correspond to some gis files      # 14 size groups
    selected_szgroups          <-  c(2,5,7,9)
@@ -43,7 +43,7 @@
    general$namefolderinput    <- "adriatic"
    general$igraph             <- 1  # caution: should be consistent with existing pops already built upon a given graph
    do_append                  <- TRUE
-   name_gis_file_for_total_abundance_per_polygon <- c("sole/Sole_small", "sole/Sole_medium", "sole/Sole_large")   # Solea solea in 3 size categories
+   name_gis_file_for_total_abundance_per_polygon <- c("sole/Sole_small_Drawing", "sole/Sole_medium_Drawing", "sole/Sole_large_Drawing")   # Solea solea in 3 size categories
    popids                     <- 1 # stock name 0:Hake, 1:Sole, 2: Mullet, 3: Mantis
    szgroups                   <-  "0 1 2 3 4 5 6_7 8 9 10_11 12 13"  # for 0:Hake, 1:Sole,  # should correspond to some gis files      # 14 size groups
    selected_szgroups          <-  c(2,5,7,9)
@@ -56,7 +56,7 @@
    general$namefolderinput    <- "adriatic"
    general$igraph             <- 1  # caution: should be consistent with existing pops already built upon a given graph
    do_append                  <- TRUE
-   name_gis_file_for_total_abundance_per_polygon <- c("redmullet/mullet_small", "redmullet/mullet_medium", "redmullet/mullet_large")   # Solea solea in 3 size categories
+   name_gis_file_for_total_abundance_per_polygon <- c("redmullet/mullet_small_Drawing", "redmullet/mullet_medium_Drawing", "redmullet/mullet_large_Drawing")   # Solea solea in 3 size categories
    popids                     <- 2 # stock name 0:Hake, 1:Sole, 2: Mullet, 3: Mantis
    szgroups                   <-  "0 1 2 3_4 5_6 7 8 9 10 11 12 13"  # for 0:Hake, 1:Sole,  # should correspond to some gis files      # 14 size groups
    selected_szgroups          <-  c(2,5,7,9)
@@ -69,7 +69,7 @@
    general$namefolderinput    <- "adriatic"
    general$igraph             <- 1  # caution: should be consistent with existing pops already built upon a given graph
    do_append                  <- TRUE
-   name_gis_file_for_total_abundance_per_polygon <- c("spottailmantisshrimp/spottailmantis_small", "spottailmantisshrimp/spottailmantis_medium", "spottailmantisshrimp/spottailmantis_large")   # Solea solea in 3 size categories
+   name_gis_file_for_total_abundance_per_polygon <- c("spottailmantisshrimp/spottailmantis_small_Drawing", "spottailmantisshrimp/spottailmantis_medium_Drawing", "spottailmantisshrimp/spottailmantis_large_Drawing")   # Solea solea in 3 size categories
    popids                     <- 3 # stock name 0:Hake, 1:Sole, 2: Mullet, 3: Mantis
    szgroups                   <-  "0 1 2 3 4 5 6 7 8_9 10 11_12 13"  # for 0:Hake, 1:Sole,  # should correspond to some gis files      # 14 size groups
    selected_szgroups          <-  c(2,5,7,9)
@@ -81,7 +81,7 @@
     # create a config file
    
    a_comment <- popids
-   namefile  <- file.path(general$main.path.param.gis, paste(a_comment, "pops_creator_args_", general$namefolderinput, ".dat", sep=''))
+   namefile  <- file.path(general$main.path.param.gis, "POPULATIONS", "pops_config_files", paste(a_comment, "pops_creator_args_", general$namefolderinput, ".dat", sep=''))
   
    write("# config file for the vessel editor: adding some vessel(s)", file=namefile)
    write("# (the shortestPaths library will have to be re-created for the graph)", file=namefile, ncolumns=1, append=TRUE)
@@ -144,7 +144,7 @@
    #!#¤!#!#!#!#
    #!#¤!#!#!#!#
    path <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis") # where is the config file?
-   dat  <- readLines(file.path(path, application, paste(popids, "pops_creator_args_",application,".dat", sep="")))
+   dat  <- readLines(file.path(path, application, "POPULATIONS", "pops_config_files", paste(popids, "pops_creator_args_",application,".dat", sep="")))
    
    my_split <- function(x) unlist(strsplit(x, " "))
    my_split2 <- function(x) unlist(strsplit(x, "_"))

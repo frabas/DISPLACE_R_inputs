@@ -9,7 +9,11 @@
      general$application           <- "adriatic" # ...or myfish
      general$main.path.param       <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw")
      general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
-     general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input")
+     general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
+  
+    dir_to_clean <-    file.path(general$main.path.ibm, "FISHERIES", "vessels_config_files")
+    file.remove(dir(   dir_to_clean, pattern = "vessels_creator_args", full.names = FALSE))
+ 
    }
    
   
@@ -50,8 +54,9 @@
    general$namefolderinput    <- "adriatic"
    dir.create(path=file.path(general$main.path.param.gis, "FISHERIES", "vessels_config_files"))
   
-   vessel_specifications <- read.table(file=file.path(general$main.path.param.gis, "FISHERIES", "vessels_specifications_per_harbour.csv"), sep=",", header=TRUE )
+   vessel_specifications <- read.table(file=file.path(general$main.path.param.gis, "FISHERIES", "vessels_specifications_per_harbour_3metiers.csv"), sep=",", header=TRUE )
    vessel_specifications <- cbind.data.frame(vessel_specifications, id=1:nrow(vessel_specifications))
+   #=> CAUTION: do not leave white rows at the end of this file! otherwise will create some extra wrong config_files
    
    nb_agent_per_vessels <- 4  # caution: super-individuals to reduce the total nb of vessels to be simulated
    vessel_specifications[, "N..of.vessels"] <- ceiling(vessel_specifications[, "N..of.vessels"])/nb_agent_per_vessels
@@ -60,7 +65,9 @@
                                 paste("harboursspe_",general$namefolderinput,sep=''),
                                   paste("harbours.dat", sep='')), sep=";")
   # quick check
-   if(!"trawl" %in% unique(vessel_specifications[, "metier"]) && !"gillnet" %in% unique(vessel_specifications[, "metier"]) )  stop("Not defined for these metiers...check metier names")
+   if(!"bottom_otter_trawl" %in% unique(vessel_specifications[, "metier"]) 
+       && !"gillnet" %in% unique(vessel_specifications[, "metier"]) 
+       && !"rapido_trawl" %in% unique(vessel_specifications[, "metier"]))  stop("Not defined for these metiers...check metier names")
    
    for (i in 1 : nrow(vessel_specifications)){
       spp                        <- c("hake", "sole", "redmullet", "mantis")
@@ -71,25 +78,37 @@
       
       
       if(vessel_specifications[i, "metier"]=="gillnet"){
-         name_gis_file_for_fishing_effort_per_polygon <- "ssc0121"
+         name_gis_file_for_fishing_effort_per_polygon <- "set_nets"
          name_gis_layer_field                         <- "GRIDCODE"                     # giving releative effort ditribtion e.g. in 5 categories: 1 to 5 with 1 high occurence
          is_gis_layer_field_relative_numbers          <- TRUE                           # if relative effort categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
-         xfold_gis_layer_field                        <- c(10000, 1000, 100, 10, 1)     # giving relative importance of the 5 categories e.g. visting an area of cat 1 is 10000 times more probable than for cat 5
-         vesselids                                    <- paste("ITA_",harbcode,"_NETTER", 1:nbvids, sep="") # caution: three first letters (nationality) should be consistent with  popsspe/XXctrysspe_relative_stability_semesterXX 
+         xfold_gis_layer_field                        <- c(64, 32, 16, 4, 2, 1)     # giving relative importance of the 5 categories e.g. visting an area of cat 1 is 10000 times more probable than for cat 5
+         #xfold_gis_layer_field                        <- c(10000, 1000, 100, 10, 1)     # giving relative importance of the 5 categories e.g. visting an area of cat 1 is 10000 times more probable than for cat 5
+         vesselids                                    <- paste("ITA_",harbcode,"_NET", 1:nbvids, sep="") # caution: three first letters (nationality) should be consistent with  popsspe/XXctrysspe_relative_stability_semesterXX 
          vessel_range_km                              <- 15 # netters
          metierids                                    <- 1             # e.g. c(0,1) # look at /metiersspe.... 0:trawler; 1 gillnetter
          metierids_frequencies                        <- c(1)  # pure fishery        # or e.g. c(0.2,0.8)
          cruisespeed                                  <- 18 # knots
                    
          }   
-      if(vessel_specifications[i, "metier"]=="trawl"){
-         name_gis_file_for_fishing_effort_per_polygon <- "GSA 17_18_grid_5km_sel"
-         name_gis_layer_field                         <- "OTB12" # PTM_12 OTB_13 PTM_13     
+      if(vessel_specifications[i, "metier"]=="otter_trawl"){
+         name_gis_file_for_fishing_effort_per_polygon <- "bottom_otter_trawl"
+         name_gis_layer_field                         <- "OTB_13" 
          is_gis_layer_field_relative_numbers          <- TRUE                           # if relative effort categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
          xfold_gis_layer_field                        <- 1     # giving relative importance of the 5 categories e.g. visting an area of cat 1 is 10000 times more probable than for cat 5
-         vesselids                                    <-  paste("ITA_",harbcode,"_TRAWL", 1:nbvids, sep="") # caution: three first letters should be consistent with  popsspe/XXctrysspe_relative_stability_semesterXX
-         vessel_range_km                              <- 90  # trawlers
+         vesselids                                    <-  paste("ITA_",harbcode,"_OTB", 1:nbvids, sep="") # caution: three first letters should be consistent with  popsspe/XXctrysspe_relative_stability_semesterXX
+         vessel_range_km                              <- 80  # trawlers
          metierids                                    <- 0             # e.g. c(0,1) # look at /metiersspe.... 0:trawler; 1 gillnetter
+         metierids_frequencies                        <- c(1)  # pure fishery        # or e.g. c(0.2,0.8)
+         cruisespeed                                  <- 10 # knots
+         } 
+    if(vessel_specifications[i, "metier"]=="rapido_trawl"){
+         name_gis_file_for_fishing_effort_per_polygon <- "Rapidi Drawing_def"
+         name_gis_layer_field                         <- "TOTAL"     
+         is_gis_layer_field_relative_numbers          <- TRUE                           # if relative effort categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
+         xfold_gis_layer_field                        <- 1     # giving relative importance of the 5 categories e.g. visting an area of cat 1 is 10000 times more probable than for cat 5
+         vesselids                                    <-  paste("ITA_",harbcode,"_RAP", 1:nbvids, sep="") # caution: three first letters should be consistent with  popsspe/XXctrysspe_relative_stability_semesterXX
+         vessel_range_km                              <- 80  # trawlers
+         metierids                                    <- 2             # e.g. c(0,1) # look at /metiersspe.... 0:trawler; 1 gillnetter
          metierids_frequencies                        <- c(1)  # pure fishery        # or e.g. c(0.2,0.8)
          cruisespeed                                  <- 10 # knots
          } 
@@ -116,7 +135,7 @@
                                    vessel_specifications[i, "multip.fuel.fishing"],
                                    vessel_specifications[i, "multip.fuel.ret.port.fish"],
                                    vessel_specifications[i, "multip.fuel.inactive"]) 
-   step_in_share              <- rep(vessel_specifications[i, "N..of.vessels"]/ sum(vessel_specifications[, "N..of.vessels"]), nb_stocks) # i.e. 100 % of each TAC per stock will be booked for these new vessels
+   step_in_share              <- rep(vessel_specifications[i, "N..of.vessels"]/ sum(vessel_specifications[, "N..of.vessels"], na.rm=TRUE), nb_stocks) # i.e. 100 % of each TAC per stock will be booked for these new vessels
    vesselsspe_betas           <- log(vessel_specifications[i, paste(spp, "_kg_h", sep='') ]*nb_agent_per_vessels +0.01 )  # catch rate log(kg per hour) from the Marche region # stock name 0:Hake, 1:Sole, 2: Mullet, 3: Mantis  CAUTION: log(0)=-Inf !
    create_file_for_fuel_price_per_vessel_size <- TRUE
    some_fuel_price_per_vessel_size            <- c(0.4,0.4,0.4,0.4,0.4)  # euro per litre
@@ -252,6 +271,7 @@
    # create from different set of vessels, for example:
    path      <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", "adriatic", "FISHERIES", "vessels_config_files")
    namefiles <- list.files(file.path( path))
+ 
  
  count <- 0 
  for (namefile in namefiles){ # LOOP OVER CONFIG FILES
@@ -447,7 +467,7 @@ getPolyAroundACoord <- function(dat, a_dist_m){
  handmade            <- readShapePoly(file.path(general$main.path.param.gis, "FISHERIES", name_gis_file_for_fishing_effort_per_polygon))  # build in ArcGIS 10.1
  library(rgdal)
  handmade2           <- readOGR(file.path(general$main.path.param.gis,  "FISHERIES"), name_gis_file_for_fishing_effort_per_polygon ) #  Projection info in a .prj associated with the shp should be imported automagically.
-
+ if(is.na( projection(handmade2))) projection(handmade2) <- CRS("+proj=longlat +datum=WGS84")   # a guess!
  # How can I get the proj4 string from a shapefile .prj file? http://gis.stackexchange.com/questions/55196/how-can-i-get-the-proj4-string-or-epsg-code-from-a-shapefile-prj-file
 
  library(sp)
@@ -513,7 +533,8 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
     fgrounds_this_quarter$effort_on_node                 <- an(fgrounds_this_quarter[,name_gis_layer_field]) * an(fgrounds_this_quarter[,'xfold'])  /   an(fgrounds_this_quarter$nb_nodes_in_this_cat)
     fgrounds_this_quarter$freq_feffort                   <- an(fgrounds_this_quarter$effort_on_node) /sum(an(fgrounds_this_quarter$effort_on_node))
      #=> scale to 1 to obtain a proba of visit per node
- 
+    if(is.na(fgrounds_this_quarter$freq_feffort)) fgrounds_this_quarter$freq_feffort  <- 1 # debug
+    
     fgrounds <- rbind.data.frame(fgrounds, fgrounds_this_quarter)
  }
  
