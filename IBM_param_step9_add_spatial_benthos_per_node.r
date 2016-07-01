@@ -10,6 +10,7 @@
 # 4. attach a recovery function
 
  a_case <- "myfish"
+ a_case <- "adriatic"
 
   # GENERAL SETTINGS
   if(a_case=="balticonly"){
@@ -34,6 +35,16 @@
      general$a.year                <- "2012"
      }
     
+  if(a_case=="adriatic"){   
+     general <- list()
+     general$main.path      <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", a_case, sep=""))
+     general$main.path.code <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_R_inputs")
+     
+     general$igraph                <- 40
+     general$case_study            <- "adriatic"
+     general$case_study_countries  <- c("ITA")    # for the myfish cod app
+     general$a.year                <- "2014"
+     }
                                                       
   #load(file.path(general$main.path, "igraph", paste(general$igraph, "_graphibm.RData",sep=''))) # built from the R code
   coord <- read.table(file=file.path(general$main.path, "graphsspe", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
@@ -57,7 +68,60 @@
   ##---------------------------------------------------------------------------##
   ##---------------------------------------------------------------------------##
  
+if(a_case=="adriatic"){
+
+  #------------------
+  # SHAPE-----------
+  #------------------
+   library(maptools)
+   #polPath              <- "C:/BENTHIS/EUNIS/Eastern Med habitat map"
+   polPath              <- "C:/Users/fbas/Documents/GitHub/DISPLACE_input_gis/adriatic/HABITATS"
+   anf                  <- function(x) as.numeric(as.character(x))
+   sh_coastlines        <- readShapePoly(file.path("C:/BENTHIS/BalanceMaps","francois_EU"))
+
+   ## use point-raster overlay.......
+   #landscapes       <- readShapePoly(file.path(polPath, "Greece_sediment_bathymentry_FAO_areas_intersect1_lat_long"),
+   landscapes       <- readShapePoly(file.path(polPath, "Benthos_GSA17"),
+                                       proj4string=CRS("+proj=longlat +datum=WGS84")    )    # probably need an update of rgdal here....
   
+  
+   coord           <- cbind(x=anf(coord[,'x']), y=anf(coord[,'y']))
+  
+   # convert to UTM
+   library(sp)
+   library(rgdal)
+   spo <- SpatialPoints(cbind(as.numeric(as.character(coord[,'x'])), as.numeric(as.character(coord[,'y']))),
+                       proj4string=CRS("+proj=longlat +datum=WGS84"))
+
+
+  #Use the magic 'over' function to see in which polygon it is located
+  idx                           <- over(spo, landscapes); #print(idx)
+  coord                         <- cbind.data.frame(as.data.frame(coord), landscapes_code=NA)
+  coord$landscapes_code         <- as.character(idx$CATEGORY)
+
+
+  
+   # assign 0 to the NA code
+   coord[is.na(coord$landscapes_code), 'landscapes_code'] <- 0
+  
+   plot(coord[,1], coord[,2], col=coord[,3])
+
+ 
+ 
+  # EXPORT FOR C++------------
+  write(coord[, 'landscapes_code'], file=file.path(general$main.path,"graphsspe", paste("coord", general$igraph,"_with_landscape.dat", sep='')), ncol=1)
+  nrow(coord)
+  ncol(coord)
+  #----------------------------
+
+
+
+
+}  
+
+
+
+
   #------------------
   # RASTER-----------
   #------------------

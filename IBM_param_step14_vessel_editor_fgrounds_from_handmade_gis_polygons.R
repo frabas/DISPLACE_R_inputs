@@ -36,7 +36,7 @@
    fixed_cpue_per_stock       <- rep(100, nb_stocks)   # kg catch per hour
    gshape_cpue_per_stock      <- rep(100, nb_stocks)   # for Gamma on each node   e.g. rgamma(1000, shape=100, scale = 2) -> kg per hour
    gscale_cpue_per_stock      <- rep(2, nb_stocks)     # for Gamma on each node
-   vessel_features            <- c(15.47,34.42,15,129,23662,4095,7,0.4485,336.7618,18,1,1.1,1.1,0.2) # vessels will be all the same
+   vessel_features            <- c(15.47,34.42,15,129,23662,4095,7,0.4485,336.7618,18,1,1.1,1.1,0.2,4, 6, 4, 22) # vessels will be all the same
    step_in_share              <- rep(20, nb_stocks) # i.e. 20 % of each TAC per stock will be booked for these new vessels
    vesselsspe_betas           <- rnorm(nb_stocks, 3, 5) # i.e. vessel effect in the catch rate equation 
    create_file_for_fuel_price_per_vessel_size <- TRUE
@@ -113,8 +113,35 @@
          cruisespeed                                  <- 10 # knots
          } 
    visited_ports              <- vessel_specifications[i, "Harbor"]   # e.g. c("ANCONA", "RIMINI") # should exist in harbour.dat!
-   if(!visited_ports %in% row.names(port_names))  visited_ports <- "ANCONA" ## CAUTION DEBUG: MISSING PORTS IN GRAPH......
    
+    #  dd <- read.table ("C:\\Users\\fbas\\Documents\\GitHub\\DISPLACE_input_adriatic\\harboursspe_adriatic\\names_harbours.dat", header=T)
+    # unique(as.character(vessel_specifications$Harbor))[! unique(as.character(vessel_specifications$Harbor)) %in% dd$name]
+   if(!visited_ports %in% row.names(port_names)){  
+       visited_ports <- switch(as.character(visited_ports), 
+                 "ROSETO DEGLI ABRUZZI"= "GIULIANOVA",
+                 "SILVI"= "PESCARA",
+                 "TORTORETO"= "GIULIANOVA",
+                 "RAVENNA"="PORTO CORSINI",
+                 "MONFALCONE"="TRIESTE",
+                 "SISTIANA"= "TRIESTE",
+                 "CUPRA MARITTIMA"="SAN BENEDETTO DEL TRONTO",
+                 "GABICCE MARE"="RIMINI",
+                 "GROTTAMMARE"="SAN BENEDETTO DEL TRONTO",
+                 "PORTO SAN GIORGIO"="CIVITANOVA MARCHE",
+                 "MARGHERITA DI SAVOIA"="VIESTE",
+                 "RODI GARGANICO"="PESCHICI",
+                 "BURANO"="VENEZIA",
+                 "IESOLO"="CAORLE",
+                 "LIGNANO SABBIADORO"="MARANO LAGUNARE", 
+                 "PELLESTRINA"="CHIOGGIA" ,
+                 "PORTO LEVANTE"= "CHIOGGIA",
+                 "SCARDOVARI"="PORTO TOLLE" ,
+                 "SAN BENEDETTO"="SAN BENEDETTO DEL TRONTO",
+                 
+                 "ANCONA") ## CAUTION DEBUG: MISSING PORTS IN GRAPH......
+     }
+     
+     
    name_file_ports            <- "harbours_adriatic.dat" 
    visited_ports_frequencies  <- c(1)          # e.g. c(0.8, 0.2)
    nb_stocks                  <- length(spp)  # from 0 in c++
@@ -134,7 +161,12 @@
                                    vessel_specifications[i, "multip.fuel.steaming"],
                                    vessel_specifications[i, "multip.fuel.fishing"],
                                    vessel_specifications[i, "multip.fuel.ret.port.fish"],
-                                   vessel_specifications[i, "multip.fuel.inactive"]) 
+                                   vessel_specifications[i, "multip.fuel.inactive"],
+                                   vessel_specifications[i, "weekEndStartDay"],
+                                   vessel_specifications[i, "WeekEndEndDay"],
+                                   vessel_specifications[i, "WorkHoursStart"],
+                                   vessel_specifications[i, "WorkHoursEnd"]
+                                   ) 
    step_in_share              <- rep(vessel_specifications[i, "N..of.vessels"]/ sum(vessel_specifications[, "N..of.vessels"], na.rm=TRUE), nb_stocks) # i.e. 100 % of each TAC per stock will be booked for these new vessels
    vesselsspe_betas           <- log(vessel_specifications[i, paste(spp, "_kg_h", sep='') ]*nb_agent_per_vessels +0.01 )  # catch rate log(kg per hour) from the Marche region # stock name 0:Hake, 1:Sole, 2: Mullet, 3: Mantis  CAUTION: log(0)=-Inf !
    create_file_for_fuel_price_per_vessel_size <- TRUE
@@ -277,7 +309,10 @@
  for (namefile in namefiles){ # LOOP OVER CONFIG FILES
   count <- count+1
   
-   dat              <- readLines(file.path(path, namefile))
+ ##if(namefile %in% c("vessels_creator_args_adriatic_VEN52_gillnet.dat") ||
+ ##){
+ 
+    dat              <- readLines(file.path(path, namefile))
    
    my_split <- function(x) unlist(strsplit(x, " "))
    my_split2 <- function(x) unlist(strsplit(x, "_"))

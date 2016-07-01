@@ -43,26 +43,29 @@
    general$namefolderinput    <- "adriatic"
    general$igraph             <- 1  # caution: should be consistent with existing pops already built upon a given graph
    do_append                  <- TRUE
-   name_gis_file_for_total_abundance_per_polygon <- c("sole/Sole_small_Drawing", "sole/Sole_medium_Drawing", "sole/Sole_large_Drawing")   # Solea solea in 3 size categories
+   #name_gis_file_for_total_abundance_per_polygon <- c("sole/Sole_small_Drawing", "sole/Sole_medium_Drawing", "sole/Sole_large_Drawing")   # Solea solea in 3 size categories
+   name_gis_file_for_total_abundance_per_polygon <- c("sole/Sole0", "sole/Sole1", "sole/Sole2", "sole/Sole3", "sole/Sole4", "sole/Sole5")   # Solea solea in 3 size categories
    popids                     <- 1 # stock name 0:Hake, 1:Sole, 2: Mullet, 3: Mantis
-   szgroups                   <-  "0 1 2 3 4 5 6_7 8 9 10_11 12 13"  # for 0:Hake, 1:Sole,  # should correspond to some gis files      # 14 size groups
+   #szgroups                   <-  "0 1 2 3 4 5 6_7 8 9 10_11 12 13"  # for 0:Hake, 1:Sole,  # should correspond to some gis files      # 14 size groups
+   szgroups                   <-  "0 1 2 3 4_5 6_7 8 9_10 11_12_13"  # for 0:Hake, 1:Sole,  # should correspond to some gis files      # 14 size groups
    selected_szgroups          <-  c(2,5,7,9)
    name_gis_layer_field       <- "KG_KM2"    # e.g. giving occurences in polygon
    is_gis_layer_field_relative_numbers          <- FALSE   # if relative categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
-   xfold_gis_layer_field      <- c(1, 1, 1, 1, 1)  # [not used if is_gis_layer_field_relative_numbers is FALSE] 
+   #xfold_gis_layer_field      <- c(1, 1, 1, 1, 1)  # [not used if is_gis_layer_field_relative_numbers is FALSE] 
+   xfold_gis_layer_field      <- c(1)  # [not used if is_gis_layer_field_relative_numbers is FALSE] 
    }
    
    if(general$application=="adriatic" && redmullet){
    general$namefolderinput    <- "adriatic"
    general$igraph             <- 1  # caution: should be consistent with existing pops already built upon a given graph
    do_append                  <- TRUE
-   name_gis_file_for_total_abundance_per_polygon <- c("redmullet/mullet_small_Drawing", "redmullet/mullet_medium_Drawing", "redmullet/mullet_large_Drawing")   # Solea solea in 3 size categories
+   name_gis_file_for_total_abundance_per_polygon <- c("redmullet/mullet_small", "redmullet/mullet_medium", "redmullet/mullet_large")   # Solea solea in 3 size categories
    popids                     <- 2 # stock name 0:Hake, 1:Sole, 2: Mullet, 3: Mantis
    szgroups                   <-  "0 1 2 3_4 5_6 7 8 9 10 11 12 13"  # for 0:Hake, 1:Sole,  # should correspond to some gis files      # 14 size groups
    selected_szgroups          <-  c(2,5,7,9)
    name_gis_layer_field       <- "KG_KM2"    # e.g. giving occurences in polygon
    is_gis_layer_field_relative_numbers          <- FALSE   # if relative categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
-   xfold_gis_layer_field      <- c(1, 1, 1, 1, 1)  # [not used if is_gis_layer_field_relative_numbers is FALSE] 
+   xfold_gis_layer_field      <- c(1, 1, 1, 1, 1, 1)  # [not used if is_gis_layer_field_relative_numbers is FALSE] 
    }
    
    if(general$application=="adriatic" && spottailmantisshrimp){
@@ -140,7 +143,7 @@
    application           <- "adriatic" # ...or myfish etc.
    #!#¤!#!#!#!#
    #!#¤!#!#!#!#
-   popids                <- 3 # stock 0 to 3
+   popids                <- 2 # stock 0 to 3
    #!#¤!#!#!#!#
    #!#¤!#!#!#!#
    path <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis") # where is the config file?
@@ -186,8 +189,9 @@
  detectingCoordInPolygonsFromSH <- function (sh, coord, name_column="poly"){
 
      coord <- eval(parse(text=paste("cbind(coord, ",name_column,"= 0)", sep='')))
-     dd                   <- sapply(slot(sh, "polygons"), function(x) lapply(slot(x, "Polygons"), function(x) x@coords)) # tricky there...
-     
+     dd                   <- sapply(slot(sh, "polygons"), function(x) lapply(slot(x, "Polygons"), function(x) x@coords), simplify=FALSE) # tricky there...
+     if(length(dd)==1) dd <- dd[[1]]   # debug if only one level of polygons
+ 
      ids <- sapply(slot(sh, "polygons"),  function (x) x@ID)
      
      library(sp)
@@ -198,13 +202,13 @@
           # Points on land are 1 or 2 and not is 0
           er <- try({res   <- point.in.polygon(coord[,1],coord[,2],dd[[iLand]][[i]][,1],dd[[iLand]][[i]][,2])}, silent=TRUE)
           if(class(er)=="try-error") res   <- point.in.polygon(coord[,1],coord[,2],dd[[iLand]][,1],dd[[iLand]][,2])
-          coord[which(res!=0), name_column] <- ids[iLand]
+          if(length(ids)==1) coord[which(res!=0), name_column] <- 1 else  coord[which(res!=0), name_column] <- ids[iLand]
        }
       } else{
           er <- try({res   <- point.in.polygon(coord[,1],coord[,2],dd[[1]][,1],dd[[1]][,2])}, silent=TRUE)
           if(class(er)=="try-error") res   <- point.in.polygon(coord[,1],coord[,2],dd[[1]][,1],dd[[1]][,2])
-          coord[which(res!=0), name_column] <- ids[iLand]
-
+          if(length(ids)==1) coord[which(res!=0), name_column] <- 1 else  coord[which(res!=0), name_column] <- ids[iLand]
+  
       }
 
      }
