@@ -140,6 +140,9 @@
                  
                  "ANCONA") ## CAUTION DEBUG: MISSING PORTS IN GRAPH......
      }
+   if(visited_ports=="VIESTE") visited_ports <- "RODI GARGANICO" 
+   #  "ITA_ROD40_NET1" <="ITA_VIE41_NET2"  and ITA_MAR39_NET1
+   
      
      
    name_file_ports            <- "harbours_adriatic.dat" 
@@ -540,6 +543,7 @@ getPolyAroundACoord <- function(dat, a_dist_m){
 
  
  
+ 
  # check
  plot(sp)
  plot(handmade_WGS84,  add=TRUE, border=as.data.frame(handmade_WGS84)[,name_gis_layer_field])
@@ -618,6 +622,8 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
     #-----------
 
 
+   
+    
 
     #-----------
     # vesselsspe_harbours_quarter[xx].dat
@@ -885,6 +891,52 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
 
 
 } # END LOOP OVER CONFIG FILES
+
+
+
+
+ ## LASTLY,
+   # fix the files to avoid vessel fishing in harbour (!)
+   # but do not remove a vessel by inadvertance....
+ for (a.quarter in c("Q1","Q2","Q3","Q4")){
+
+    port_names <- read.table(file=file.path(general$main.path.ibm,
+                                paste("harboursspe_",general$namefolderinput,sep=''),
+                                  paste("harbours.dat", sep='')), sep=";")
+    port_names$pt_graph   <- saved_coord[match(port_names$idx.port, saved_coord[,"harb"]), "pt_graph"] 
+    port_names$pt_graph <-  as.numeric(as.character(port_names$pt_graph)) - 1 ##!!! FOR C++ !!!##
+   
+    # 1
+    vesselsspe_fgrounds_quarter <- read.table(file.path(general$main.path.param, "vesselsspe",
+              paste("vesselsspe_fgrounds_quarter",gsub("Q","",a.quarter),".dat",sep='')), header=TRUE)
+    idx  <- vesselsspe_fgrounds_quarter$pt_graph %in%  port_names$pt_graph          
+    vids_before <- vesselsspe_fgrounds_quarter[,1]
+    vesselsspe_fgrounds_quarter <- vesselsspe_fgrounds_quarter[!idx,]  # correct
+    vids_after <- vesselsspe_fgrounds_quarter[,1]
+    print(vids_before[!vids_before %in% vids_after])  #check if all vid kept on board...if not you are in trouble....
+    
+    colnames(vesselsspe_fgrounds_quarter) <- c("vids", "pt_graph")
+   
+   
+    write.table(vesselsspe_fgrounds_quarter,
+          file=file.path(general$main.path.param, "vesselsspe",
+            paste("vesselsspe_fgrounds_quarter",gsub("Q","",a.quarter),".dat",sep='')),
+               col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
+    # 2
+    vesselsspe_freq_fgrounds_quarter <- read.table(file.path(general$main.path.param, "vesselsspe",
+              paste("vesselsspe_freq_fgrounds_quarter",gsub("Q","",a.quarter),".dat",sep='')), header=TRUE)
+    vesselsspe_freq_fgrounds_quarter <- vesselsspe_freq_fgrounds_quarter[!idx,]  # correct
+    colnames(vesselsspe_freq_fgrounds_quarter) <- c("vids", "freq")
+
+  
+    vesselsspe_freq_fgrounds_quarter$freq <- format(vesselsspe_freq_fgrounds_quarter$freq, scientific = FALSE)
+    write.table(vesselsspe_freq_fgrounds_quarter,
+          file=file.path(general$main.path.param, "vesselsspe",
+            paste("vesselsspe_freq_fgrounds_quarter",gsub("Q","",a.quarter),".dat",sep='')),
+               col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
+    }
+    #-----------
+ 
 
 cat("Remenber that because some new fgrounds are created \n you will have (in DISPLACE GUI) to derive a new graph with a new shortestPath library (say 57 by loading the graph 56 and then create the shortestPaths) \n and also create a new baseline.dat /simusspe with the right missing port idx (say 9979) (absence of the right index for the port makes the ui crash)\n") 
 
