@@ -9,15 +9,15 @@
      general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
      general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
   
-   # dir_to_clean <-    file.path(general$main.path.ibm, "FISHERIES", "vessels_config_files")
-   # file.remove(dir(   dir_to_clean, pattern = "vessels_creator_args", full.names = FALSE))
  
    }
    
   
   
-   general$namefolderinput    <- "balticRTI"
    dir.create(path=file.path(general$main.path.param.gis, "FISHERIES", "vessels_config_files"))
+   dir.create(path=file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep='')))
+  
+  
   
    filename <- file.path(general$main.path.param.gis, "FISHERIES", "vessels_specifications_per_harbour_metiers.csv")
    cnts     <- count.fields(filename, sep = ";") 
@@ -46,7 +46,7 @@
    metier_names <-  cbind.data.frame(idx=0: (length(levels(vessel_specifications$LE_MET))-1),  name=levels(vessel_specifications$LE_MET))
    write.table(
     metier_names,
-     file=file.path(general$main.path.param.gis, "FISHERIES", "metier_names.dat"),
+     file=file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep=''), "metier_names.dat"),
      quote=FALSE, row.names=FALSE, col.names=TRUE)
      
 
@@ -60,11 +60,7 @@
        # test for truly individual vessel data i.e. one vessel => one config file
     
     
-    
-     # balticRTI (caution: give the order for naming stocks in integer from 0 to n-1)
-     # spp                        <- c("COD.2532", "COD.2224", "FLE.2223", "FLE.2425", "PLE.2123", "PLE.2432", "SOLIIIa2223", "WHG.2232", "DAB.2232", "TUR.2232", "HER.IIIa22", "HER.2532", "SPR.2232") 
-     
-     spp_table <-  read.table(file=file.path(general$inPathPop, paste("pop_names_",general$application ,".txt",sep='')),
+      spp_table <-  read.table(file=file.path(general$inPathPop, paste("pop_names_",general$application ,".txt",sep='')),
               header=TRUE)
       spp                        <- as.character(spp_table$spp)
 
@@ -166,10 +162,10 @@
    # create a (intermediate) config file
    if(any("vid" %in% colnames(vessel_specifications))){
       namefile <- file.path(general$main.path.param.gis, "FISHERIES", "vessels_config_files",
-               paste("vessels_creator_args_",general$namefolderinput,"_", as.character(vessel_specifications[i, "vid"]), "_", harbcode, "_", all_records_this_vid[imax, "metier"], ".dat", sep=''))
+               paste("vessels_creator_args_",general$application,"_", as.character(vessel_specifications[i, "vid"]), "_", harbcode, "_", all_records_this_vid[imax, "metier"], ".dat", sep=''))
    } else{
       namefile <- file.path(general$main.path.param.gis, "FISHERIES", "vessels_config_files",
-               paste("vessels_creator_args_",general$namefolderinput, "_", harbcode, "_", vessel_specifications[i, "metier"], ".dat", sep=''))
+               paste("vessels_creator_args_",general$application, "_", harbcode, "_", vessel_specifications[i, "metier"], ".dat", sep=''))
    }
  
    
@@ -187,7 +183,7 @@
    write(general$main.path.ibm, file=namefile, ncolumns=1, append=TRUE)
   
    write("# name of the application",file=namefile, ncolumns=1, append=TRUE)
-   write(general$namefolderinput, file=namefile, ncolumns=1, append=TRUE)
+   write(general$application, file=namefile, ncolumns=1, append=TRUE)
   
    write("# name of the graph for this application", file=namefile, ncolumns=1, append=TRUE)
    write(general$igraph,file=namefile, ncolumns=1, append=TRUE)

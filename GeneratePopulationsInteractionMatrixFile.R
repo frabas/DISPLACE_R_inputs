@@ -1,10 +1,9 @@
    
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-  general <- list()
-  general$application <- "balticRTI"
+ 
   
-   path      <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application,  "POPULATIONS", "pops_config_files")
+   path      <- file.path(general$main.path.param.gis, "POPULATIONS", "pops_config_files")
    namefiles <- list.files(file.path( path))
 
  
@@ -286,32 +285,6 @@ for (a.semester in c("S1", "S2")){
 
 
  
-
-  ## ADDITIONAL FILES FOR THE CATCH EQUATION
-   spp_table    <- read.table(file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''), paste("pop_names_",general$application ,".txt",sep='')), header=TRUE)
-   spp          <- as.character(spp_table$spp)
-  
-    for (a.semester in 1:2){
-   #-----------
-   #-----------
-    ## POP SPE----------
-      for(rg in selected_szgroups){
-        # export betas specific to the avai szgroup given this pop (caution: remenber the scaling i.e *1000)
-        # mean estimates
-         popsspe_delta_semester <- cbind.data.frame(0:(length(spp)-1), rep(0, length(0:(length(spp)-1))) )
-         colnames(popsspe_delta_semester) <- c('pop', 'delta.nb_indiv')
-
-        # save .dat files
-        write.table(popsspe_delta_semester,
-           file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
-             paste("avai", rg, "_betas_semester", a.semester,".dat",sep='')),
-               col.names=TRUE,  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")
-       }
-
-
-
-   } # end a.semester
-
  
 } 
  

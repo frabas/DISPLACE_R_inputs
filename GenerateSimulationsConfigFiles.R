@@ -21,11 +21,6 @@
   colnames(coord) <- c('x', 'y', 'harb')
   plot(coord[,1], coord[,2])
  
-  dep <-  ((nrow(dd)/3)+1) -nrow(port_names)
-  idx <-  dep : (nrow(dd)/3)   # all idx nodes for ports
-  idx <- idx - 1 ##!!## CAUTION OFFSET BY 1 in C++ ##!!##
- 
-
  
   graph <- read.table(file=file.path(general$main.path.param.gis, "GRAPH", paste("graph", general$igraph, ".dat", sep=""))) # build from the c++ gui
   graph <- as.matrix(as.vector(graph))

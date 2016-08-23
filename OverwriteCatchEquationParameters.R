@@ -223,7 +223,7 @@
   load(file.path(general$inPathPop, "avai",
         paste("lst_avai_igraph",general$igraph,"_",years,"_",method,"_",threshold,".RData",sep=""))) ##!!e.g.  2005-2010 !!##
 
-  # balticRTI (caution: give the order for naming stocks in integer from 0 to n-1)
+  # (caution: give the order for naming stocks in integer from 0 to n-1)
   spp_table <-  read.table(file=file.path(general$inPathPop, paste("pop_names_",general$casestudy ,".txt",sep='')),
               header=TRUE)
   spp                        <- as.character(spp_table$spp)
@@ -827,6 +827,7 @@
 
 
       ## POP SPE----------
+      # (caution: give the order for naming stocks in integer from 0 to n-1)
       for(rg in range_szgroup){
         # export betas specific to the avai szgroup given this pop (caution: remenber the scaling i.e *1000)
         # mean estimates

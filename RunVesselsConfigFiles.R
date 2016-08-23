@@ -9,6 +9,8 @@ general$application           <- "balticRTI"
 general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_" , general$application, sep=""))
  
 dir.create(file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep='')))
+dir.create(file.path(general$main.path.ibm, paste("popssspe_", general$application, sep='')))
+dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep='')))
 
 
 #-------------------------------------------------------------------------------
@@ -605,6 +607,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
 
    #-----------
    #-----------
+   ## VESSEL SPE----------
    # vesselsspe_betas_semester
    vesselsspe_betas_semester <- cbind.data.frame(rep(vesselids, each=nb_stocks), rep(vesselsspe_betas, length(vesselids)) )
    colnames(vesselsspe_betas_semester) <- c('VE_REF', 'beta.VE_REF')
@@ -614,7 +617,9 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
            file=file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep=''),
              paste("vesselsspe_betas_semester", a.semester,".dat",sep='')),
                col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, quote=FALSE, append=do_append, sep = " ")
-   #-----------
+  
+
+
 
  }
 
@@ -708,6 +713,37 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
                col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
     }
     #-----------
+
+
+
+
+
+  ## ADDITIONAL FILES FOR THE CATCH EQUATION
+   spp_table    <- read.table(file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''), paste("pop_names_",general$application ,".txt",sep='')), header=TRUE)
+   spp          <- as.character(spp_table$spp)
+   metier_names <- read.table( file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''), "metier_names.dat"), header=TRUE)
+
+    for (a.semester in 1:2){
+   #-----------
+   #-----------
+   ## METIER SPE----------
+      # export betas specific to the metier given this pop
+      # mean estimates
+      nb_met         <- (nrow(metier_names)-1)
+      nb_stk         <- length(spp)
+      metiersspe_gamma_semester <- cbind.data.frame( rep(0:(nb_met-1), each=nb_stk), rep(0, length= nb_met*nb_stk)    )
+      colnames(metiersspe_gamma_semester) <- c('LE_MET_level6', 'gamma.VE_REF')
+
+      # save .dat files
+       write.table(metiersspe_gamma_semester,
+           file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''),
+             paste("metiersspe_betas_semester", a.semester,".dat",sep='')),
+               col.names=TRUE,  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")
+  
+
+ 
+
+ } # end a.semester
 
 
 cat("Remenber that because some new fgrounds are created \n you will have (in DISPLACE GUI) to derive a new graph with a new shortestPath library (say 57 by loading the graph 56 and then create the shortestPaths) \n and also create a new baseline.dat /simusspe with the right missing port idx (say 9979) (absence of the right index for the port makes the ui crash)\n")

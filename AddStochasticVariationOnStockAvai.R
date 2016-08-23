@@ -2,10 +2,12 @@
    # GENERAL SETTINGS
    general <- list()
    if(.Platform$OS.type == "windows") {
-     general$application           <- "adriatic" # ...or myfish etc.
+     general$application           <- "balticRTI" # ...or myfish etc.
      general$main.path.param       <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
+     general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
    }
 
+    dir.create(file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''), "stochastic_avai"))
 
 
 ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
@@ -24,7 +26,7 @@ call_make_avai_files <- function(pid=0, num="1", general=general){
 
     # input (a static)
      popsspe_avai_semester_this_pop <-
-         read.table(file=file.path(general$main.path.param, paste("popsspe_", general$application, sep=''), "static_avai",
+         read.table(file=file.path( general$main.path.ibm, paste("popsspe_", general$application, sep=''), "static_avai",
               paste(pid, "spe_full_avai_szgroup_nodes_semester",gsub("Q","",a.semester),".dat",sep='')),
                   header=TRUE)
 
@@ -93,7 +95,7 @@ call_make_avai_files <- function(pid=0, num="1", general=general){
 
         # output (a stochastic draw)
           write.table(avai_this_szgroup[,c('pt_graph', 'abundance')],  # the szgroup dim is implicit....
-            file=file.path(general$main.path.param, paste("popsspe_", general$application, sep=''), "stochast_avai",
+            file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),  "stochast_avai",
               paste(pid, "spe_full_avai_szgroup_nodes_semester",gsub("Q","",a.semester),paste("_",as.character(num),sep=''),".dat",sep='')),
                   col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
 
@@ -104,7 +106,7 @@ call_make_avai_files <- function(pid=0, num="1", general=general){
 
         # output 2
         write.table(avai_this_szgroup[avai_this_szgroup$szgroup %in% idx, c('pt_graph', 'abundance')],  # the szgroup dim is implicit....
-            file=file.path(general$main.path.param, paste("popsspe_", general$application, sep=''), "stochast_avai",
+            file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),  "stochast_avai",
               paste(pid, "spe_avai_szgroup_nodes_semester",gsub("Q","",a.semester),paste("_",as.character(num),sep=''),".dat",sep='')),
                   col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
 
@@ -124,7 +126,7 @@ return()
     # add a multivariate lognormal error
    cat("if it still doesn't exist, 'stochast_avai' folder is created in ",
                       file.path(general$main.path,"popsspe","\n"))
-   dir.create(file.path(general$main.path.param, paste("popsspe_", general$application, sep='') ,"stochast_avai"),
+   dir.create(file.path(general$main.path.ibm, paste("popsspe_", general$application, sep='') ,"stochast_avai"),
                       showWarnings = TRUE, recursive = TRUE, mode = "0777")
    n<-50
    increment <- sprintf("%03d", 1:n)
