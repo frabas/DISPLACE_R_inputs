@@ -26,7 +26,11 @@ general                     <- list()
  
  
  
- # balticRTI (caution: give the order for naming stocks in integer from 0 to n-1)
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ## STOCK NAMES !!
+  
+  # balticRTI (caution: give the order for naming stocks in integer from 0 to n-1)
   spp                        <- c("COD.2532", "COD.2224", "FLE.2223", "FLE.2425", "PLE.2123", "PLE.2432", "SOL.IIIa2223", "WHG.2232", "DAB.2232", "TUR.2232", "HER.IIIa22", "HER.2532", "SPR.2232") 
   
   write.table(cbind(idx=0:(length(spp)-1), spp=spp),
@@ -37,14 +41,16 @@ general                     <- list()
               quote=FALSE, col.names=TRUE, row.names=FALSE)
 
   
-  dir.create(path=file.path(general$main_path_gis, general$application,  "POPULATIONS", "SpatialLayers"))
+  
+
+
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+
+ dir.create(path=file.path(general$main_path_gis, general$application,  "POPULATIONS", "SpatialLayers"))
  
-
-
- ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
- ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
- ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
- ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
 
   get_contour_this_avai <- function (
                           a.semester = "1",
@@ -182,6 +188,24 @@ general                     <- list()
   size_cats[["SPR.2232"]] [["small"]]  <- c("1")
   size_cats[["SPR.2232"]] [["medium"]] <- c("2")
   size_cats[["SPR.2232"]] [["large"]]  <- c("3")
+ 
+ 
+ # the selected groups in the catch rate equation
+ write(c('stock',  'comcat_per_szgroup'),
+                   file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
+                       paste("comcat_per_szgroup_done_by_hand.dat",sep=' ')), append=FALSE,  ncol=2,
+                          sep=" ") 
+ count <-0
+ for (sp in 1: length(spp)){
+    count <- count+1
+       dd <- unlist(lapply(size_cats[[sp]], length))
+       comcat_per_szgroup <- c(rep(0, dd[1]), rep(1, dd[2]), rep(2, 14-(dd[1]+dd[2])))
+       write.table(cbind(rep(sp-1, 14), comcat_per_szgroup),
+                   file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
+                       paste("comcat_per_szgroup_done_by_hand.dat",sep=' ')), append=TRUE,
+                         quote = FALSE, sep=" ", col.names=FALSE, row.names=FALSE)
+ 
+ }
  
  
    
