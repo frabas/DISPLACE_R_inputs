@@ -1,31 +1,43 @@
 general                     <- list()
-  general$casestudy           <- "balticRTI"
-  general$main_path           <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_raw")
-  general$main_path_input     <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input")
-  general$main_path_R_inputs  <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
-  general$main_path_gis       <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_gis")
+
+  general$application         <- "balticRTI"
   general$igraph              <- "56"   # for the baltic only CS.
   general$method              <- "inverse" # for the baltic only CS.
   general$threshold           <- 25
   general$p                   <- 0.1
   general$nmy                 <- "2013_2014_2015"
 
- # load
-  load(file = file.path(general$main_path_gis, general$casestudy, "POPULATIONS", "avai",
+ 
+  general$main_path           <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_raw")
+  general$main_path_input     <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input")
+  general$main_path_R_inputs  <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
+  general$main_path_gis       <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_gis")
+  general$main.path.ibm       <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
+
+ 
+  
+  dir.create(file.path( general$main.path.ibm, paste("pop_names_",general$application ,".txt",sep='')))
+  
+  
+  # load
+  load(file = file.path(general$main_path_gis, general$application, "POPULATIONS", "avai",
                             paste("lst_avai_igraph", general$igraph,"_", general$nmy,"_",general$method,"_", general$threshold, ".RData",sep="")) )
 
  
+ 
+ 
  # balticRTI (caution: give the order for naming stocks in integer from 0 to n-1)
   spp                        <- c("COD.2532", "COD.2224", "FLE.2223", "FLE.2425", "PLE.2123", "PLE.2432", "SOL.IIIa2223", "WHG.2232", "DAB.2232", "TUR.2232", "HER.IIIa22", "HER.2532", "SPR.2232") 
+  
   write.table(cbind(idx=0:(length(spp)-1), spp=spp),
-              file=file.path( general$main_path, paste("pop_names_",general$casestudy ,".txt",sep='')),
+              file=file.path( general$main.path.ibm, paste("pop_names_",general$application ,".txt",sep='')),
               quote=FALSE, col.names=TRUE, row.names=FALSE)
   write.table(cbind(idx=0:(length(spp)-1), spp=spp),
-              file=file.path(general$main_path_gis, general$casestudy, "POPULATIONS", paste("pop_names_",general$casestudy ,".txt",sep='')),
+              file=file.path(general$main_path_gis, general$application, "POPULATIONS", paste("pop_names_",general$application ,".txt",sep='')),
               quote=FALSE, col.names=TRUE, row.names=FALSE)
 
   
-  dir.create(path=file.path(general$main_path_gis, general$casestudy,  "POPULATIONS", "SpatialLayers"))
+  dir.create(path=file.path(general$main_path_gis, general$application,  "POPULATIONS", "SpatialLayers"))
  
 
 
@@ -118,7 +130,7 @@ general                     <- list()
     IDs  <- sapply(slot(sp, "polygons"), function(x) slot(x, "ID"))
     a_df <-  data.frame(GRIDCODE=sapply(contourobj, function(x) x$level) [as.numeric(IDs)], row.names=IDs)
     spdf <- SpatialPolygonsDataFrame(sp, a_df)
-    writePolyShape(spdf, file.path(general$main_path_gis, general$casestudy, "POPULATIONS", "SpatialLayers", nameobj))
+    writePolyShape(spdf, file.path(general$main_path_gis, general$application, "POPULATIONS", "SpatialLayers", nameobj))
 
    return()
    }
@@ -218,11 +230,11 @@ general                     <- list()
   }}      
            
   # additional info on the plot         
-  sh1 <- readShapePoly(file.path(general$main_path_gis, general$casestudy, "MANAGEMENT", "francois_EU"))
+  sh1 <- readShapePoly(file.path(general$main_path_gis, general$application, "MANAGEMENT", "francois_EU"))
   plot(sh1, add=TRUE, col=grey(0.5))
   legend("bottomright", legend=paste(c(spp)),
          fill=cols, ncol=2, cex=0.8, bg="white", box.col="white")
-  savePlot(file.path(general$main_path_gis, general$casestudy, "POPULATIONS", "avai", "avai_distrib_small_medium_large.jpeg"), type="jpeg")
+  savePlot(file.path(general$main_path_gis, general$application, "POPULATIONS", "avai", "avai_distrib_small_medium_large.jpeg"), type="jpeg")
 
 
 

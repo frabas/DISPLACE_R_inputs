@@ -40,12 +40,7 @@
     }
    selected_szgroups          <-  as.character(my_split(dat[29]))
 
-   # quick check
-   if(length(name_gis_file_for_total_abundance_per_polygon) != length(szgroups)) stop("Need for same number of GIS layers and sets of size groups....")
-
-
-
-
+ 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #-----utils---------------------------------------------------------------------
@@ -136,6 +131,7 @@
    # How can I get the proj4 string from a shapefile .prj file? http://gis.stackexchange.com/questions/55196/how-can-i-get-the-proj4-string-or-epsg-code-from-a-shapefile-prj-file
    if(is.na( projection(handmade2))) projection(handmade2) <- CRS("+proj=longlat +datum=WGS84")   # a guess!
    library(sp)
+    library(rgdal)
     handmade_WGS84 <- spTransform(handmade2, CRS("+proj=longlat +datum=WGS84"))    # convert to longlat
     }
     
@@ -147,8 +143,7 @@
 
     # test coord for polygon inclusion
      spo                          <- SpatialPoints(coordinates(data.frame(CELL_LONG=coord[,1],
-                                             CELL_LATI=coord[,2])))
-     projection(spo)              <-  CRS("+proj=longlat +datum=WGS84")
+                                             CELL_LATI=coord[,2])), proj4string=CRS("+proj=longlat +datum=WGS84"))
      idx                          <- over(spo, handmade_WGS84, returnList=FALSE)  # idx in handmade_WGS84_reduced
      coord                        <- cbind(coord, idx[,name_gis_layer_field])
      colnames(coord)[ncol(coord)] <- name_gis_layer_field
@@ -285,7 +280,9 @@ for (a.semester in c("S1", "S2")){
    #-----------
 
 
- 
+                          
+                         
+
 
   ## ADDITIONAL FILES FOR THE CATCH EQUATION
    spp_table    <- read.table(file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''), paste("pop_names_",general$application ,".txt",sep='')), header=TRUE)
@@ -295,7 +292,7 @@ for (a.semester in c("S1", "S2")){
    #-----------
    #-----------
     ## POP SPE----------
-      for(rg in selected_szgroups){
+      for(rg in c('0', '2', '3', '5', '7')){
         # export betas specific to the avai szgroup given this pop (caution: remenber the scaling i.e *1000)
         # mean estimates
          popsspe_delta_semester <- cbind.data.frame(0:(length(spp)-1), rep(0, length(0:(length(spp)-1))) )
@@ -306,11 +303,43 @@ for (a.semester in c("S1", "S2")){
            file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
              paste("avai", rg, "_betas_semester", a.semester,".dat",sep='')),
                col.names=TRUE,  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")
-       }
+     
+     
+     
+     
+          }
 
 
 
    } # end a.semester
+
+
+    # the selected groups in the catch rate equation
+    write(c('nm2',  'selected_szgroups'),
+                   file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
+                       paste("the_selected_szgroups.dat",sep=' ')), append=FALSE,  ncol=2,
+                          sep=" ")
+                         
+    for(sp in (0:(length(spp)-1))){
+       write.table(cbind(nm2=sp, selected_szgroups=c(0, 2, 3, 5, 7)),
+                   file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
+                       paste("the_selected_szgroups.dat",sep=' ')), append=TRUE,
+                         quote = FALSE, sep=" ", col.names=FALSE, row.names=FALSE)
+ 
+    }
+
+   
+ 
+ 
+ 
+
+
+
+   
+     # quick check
+   if(length(name_gis_file_for_total_abundance_per_polygon) != length(szgroups)) stop("Need for same number of GIS layers and sets of size groups....")
+
+
 
  
 } 

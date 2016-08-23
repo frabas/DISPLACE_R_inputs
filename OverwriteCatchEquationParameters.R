@@ -13,7 +13,7 @@
 
   
   
-  general$case_study            <- "balticRTI"
+  general$application            <- "balticRTI"
   
   general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_" , general$application, sep=""))
   dir.create(file.path(general$inPathPop , "CatchRates")) 
@@ -224,7 +224,7 @@
         paste("lst_avai_igraph",general$igraph,"_",years,"_",method,"_",threshold,".RData",sep=""))) ##!!e.g.  2005-2010 !!##
 
   # (caution: give the order for naming stocks in integer from 0 to n-1)
-  spp_table <-  read.table(file=file.path(general$inPathPop, paste("pop_names_",general$casestudy ,".txt",sep='')),
+  spp_table <-  read.table(file=file.path(general$inPathPop, paste("pop_names_",general$application ,".txt",sep='')),
               header=TRUE)
   spp                        <- as.character(spp_table$spp)
 
@@ -233,8 +233,12 @@
   all.betas.vid.se   <- NULL  # VE_REF standard error
   all.gammas.met.se  <- NULL  # LE_MET_level6 standard error
 
-  range_szgroup <-  c(2,5,7,8,9)   # should be consistent with PopulationsConfigFiles
+  range_szgroup <-  c('0', '2', '3', '5', '7')   # this actually cannot be changed because this naming is used in DISPLACE c++
   the_selected_szgroups <- NULL
+  write(c('nm2',  'selected_szgroups'), # init
+                   file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
+                       paste("the_selected_szgroups.dat",sep=' ')), append=FALSE,  ncol=2,
+                          sep=" ")
 
 
   for(rg in range_szgroup){
@@ -271,6 +275,9 @@
        # hereafter an easy and DANGEROUS shortcut (dangerous because confusing...) as a way for changing the szgroups used for the catch rate equation....
        # i.e. select the 5 most relevant ones for this species.
        # e.g. try to contrast the spatial avai data for small vs. larger fish (i.e. >minimum landing size)
+  
+  
+  
        selected_szgroups <-  range_szgroup #default
        if(nm2 %in% "COD.2224") selected_szgroups <-   c(2,5,7,8,9)
        if(nm2 %in% "COD.2532") selected_szgroups <-   c(2,5,7,8,9)
@@ -279,7 +286,14 @@
        avai[,paste(name.sp,'.nb_indiv.',range_szgroup, sep='')] <- avai[,paste(name.sp,'.nb_indiv.', selected_szgroups, sep='')] ## CAUTION HERE!
        if(nm3=="1") the_selected_szgroups <- rbind(the_selected_szgroups, cbind.data.frame(nm2, selected_szgroups))   # store for later use....
 
-
+      
+       # replace the selected groups in the catch rate equation                         
+       write.table(cbind(nm2=nm2, selected_szgroups=selected_szgroups,
+                   file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
+                       paste("the_selected_szgroups.dat",sep=' ')), append=TRUE,
+                         quote = FALSE, sep=" ", col.names=FALSE, row.names=FALSE)
+ 
+     
 
        # map avai according to pt_graph
        xx$idx                                  <- match( xx[,"pt_graph"], avai[,4])  # avai[,4] is the pt_graph
@@ -772,15 +786,7 @@
                    file=file.path(general$inPathPop, "CatchRates",
                        paste("goodness_of_fit_table_", general$application,".csv",sep=' ')),
                          quote = FALSE, sep=" ", col.names=FALSE, row.names=FALSE)
-  
-    # the selected groups in the catch rate equation
-    levels(the_selected_szgroups$nm2)  <- 0: (length(spp)-1) # map the name to integer
-
-    write.table(the_selected_szgroups,
-                   file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
-                       paste("the_selected_szgroups.dat",sep=' ')),
-                         quote = FALSE, sep=" ", col.names=TRUE, row.names=FALSE)
-
+ 
 
      # then, export PER SEMESTER:
     for(semester in c(1,2)){
@@ -828,7 +834,7 @@
 
       ## POP SPE----------
       # (caution: give the order for naming stocks in integer from 0 to n-1)
-      for(rg in range_szgroup){
+      for(rg in  c('0', '2', '3', '5', '7')){  # caution the naming  c('0', '2', '3', '5', '7') cannot be negotiate...but could correspond to other sizes ()
         # export betas specific to the avai szgroup given this pop (caution: remenber the scaling i.e *1000)
         # mean estimates
         all.deltas <- get(paste('all.deltas',rg,sep=''))

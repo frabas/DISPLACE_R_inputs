@@ -33,8 +33,7 @@
    colnames(dd) <- c("popid", "size", "sizegroups")
    dd <- dd[!duplicated(data.frame(dd$popid, dd$size, dd$sizegroups)),]
    
-   
-   
+  
  for (popid in as.numeric(as.character(unique(dd$popid)))){
    
    
@@ -101,5 +100,7 @@
    write(selected_szgroups, file=namefile, ncolumns=length(selected_szgroups), append=TRUE)
 
    }
+
+
 
 
