@@ -40,7 +40,7 @@ if(general$application=="balticRTI"){
  
  ## CAUTION POP ORDER SHOULD BE CONSISTENT WITH : 
  # balticRTI
- spp                        <- c("COD.2532", "COD.2224", "FLE.2223", "FLE.2425", "PLE.2123", "PLE.2432", "SOL.IIIa2223", "WHG.2232", "DAB.2232", "TUR.2232")  
+ spp                        <- c("COD.2532", "COD.2224", "FLE.2223", "FLE.2425", "PLE.2123", "PLE.2432", "SOL.IIIa2223", "WHG.2232", "DAB.2232", "TUR.2232", "HER.IIIa22", "HER.2532", "SPR.2232")  
  pa <- pa[spp,]  # reorder
  pa$index_pops <- 0: (length(spp)-1)
 
@@ -163,7 +163,6 @@ for (sce in sces){
  write("stock  init_M_per_szgroup", file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),paste("init_M_per_szgroup_biolsce",sce,".dat",sep='')), append=FALSE) 
  write("stock  init_weight_per_szgroup", file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),paste("init_weight_per_szgroup_biolsce",sce,".dat",sep='')), append=FALSE) 
  write("stock  init_pops_per_szgroup", file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),paste("init_pops_per_szgroup_biolsce",sce,".dat",sep='')), append=FALSE) 
- write("stock  init_pops_per_szgroup", file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),paste("init_pops_per_szgroup_2011_biolsce",sce,".dat",sep='')), append=FALSE) 
  write("stock  init_fecundity_per_szgroup", file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),paste("init_fecundity_per_szgroup_biolsce",sce,".dat",sep='')), append=FALSE) 
  write("stock  init_proprecru_per_szgroup", file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),paste("init_proprecru_per_szgroup_biolsce",sce,".dat",sep='')), append=FALSE) 
  

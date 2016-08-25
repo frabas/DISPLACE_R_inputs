@@ -729,10 +729,10 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
    ## METIER SPE----------
       # export betas specific to the metier given this pop
       # mean estimates
-      nb_met         <- (nrow(metier_names)-1)
+      nb_met         <- (nrow(metier_names))
       nb_stk         <- length(spp)
       metiersspe_gamma_semester <- cbind.data.frame( rep(0:(nb_met-1), each=nb_stk), rep(0, length= nb_met*nb_stk)    )
-      colnames(metiersspe_gamma_semester) <- c('LE_MET_level6', 'gamma.VE_REF')
+      colnames(metiersspe_gamma_semester) <- c('LE_MET_level6', 'gamma.LE_MET_level6')
 
       # save .dat files
        write.table(metiersspe_gamma_semester,
