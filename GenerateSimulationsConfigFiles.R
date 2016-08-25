@@ -5,6 +5,7 @@
      general$main.path             <- file.path("C:","DISPLACE_outputs")
      general$application           <- "balticRTI" # ...or myfish
      general$igraph                <- 56
+     general$implicit_stocks       <- c(0, 2, 3, 7, 8, 9, 10, 11, 12) 
      general$main.path.param       <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw")
      general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
      general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_" , general$application, sep=""))
@@ -147,13 +148,13 @@
   namefile  <- file.path(general$main.path.ibm, paste("simusspe_", general$application, sep=''), paste("config.dat", sep=''))
 
   # caution: give the order for naming stocks in integer from 0 to n-1
-  spp_table <-  read.table(file=file.path(general$main.path.param.gis, "POPULATIONS", paste("pop_names_",general$application ,".txt",sep='')),
+  spp_table <-  read.table(file=file.path(general$main.path.param.gis, "POPULATIONS", paste("pop_names_", general$application ,".txt",sep='')),
               header=TRUE)
   spp                        <- as.character(spp_table$spp)
 
   nbpops           <- length(spp)
   nbbenthospops    <- 2
-  implicit_stocks  <- ""
+  implicit_stocks  <- general$implicit_stocks
   calib_other_landings        <- rep(1, nbpops)
   calib_weight_at_size_group  <- rep(1, nbpops)
   calib_cpue_multipliers      <- rep(1, nbpops)
@@ -167,7 +168,7 @@
   write(nbbenthospops, file=namefile, ncolumns=1, append=TRUE)
 
   write("# implicit stocks", file=namefile, ncolumns=1, append=TRUE)
-  write(implicit_stocks, file=namefile, ncolumns=1, append=TRUE)
+  write(implicit_stocks, file=namefile, ncolumns=length(implicit_stocks), append=TRUE)
  
   write("# calib the other landings per stock", file=namefile, ncolumns=1, append=TRUE)
   write(calib_other_landings, file=namefile, ncolumns=length(calib_other_landings), append=TRUE)
