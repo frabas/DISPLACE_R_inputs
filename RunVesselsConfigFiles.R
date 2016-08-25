@@ -731,13 +731,13 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
       # mean estimates
       nb_met         <- (nrow(metier_names))
       nb_stk         <- length(spp)
-      metiersspe_gamma_semester <- cbind.data.frame( rep(0:(nb_met-1), each=nb_stk), rep(0, length= nb_met*nb_stk)    )
+      metiersspe_gamma_semester <- cbind.data.frame( rep(0:(nb_met-1), each=nb_stk), rep(-20, length= nb_met*nb_stk)    )
       colnames(metiersspe_gamma_semester) <- c('LE_MET_level6', 'gamma.LE_MET_level6')
 
       # save .dat files
        write.table(metiersspe_gamma_semester,
            file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''),
-             paste("metiersspe_betas_semester", a.semester,".dat",sep='')),
+             paste("metierspe_betas_semester", a.semester,".dat",sep='')),
                col.names=TRUE,  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")
   
 
