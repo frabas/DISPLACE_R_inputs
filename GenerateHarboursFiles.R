@@ -23,6 +23,10 @@
   port_names <- read.table(file=file.path(general$main.path.param.gis,  "GRAPH",
                                   paste("harbours.dat", sep='')), sep=";")
  
+ # a quick check of consistent port_names file
+ max_idx <- max(port_names$idx.port)
+ c(1:max_idx)[ ! c(1:max_idx) %in% port_names$idx.port ]  # should return integer(0)
+
 
  #load
   coord <- read.table(file=file.path(general$main.path.param.gis, "GRAPH", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
@@ -61,8 +65,14 @@
   # obtain a c++ multimap with stock / price for cat
   prices_per_szcat <-  read.table(file=file.path(general$main.path.param.gis, "POPULATIONS", paste("DISPLACE_datainput_prices_per_category.csv")), sep=',',
               header=TRUE)
-
-
+  #head(prices_per_szcat)
+  #stock small medium large  
+ #COD.2532   0.5      1     2 
+ #COD.2224   0.5      1     2 
+ #FLE.2223   0.5      1     2 
+ #FLE.2425   0.5      1     2 
+ #PLE.2123   0.5      1     2 
+ #PLE.2432   0.5      1     2
 
 for (i in idx){
  prices_per_species_per_cat <- prices_per_szcat [, 2:4]  # price in euro per kilo for three size (small, medium, and large) 
@@ -83,6 +93,6 @@ for (i in idx){
 }
                                  
 
- write.table(cbind(idx,  sapply(rownames(port_names), function (x) paste(unlist(strsplit(x, " ")), collapse="_"))    ),
-    file= file.path(general$main.path.ibm, paste("harboursspe_", general$application, sep=''),  "names_harbours.dat"), row.names=FALSE, col.names=FALSE, quote=FALSE)
+ write.table(cbind(node=idx,  name=sapply(rownames(port_names), function (x) paste(unlist(strsplit(x, " ")), collapse="_"))    ),
+    file= file.path(general$main.path.ibm, paste("harboursspe_", general$application, sep=''),  "names_harbours.dat"), row.names=FALSE, col.names=TRUE, quote=FALSE)
 
