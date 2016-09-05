@@ -1,17 +1,27 @@
  # some args for the bunch of vessels to be created....
+ # Usage:
+ # GenerateVesselsConfigFiles.R Dest_path application gis_path input_application_path
+
  
    # GENERAL SETTINGS
+
+   args <- commandArgs(trailingOnly = TRUE)
+
    general <- list()
-   if(.Platform$OS.type == "windows") {
-     general$main.path             <- file.path("C:","DISPLACE_outputs")
-     general$application           <- "balticRTI" # ...or myfish
-     general$main.path.param       <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw")
-     general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
-     general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
-  
- 
-   }
-   
+
+   if (length(args) < 2) {
+     if(.Platform$OS.type == "windows") {
+       general$main.path             <- file.path("C:","DISPLACE_outputs")
+       general$application           <- "balticRTI" # ...or myfish
+       general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+       general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
+     }
+  } else {
+       general$main.path             <- args[1]
+       general$application           <- args[2]
+       general$main.path.param.gis   <- args[3]
+       general$main.path.ibm         <- args[4]
+  }
   
   
    dir.create(path=file.path(general$main.path.param.gis, "FISHERIES", "vessels_config_files"))
@@ -175,9 +185,6 @@
   
    write("# input folder for config file", file=namefile, ncolumns=1, append=TRUE)
    write(general$main.path.param.gis, file=namefile, ncolumns=1, append=TRUE)
-  
-   write("# output folder for parameterisation file", file=namefile, ncolumns=1, append=TRUE)
-   write(general$main.path.param, file=namefile, ncolumns=1, append=TRUE)
   
    write("# input folder for DISPLACE", file=namefile, ncolumns=1, append=TRUE)
    write(general$main.path.ibm, file=namefile, ncolumns=1, append=TRUE)

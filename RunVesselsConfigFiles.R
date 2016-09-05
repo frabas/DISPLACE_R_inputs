@@ -1,13 +1,28 @@
+# some args for the bunch of vessels to be created....
+# Usage:
+# RunVesselsConfigFiles.R Dest_path application gis_path input_application_path
 
-
+args <- commandArgs(trailingOnly = TRUE)
 
 general <- list()
-general$main.path.data        <- file.path("C:","Users", "fbas", "Documents", "GitHub", "DISPLACE_input_gis", "balticRTI", "POPULATIONS")
-general$main.path.param       <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw")
-general$application           <- "balticRTI"  
 
-general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_" , general$application, sep=""))
- 
+if (length(args) < 2) {
+  if(.Platform$OS.type == "windows") {
+    general$main.path             <- file.path("C:","DISPLACE_outputs")
+    general$application           <- "balticRTI" # ...or myfish
+    general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+    general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
+
+    general$main.path.data        <- file.path(general$main.path.param.gis, general$application, "POPULATIONS")
+  }
+} else {
+  general$main.path             <- args[1]
+  general$application           <- args[2]
+  general$main.path.param.gis   <- args[3]
+  general$main.path.ibm         <- args[4]
+  general$main.path.data        <- file.path(general$main.path.param.gis, general$application, "POPULATIONS")
+}
+
 dir.create(file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep='')))
 dir.create(file.path(general$main.path.ibm, paste("popssspe_", general$application, sep='')))
 dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep='')))
@@ -39,7 +54,6 @@ dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$applica
 
    general <- list()
    general$main.path.param.gis   <- as.character(dat[5])
-   general$main.path.param       <- as.character(dat[7])
    general$main.path.ibm         <- as.character(dat[9])
    general$namefolderinput       <- as.character(dat[11])
    general$igraph                <- as.numeric(dat[13])
