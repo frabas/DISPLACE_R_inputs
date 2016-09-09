@@ -1,6 +1,6 @@
  # some args for the bunch of vessels to be created....
  # Usage:
- # GenerateVesselsConfigFiles.R Dest_path application gis_path input_application_path
+ # GenerateVesselsConfigFiles.R Dest_path application gis_path input_application_path igraph
 
  
    # GENERAL SETTINGS
@@ -15,12 +15,15 @@
        general$application           <- "balticRTI" # ...or myfish
        general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
        general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
+       general$igraph                <- 56  # caution: should be consistent with existing vessels already built upon a given graph
+   
      }
   } else {
        general$main.path             <- args[1]
        general$application           <- args[2]
        general$main.path.param.gis   <- args[3]
        general$main.path.ibm         <- args[4]
+       general$igraph                <- args[5]  # caution: should be consistent with existing vessels already built upon a given graph
   }
   
   
@@ -75,7 +78,6 @@
       spp                        <- as.character(spp_table$spp)
 
       
-      general$igraph             <- 56  # caution: should be consistent with existing vessels already built upon a given graph
       do_append                  <- TRUE
       nbvids                     <- vessel_specifications[i, "N..of.vessels"]
       
