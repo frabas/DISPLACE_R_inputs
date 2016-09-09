@@ -43,6 +43,7 @@ dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$applica
 
  count <- 0
  for (namefile in namefiles){ # LOOP OVER CONFIG FILES
+   cat(paste("Treatment for", namefile, "\n"))
    count <- count+1
 
     dat              <- readLines(file.path(path, namefile))
@@ -199,6 +200,7 @@ getPolyAroundACoord <- function(dat, a_dist_m){
  # }
 
 
+ cat(paste("Read the GIS layer for", namefile, "\n"))
  library(maptools)
  #handmade            <- readShapePoly(file.path(general$main.path.param.gis, "FISHERIES", name_gis_file_for_fishing_effort_per_polygon))  # build in ArcGIS 10.1
  library(rgdal)
@@ -239,15 +241,15 @@ getPolyAroundACoord <- function(dat, a_dist_m){
  
   sauv <- coord
  
-
+  cat(paste("Intersect vessel home range with the GIS effort layer and retrieve the corresponding graph nodes for", namefile, "\n"))
  # heuristic to reduce the search to within the circles around harbours i.e. sp
   handmade_WGS84_reduced <-  gIntersection(handmade_WGS84, sp, byid = TRUE) 
-  if(is.null(handmade_WGS84_reduced)) { # for the few cases were nothing is found within the harbour circles (!) redo with a larger radius.
-                                      lst             <- getPolyAroundACoord(harbours, a_dist_m= vessel_range_km*10 * 1000)
-                                      sp              <- SpatialPolygons(lst, 1:nrow(harbours))
-                                      projection(sp)  <- CRS(paste("+proj=utm +zone=",UTMzone," +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0", sep='') )
-                                      sp               <- spTransform(sp, CRS("+proj=longlat +datum=WGS84"))
-                                      handmade_WGS84_reduced <-  gIntersection(handmade_WGS84, sp, byid = TRUE) 
+  if(is.null(handmade_WGS84_reduced)) { # for the few "edge" cases where nothing is found within the harbour circles (!) then redo with a larger radius.
+                                      lst                    <- getPolyAroundACoord(harbours, a_dist_m= vessel_range_km*10 * 1000)
+                                      sp                     <- SpatialPolygons(lst, 1:nrow(harbours))
+                                      projection(sp)         <- CRS(paste("+proj=utm +zone=",UTMzone," +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0", sep='') )
+                                      sp                     <- spTransform(sp, CRS("+proj=longlat +datum=WGS84"))
+                                      handmade_WGS84_reduced <- gIntersection(handmade_WGS84, sp, byid = TRUE) 
                                       coord                  <- saved_coord
                                       }
                                       
@@ -280,9 +282,9 @@ getPolyAroundACoord <- function(dat, a_dist_m){
  } else{
  handmade_WGS84_reduced_df$xfold         <- factor(handmade_WGS84_reduced_df[,name_gis_layer_field]) # init
  levels(handmade_WGS84_reduced_df$xfold) <- xfold_gis_layer_field
- handmade_WGS84_reduced_df$xfold         <-   as.character(handmade_WGS84_reduced_df$xfold)
+ handmade_WGS84_reduced_df$xfold         <- as.character(handmade_WGS84_reduced_df$xfold)
  handmade_WGS84_reduced_df               <- rbind.data.frame( c(ID=0, 0, min(xfold_gis_layer_field)/2), handmade_WGS84_reduced_df)   # add an ID 0 for not included coord points AND ASSUME SOME ACTIVITY IN IT
- handmade_WGS84_reduced_df$xfold         <-   as.factor(handmade_WGS84_reduced_df$xfold)
+ handmade_WGS84_reduced_df$xfold         <- as.factor(handmade_WGS84_reduced_df$xfold)
  }
 
 
@@ -307,6 +309,8 @@ getPolyAroundACoord <- function(dat, a_dist_m){
  #plot(coord[, "x"], coord[, "y"], col= as.numeric( cut(coord[,name_gis_layer_field], breaks=c(-1,100,200, 500, 1000, 2000)) ), pch=16)
  #if("XMIN" %in% colnames(handmade_WGS84_df)) plot(handmade_WGS84_df[, "XMIN"], handmade_WGS84_df[, "YMIN"], col= as.numeric( cut(handmade_WGS84_df[,name_gis_layer_field], breaks=c(-1,100,200, 500, 1000, 2000)) ), pch=16)
 
+
+ cat(paste("Produce individual vessel DISPLACE input files from", namefile, "\n"))
 
 # WORKFLOW 2 - QUARTER-BASED-----------
 # however, note that the seasonnality of the spatial and total effort application
@@ -649,11 +653,13 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
                col.names=TRUE,  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")
 
 
+ cat(paste("............done for", namefile, "\n"))
+
 } # END LOOP OVER CONFIG FILES
 
 
 
-
+  cat(paste("lastly, collect fgrounds and frequency on fgrounds in one single file for all vessels", "\n"))
  ## LASTLY,
    # fix the files to avoid vessel fishing in harbour (!)
    # but do not remove a vessel by inadvertance....
@@ -671,7 +677,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
     vids_before <- vesselsspe_fgrounds_quarter[,1]
     vesselsspe_fgrounds_quarter <- vesselsspe_fgrounds_quarter[!idx,]  # correct
     vids_after <- vesselsspe_fgrounds_quarter[,1]
-    print(vids_before[!vids_before %in% vids_after])  #check if all vid kept on board...if not you are in trouble....
+    #print(vids_before[!vids_before %in% vids_after])  #check if all vid kept on board...if not you are in trouble....
 
     colnames(vesselsspe_fgrounds_quarter) <- c("vids", "pt_graph")
 
@@ -699,7 +705,8 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
 
 
 
-  ## ADDITIONAL FILES FOR THE CATCH EQUATION
+    cat(paste("lastly, produce additional files e.g. related to the catch equation", "\n"))
+   ## ADDITIONAL FILES FOR THE CATCH EQUATION
    spp_table    <- read.table(file=file.path(general$main.path.param.gis, "POPULATIONS", paste("pop_names_",general$application ,".txt",sep='')), header=TRUE)
    spp          <- as.character(spp_table$spp)
    metier_names <- read.table( file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''), "metier_names.dat"), header=TRUE)
