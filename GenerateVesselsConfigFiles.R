@@ -70,7 +70,7 @@
        # test for truly individual vessel data i.e. one vessel => one config file
     
     
-      spp_table <-  read.table(file=file.path(general$inPathPop, paste("pop_names_",general$application ,".txt",sep='')),
+      spp_table <-  read.table(file=file.path(general$main.path.param.gis, "POPULATIONS", paste("pop_names_",general$application,".txt",sep='')),
               header=TRUE)
       spp                        <- as.character(spp_table$spp)
 
