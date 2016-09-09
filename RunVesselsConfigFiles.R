@@ -1,6 +1,6 @@
 # some args for the bunch of vessels to be created....
 # Usage:
-# RunVesselsConfigFiles.R Dest_path application gis_path input_application_path
+# RunVesselsConfigFiles.R Dest_path application gis_path input_application_path igraph
 
 args <- commandArgs(trailingOnly = TRUE)
 
@@ -12,16 +12,15 @@ if (length(args) < 2) {
     general$application           <- "balticRTI" # ...or myfish
     general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
     general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
-
-    general$main.path.data        <- file.path(general$main.path.param.gis, general$application, "POPULATIONS")
-  }
-} else {
+    general$igraph                <- 56
+    }
+} else {            
   general$main.path             <- args[1]
   general$application           <- args[2]
   general$main.path.param.gis   <- args[3]
   general$main.path.ibm         <- args[4]
-  general$main.path.data        <- file.path(general$main.path.param.gis, general$application, "POPULATIONS")
-}
+  general$igraph                <- args[5]
+ }
 
 dir.create(file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep='')))
 dir.create(file.path(general$main.path.ibm, paste("popssspe_", general$application, sep='')))
@@ -38,7 +37,6 @@ dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$applica
    # create from different set of vessels, for example:
    
    path        <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application, "FISHERIES", "vessels_config_files")
-   inPathGraph <- file.path(general$main.path.ibm, "graphspe")
    namefiles   <- list.files(file.path( path))
 
   
@@ -52,11 +50,10 @@ dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$applica
    my_split  <- function(x) unlist(strsplit(x, " "))
    my_split2 <- function(x) unlist(strsplit(x, "_"))
 
-   general <- list()
-   general$main.path.param.gis   <- as.character(dat[5])
-   general$namefolderinput       <- as.character(dat[9])
-   general$igraph                <- as.numeric(dat[11])
-
+   #general <- list()
+   #general$main.path.param.gis   <- as.character(dat[5])
+   #general$application           <- as.character(dat[9])
+   
    do_append                     <- as.logical(dat[13])
    if (count==1) do_append <- FALSE # NOT ADDED TO PREVIOUS FILE......
 
@@ -130,7 +127,7 @@ getPolyAroundACoord <- function(dat, a_dist_m){
 
   saved_coord <- coord
 
-  graph <- read.table(file=file.path(general$main.path.ibm, "graphsspe",
+  graph <- read.table(file=file.path(general$main.path.param.gis, "GRAPH",
            paste("graph", general$igraph, ".dat", sep=""))) # build from the c++ gui
   graph <- as.matrix(as.vector(graph))
   graph <- matrix(graph, ncol=3)
@@ -222,8 +219,7 @@ getPolyAroundACoord <- function(dat, a_dist_m){
  
  
  # How can I get the proj4 string from a shapefile .prj file? http://gis.stackexchange.com/questions/55196/how-can-i-get-the-proj4-string-or-epsg-code-from-a-shapefile-prj-file
-
-row.names(handmade2)
+ row.names(handmade2)
 
 
  library(sp)
@@ -390,10 +386,10 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
     # vesselsspe_harbours_quarter[xx].dat
     # vesselsspe_freq_harbours_quarter[xx].dat
      ## get back the port name
-    port_names <- read.table(file=file.path(inPathGraph,
-                                  paste("harbours.dat", sep='')), sep=";")
+    port_names <- read.table(file.path(general$main.path.param.gis, "GRAPH", name_file_ports), sep=";", row.names=NULL)
     port_names$pt_graph   <- saved_coord[match(port_names$idx.port, saved_coord[,"harb"]), "pt_graph"]
-
+    rownames(port_names)  <- port_names[,1]
+    
     visited               <- expand.grid( port_names[visited_ports, "pt_graph"], vesselids) # retrieve the corresponding pt_graph
     visited               <- visited[,2:1]
     colnames(visited)     <- c('vids','pt_graph')
@@ -663,10 +659,10 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
    # but do not remove a vessel by inadvertance....
  for (a.quarter in c("Q1","Q2","Q3","Q4")){
 
-    port_names <- read.table(file=file.path(inPathGraph,
-                                  paste("harbours.dat", sep='')), sep=";")
-    port_names$pt_graph   <- saved_coord[match(port_names$idx.port, saved_coord[,"harb"]), "pt_graph"]
-    port_names$pt_graph <-  as.numeric(as.character(port_names$pt_graph)) - 1 ##!!! FOR C++ !!!##
+    port_names             <- read.table(file.path(general$main.path.param.gis, "GRAPH", name_file_ports), sep=";", row.names=NULL)
+    rownames(port_names)   <- port_names[,1]   
+    port_names$pt_graph    <- saved_coord[match(port_names$idx.port, saved_coord[,"harb"]), "pt_graph"]
+    port_names$pt_graph    <- as.numeric(as.character(port_names$pt_graph)) - 1 ##!!! FOR C++ !!!##
 
     # 1
     vesselsspe_fgrounds_quarter <- read.table(file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep=''),
@@ -704,10 +700,10 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
 
 
   ## ADDITIONAL FILES FOR THE CATCH EQUATION
-   spp_table    <- read.table(file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''), paste("pop_names_",general$application ,".txt",sep='')), header=TRUE)
+   spp_table    <- read.table(file=file.path(general$main.path.param.gis, "POPULATIONS", paste("pop_names_",general$application ,".txt",sep='')), header=TRUE)
    spp          <- as.character(spp_table$spp)
    metier_names <- read.table( file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''), "metier_names.dat"), header=TRUE)
-
+                                              
     for (a.semester in 1:2){
    #-----------
    #-----------
