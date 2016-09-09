@@ -8,18 +8,16 @@ general <- list()
 
 if (length(args) < 2) {
   if(.Platform$OS.type == "windows") {
-    general$main.path             <- file.path("C:","DISPLACE_outputs")
     general$application           <- "balticRTI" # ...or myfish
     general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
     general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
     general$igraph                <- 56
     }
 } else {            
-  general$main.path             <- args[1]
-  general$application           <- args[2]
-  general$main.path.param.gis   <- args[3]
-  general$main.path.ibm         <- args[4]
-  general$igraph                <- args[5]
+  general$application           <- args[1]
+  general$main.path.param.gis   <- args[2]
+  general$main.path.ibm         <- args[3]
+  general$igraph                <- args[4]
  }
 
 dir.create(file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep='')))
