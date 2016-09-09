@@ -43,53 +43,52 @@ dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$applica
 
   
 
-   count <- 0
+ count <- 0
  for (namefile in namefiles){ # LOOP OVER CONFIG FILES
    count <- count+1
 
     dat              <- readLines(file.path(path, namefile))
 
-   my_split <- function(x) unlist(strsplit(x, " "))
+   my_split  <- function(x) unlist(strsplit(x, " "))
    my_split2 <- function(x) unlist(strsplit(x, "_"))
 
    general <- list()
    general$main.path.param.gis   <- as.character(dat[5])
-   general$main.path.ibm         <- as.character(dat[9])
-   general$namefolderinput       <- as.character(dat[11])
-   general$igraph                <- as.numeric(dat[13])
+   general$namefolderinput       <- as.character(dat[9])
+   general$igraph                <- as.numeric(dat[11])
 
-   do_append                     <- as.logical(dat[15])
+   do_append                     <- as.logical(dat[13])
    if (count==1) do_append <- FALSE # NOT ADDED TO PREVIOUS FILE......
 
 
-   name_gis_file_for_fishing_effort_per_polygon <- dat[17]
-   name_gis_layer_field                        <- dat[19]
-   is_gis_layer_field_relative_numbers         <- dat[21]
-   xfold_gis_layer_field                        <- as.numeric(my_split(dat[23]))
-   vesselids                     <- as.character(my_split(dat[25]))
-   vessel_range_km               <- as.numeric(dat[27])
-   metierids                     <- as.numeric(my_split(dat[29]))
-   metierids_frequencies         <- as.numeric(my_split(dat[31]))
+   name_gis_file_for_fishing_effort_per_polygon <- dat[15]
+   name_gis_layer_field                         <- dat[17]
+   is_gis_layer_field_relative_numbers          <- dat[19]
+   xfold_gis_layer_field                        <- as.numeric(my_split(dat[21]))
+   vesselids                                    <- as.character(my_split(dat[23]))
+   vessel_range_km                              <- as.numeric(dat[25])
+   metierids                                    <- as.numeric(my_split(dat[27]))
+   metierids_frequencies                        <- as.numeric(my_split(dat[29]))
    if(length(metierids)!=length(metierids_frequencies)) stop("Check config file for vessel creator - length(metierids)")
-   visited_ports                 <- as.character(my_split(dat[33]))
-   visited_ports_frequencies     <- as.numeric(my_split(dat[35]))
+   visited_ports                                <- as.character(my_split(dat[31]))
+   visited_ports_frequencies                    <- as.numeric(my_split(dat[33]))
    if(length(visited_ports)!=length(visited_ports_frequencies)) stop("Check config file for vessel creator - length(visited_ports)")
-   name_file_ports               <-  dat[37]
-   nb_stocks                     <- as.numeric(my_split(dat[39]))
-   fixed_cpue_per_stock          <- as.numeric(my_split(dat[41]))
+   name_file_ports                              <-  dat[35]
+   nb_stocks                                    <- as.numeric(my_split(dat[37]))
+   fixed_cpue_per_stock                         <- as.numeric(my_split(dat[39]))
    if(length(fixed_cpue_per_stock)!=nb_stocks) stop("Check config file for vessel creator - length(fixed_cpue_per_stock)")
-   gshape_cpue_per_stock         <- as.numeric(my_split(dat[43]))
+   gshape_cpue_per_stock                        <- as.numeric(my_split(dat[41]))
    if(length(gshape_cpue_per_stock)!=nb_stocks) stop("Check config file for vessel creator - length(gshape_cpue_per_stock)")
-   gscale_cpue_per_stock         <- as.numeric(my_split(dat[45]))
+   gscale_cpue_per_stock                        <- as.numeric(my_split(dat[43]))
    if(length(gscale_cpue_per_stock)!=nb_stocks) stop("Check config file for vessel creator - length(gscale_cpue_per_stock)")
-   vessel_features               <- as.numeric(my_split(dat[48]))
-   step_in_share                 <- as.numeric(my_split(dat[50]))
+   vessel_features                              <- as.numeric(my_split(dat[46]))
+   step_in_share                                <- as.numeric(my_split(dat[48]))
    if(length(step_in_share)!=nb_stocks) stop("Check config file for vessel creator - length(step_in_share)")
-   vesselsspe_betas              <- as.numeric(my_split(dat[52]))
+   vesselsspe_betas                             <- as.numeric(my_split(dat[50]))
    if(length(vesselsspe_betas)!=nb_stocks) stop("Check config file for vessel creator - length(vesselsspe_betas)")
-   create_file_for_fuel_price_per_vessel_size   <-  as.logical(dat[54])
-   some_fuel_price_per_vessel_size              <-   as.numeric(my_split(dat[56]))
-   step_in_share_credits                        <-   as.numeric(dat[58])
+   create_file_for_fuel_price_per_vessel_size   <-  as.logical(dat[52])
+   some_fuel_price_per_vessel_size              <-  as.numeric(my_split(dat[54]))
+   step_in_share_credits                        <-  as.numeric(dat[56])
 
 
 #-------------------------------------------------------------------------------
@@ -97,34 +96,6 @@ dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$applica
 #-----utils---------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
- # loop over the SpatialPoly
- detectingCoordInPolygonsFromSH <- function (sh, coord, name_column="poly"){
-
-     coord <- eval(parse(text=paste("cbind(coord, ",name_column,"= 0)", sep='')))
-     dd                   <- sapply(slot(sh, "polygons"), function(x) lapply(slot(x, "Polygons"), function(x) x@coords)) # tricky there...
-
-     ids <- sapply(slot(sh, "polygons"),  function (x) x@ID)
-
-     library(sp)
-     for(iLand in 1:length(dd)){
-      if(length(dd)>1){
-       for(i in 1:length(dd[[iLand]])){
-          print(iLand)
-          # Points on land are 1 or 2 and not is 0
-          er <- try({res   <- point.in.polygon(coord[,1],coord[,2],dd[[iLand]][[i]][,1],dd[[iLand]][[i]][,2])}, silent=TRUE)
-          if(class(er)=="try-error") res   <- point.in.polygon(coord[,1],coord[,2],dd[[iLand]][,1],dd[[iLand]][,2])
-          coord[which(res!=0), name_column] <- ids[iLand]
-       }
-      } else{
-          er <- try({res   <- point.in.polygon(coord[,1],coord[,2],dd[[1]][,1],dd[[1]][,2])}, silent=TRUE)
-          if(class(er)=="try-error") res   <- point.in.polygon(coord[,1],coord[,2],dd[[1]][,1],dd[[1]][,2])
-          coord[which(res!=0), name_column] <- ids[iLand]
-
-      }
-
-     }
- return(coord)
- }
 
 getPolyAroundACoord <- function(dat, a_dist_m){
   lst <- list()
@@ -149,7 +120,7 @@ getPolyAroundACoord <- function(dat, a_dist_m){
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
  # load the graph
-  coord <- read.table(file=file.path(general$main.path.ibm, "graphsspe",
+  coord <- read.table(file=file.path(general$main.path.param.gis, "GRAPH",
              paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
   coord <- as.matrix(as.vector(coord))
   coord <- matrix(coord, ncol=3)
