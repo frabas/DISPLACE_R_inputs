@@ -5,7 +5,8 @@
      general$main.path             <- file.path("C:","DISPLACE_outputs")
      general$application           <- "balticRTI" # ...or myfish
      general$igraph                <- 56
-     general$implicit_stocks       <- c(0, 2, 3, 7, 8, 9, 10, 11, 12) 
+     general$implicit_stocks       <- c(0, 2, 3, 7, 8, 9, 10, 11, 12) # implicit level1 = we don´t know the absolute abundance 
+     general$implicit_stocks_level2<- c("") # implicit level2 = we don´t know the absolute abundance but we use the relative abudance to draw some catch rates 
      general$main.path.param       <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw")
      general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
      general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_" , general$application, sep=""))
@@ -155,6 +156,7 @@
   nbpops           <- length(spp)
   nbbenthospops    <- 2
   implicit_stocks  <- general$implicit_stocks
+  implicit_stocks_level2  <- general$implicit_stocks_level2
   calib_other_landings        <- rep(1, nbpops)
   calib_weight_at_size_group  <- rep(1, nbpops)
   calib_cpue_multipliers      <- rep(1, nbpops)
@@ -182,7 +184,8 @@
    write("# interesting harbours", file=namefile, ncolumns=1, append=TRUE)
   write(interesting_harbours, file=namefile, ncolumns=1, append=TRUE)
 
-
+   write("# implicit stocks level 2", file=namefile, ncolumns=1, append=TRUE)
+   write(implicit_stocks_level2, file=namefile, ncolumns=length(implicit_stocks_level2), append=TRUE)
 
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##

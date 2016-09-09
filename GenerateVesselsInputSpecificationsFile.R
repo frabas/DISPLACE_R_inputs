@@ -10,7 +10,8 @@
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ctry <- "DEN"
-  load(file=file.path(inPath,"all_merged_weight_DEN_2015.RData"))
+  #load(file=file.path(inPath,"all_merged_weight_DEN_2015.RData"))
+  load(file=file.path(inPath,"coupled_VMS_logbooks_DNK_2015.RData"))
   tacsatp_den <- all.merged
   tacsatp_den$SI_LONG <- as.numeric(as.character(tacsatp_den$SI_LONG))
   tacsatp_den$SI_LATI <- as.numeric(as.character(tacsatp_den$SI_LATI))
@@ -19,7 +20,8 @@
 
   # retrieve LEN and KW from EFLALO
   load(file.path(inPath,
-           paste("eflalo_","2015",".RData",sep='')))
+           #paste("eflalo_","2015",".RData",sep='')))
+           paste("logbooks_DNK_","2015",".RData",sep='')))
       eflalo  <- eflalo[grep("DNK", as.character(eflalo$VE_REF)),]
 
       x <- eflalo ; rm(eflalo); gc(reset=TRUE)
@@ -42,7 +44,8 @@
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ctry <- "SWE"
-  load(file=file.path(inPath,"Displace2015_tacsat_swe_v2.RData"))
+  #load(file=file.path(inPath,"Displace2015_tacsat_swe_v2.RData"))
+  load(file=file.path(inPath,"coupled_VMS_logbooks_SWE_2015.RData"))
   tacsatp_swe <- tacsat.swe
   tacsatp_swe$SI_LONG <- as.numeric(as.character(tacsatp_swe$SI_LONG))
   tacsatp_swe$SI_LATI <- as.numeric(as.character(tacsatp_swe$SI_LATI))
