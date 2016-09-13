@@ -270,7 +270,7 @@
   }   # end for loop over record
     
    
-   
+ cat(paste("Create the vessel config files from the specifications.........done"))  
    
       
  

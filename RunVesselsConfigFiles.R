@@ -6,18 +6,21 @@ args <- commandArgs(trailingOnly = TRUE)
 
 general <- list()
 
+
 if (length(args) < 2) {
   if(.Platform$OS.type == "windows") {
     general$application           <- "balticRTI" # ...or myfish
     general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
     general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
     general$igraph                <- 56
+    do_plot <- TRUE
     }
 } else {            
   general$application           <- args[1]
   general$main.path.param.gis   <- args[2]
   general$main.path.ibm         <- args[3]
   general$igraph                <- args[4]
+  do_plot <- FALSE
  }
 
 dir.create(file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep='')))
@@ -122,7 +125,7 @@ getPolyAroundACoord <- function(dat, a_dist_m){
   coord <- matrix(coord, ncol=3)
   coord <- cbind(coord, 1:nrow(coord))
   colnames(coord) <- c('x', 'y', 'harb', 'pt_graph')
-  plot(coord[,1], coord[,2])
+  if(do_plot) plot(coord[,1], coord[,2])
 
   saved_coord <- coord
 
@@ -130,7 +133,7 @@ getPolyAroundACoord <- function(dat, a_dist_m){
            paste("graph", general$igraph, ".dat", sep=""))) # build from the c++ gui
   graph <- as.matrix(as.vector(graph))
   graph <- matrix(graph, ncol=3)
-  segments(coord[graph[,1]+1,1], coord[graph[,1]+1,2], coord[graph[,2]+1,1], coord[graph[,2]+1,2], col=4) # CAUTION: +1, because c++ to R
+  if(do_plot) segments(coord[graph[,1]+1,1], coord[graph[,1]+1,2], coord[graph[,2]+1,1], coord[graph[,2]+1,2], col=4) # CAUTION: +1, because c++ to R
 
 
   #-------------------------------------------------------------------------------
@@ -152,7 +155,7 @@ getPolyAroundACoord <- function(dat, a_dist_m){
 
   lst             <- getPolyAroundACoord(harbours, a_dist_m= vessel_range_km * 1000)
   sp              <- SpatialPolygons(lst, 1:nrow(harbours))
-  plot(sp)
+  if(do_plot) plot(sp)
 
 
   library(rgdal)
@@ -173,8 +176,8 @@ getPolyAroundACoord <- function(dat, a_dist_m){
   coord <- coord[!is.na(coord$poly),]
 
   # check
-  plot(sp)
-  points(coord[, c(1,2)], col=3)
+  if(do_plot) plot(sp)
+  if(do_plot) points(coord[, c(1,2)], col=3)
 
 
 #-------------------------------------------------------------------------------
@@ -228,7 +231,6 @@ getPolyAroundACoord <- function(dat, a_dist_m){
 
  names(handmade_WGS84)  # "Id"         name_gis_layer_field
 
- do_plot <- FALSE
  if(do_plot) plot(handmade_WGS84,  add=TRUE, border=as.data.frame(handmade_WGS84)[,name_gis_layer_field])
 
  
@@ -292,14 +294,15 @@ getPolyAroundACoord <- function(dat, a_dist_m){
 
  
  # check
- if(do_plot){
+ do_plot2 <- FALSE
+ if(do_plot2){
   plot(sp)
   plot(handmade_WGS84_reduced,  add=TRUE, border=as.data.frame(handmade_WGS84_reduced)[,name_gis_layer_field])
   coord$color <-  factor(coord[,name_gis_layer_field]) #init
   levels(coord$color) <- 1:length(levels(coord$color))
   points(coord[, "CELL_LONG"], coord[, "CELL_LATI"], col=  coord[,"color"], pch=16)
   } else{
-  points(coord[, "CELL_LONG"], coord[, "CELL_LATI"], col=  2, pch=16)
+  if(do_plot) points(coord[, "CELL_LONG"], coord[, "CELL_LATI"], col=  2, pch=16)
   }
   
  # or if on contineous scale:
