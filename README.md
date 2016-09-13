@@ -1,0 +1,2 @@
+Please have a look to the Wiki page for some help in understanding the parameterisation steps 
+using the R routines. Some of the routines could also be directly called within the DISPLACE user interface (worki ni progress)
