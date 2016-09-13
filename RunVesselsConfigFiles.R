@@ -1,6 +1,6 @@
 # some args for the bunch of vessels to be created....
 # Usage:
-# RunVesselsConfigFiles.R Dest_path application gis_path input_application_path igraph
+# RunVesselsConfigFiles.R application gis_path input_application_path igraph
 
 args <- commandArgs(trailingOnly = TRUE)
 

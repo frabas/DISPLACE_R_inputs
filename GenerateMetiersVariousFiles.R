@@ -13,28 +13,44 @@
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
      
       
+  # some args for the bunch of vessels to be created....
+ # Usage:
+ # GenerateMetiersVariousFiles.R application gis_path input_application_path 
 
+ 
+   # GENERAL SETTINGS
 
+   args <- commandArgs(trailingOnly = TRUE)
 
- # some args for the bunch of vessels to be created....
- # GENERAL SETTINGS
    general <- list()
-   if(.Platform$OS.type == "windows") {
-     general$main.path             <- file.path("C:","DISPLACE_outputs")
-     general$application           <- "balticRTI" # ...or myfish
-     general$igraph                <- 56
-     general$main.path.param       <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw")
-     general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
-     general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_" , general$application, sep=""))
-   }
 
-  dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep='')))
+   if (length(args) < 2) {
+      # GENERAL SETTINGS
+      general <- list()
+      if(.Platform$OS.type == "windows") {
+        general$application           <- "balticRTI" # ...or myfish
+        general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+        general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_" , general$application, sep=""))
+       }
+    } else{
+       general$application           <- args[1]
+       general$main.path.param.gis   <- args[2]
+       general$main.path.ibm         <- args[3]
+      
+    }   
+
+
+
+
+   dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep='')))
   
-   if(general$application=="balticRTI"){
-        a_size_group_bin_in_cm <- 5
-        mid                    <- 2.5
-        spp                    <- c("COD.2532", "COD.2224", "FLE.2223", "FLE.2425", "PLE.2123", "PLE.2432", "SOL.IIIa2223", "WHG.2232", "DAB.2232", "TUR.2232", "HER.IIIa22", "HER.2532", "SPR.2232")
-        }
+  
+   a_size_group_bin_in_cm <- 5 # caution: hardcoding....
+    mid                    <- a_size_group_bin_in_cm/2
+ 
+   spp_table <-  read.table(file=file.path(general$main.path.param.gis, "POPULATIONS",
+                                    paste("pop_names_",general$application,".txt",sep='')), header=TRUE)
+   spp                        <- as.character(spp_table$spp)
 
    options(scipen=999)
 

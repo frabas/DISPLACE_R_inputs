@@ -1,6 +1,6 @@
  # some args for the bunch of vessels to be created....
  # Usage:
- # GenerateVesselsConfigFiles.R Dest_path application gis_path input_application_path igraph
+ # GenerateVesselsConfigFiles.R application gis_path input_application_path igraph
 
  
    # GENERAL SETTINGS
