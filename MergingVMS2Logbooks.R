@@ -6,8 +6,8 @@ CHRISTIAN    <- TRUE
 # set your own path here:
 if(FRANCOIS){
    main_path_data         <- file.path("C:","merging", "EflaloAndTacsat")   # where are eflalo and tacsat data
-   main_path_ibm_param    <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw")  # where is myEUports.RData
-   main_path_ibm_param_R  <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_R_inputs")  # where is vmstools_mergeEflalo2Pings.r etc.
+   main_path_ibm_param    <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis")  # where is myEUports.RData
+   main_path_ibm_param_R  <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_R_inputs", "old")  # where is vmstools_mergeEflalo2Pings.r etc.
 
    }
 if(CHRISTIAN){
@@ -63,7 +63,7 @@ if(CHRISTIAN){
   ###--------------------------------###
   ###--------------------------------###
    
-   load(file.path(main_path_ibm_param, "myEUports.RData"))  # get EU_ports
+   load(file.path(main_path_ibm_param, "GRAPH", "myEUports.RData"))  # get EU_ports
  
   
   ###--------------------------------###
