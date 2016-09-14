@@ -1,10 +1,22 @@
+ general <- list()
+      if(.Platform$OS.type == "windows") {
+        general$application           <- "balticRTI" # ...or myfish
+        general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+        general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_" , general$application, sep=""))
+       }
 
-  inPath  <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis","balticRTI","FISHERIES")
-  outPath <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis","balticRTI","FISHERIES")
+
+  
+  #!#!#!#!#!#
+  #!#!#!#!#!#
+  # choose your country
+  ctry <- "DEN"
+  #!#!#!#!#!#
+  #!#!#!#!#!#
 
 
-  ctry <- "DNK"
-  load(file=file.path(inPath,"all_merged_weight_DEN_2015.RData"))
+  if(ctry=="DEN"){
+  load(file=file.path(general$main.path.param.gis, "FISHERIES", "coupled_VMS_logbooks_DNK_2015.RData"))
   tacsatp_den <- all.merged
   tacsatp_den <- tacsatp_den[!is.na(as.numeric(as.character(tacsatp_den$SI_LONG))) &  !is.na(as.numeric(as.character(tacsatp_den$SI_LATI))), ]
   tacsatp_den$SI_LONG <- as.numeric(as.character(tacsatp_den$SI_LONG))
@@ -13,10 +25,10 @@
   tacsatp_den$LE_EFF_VMS <- as.numeric(as.character(tacsatp_den$LE_EFF_VMS)) /60
   tacsatp_den <- tacsatp_den[tacsatp_den$SI_STATE==1, ]  # keep fishing positions only
   tacsatp_den$ctry <- "DNK"
+  }
 
-
-  ctry <- "SWE"
-  load(file=file.path(inPath,"Displace2015_tacsat_swe_v2.RData"))
+  if(ctry=="SWE"){
+  load(file=file.path(general$main.path.param.gis, "FISHERIES", "coupled_VMS_logbooks_SWE_2015.RData"))
   tacsatp_swe <- tacsat.swe
   tacsatp_swe$SI_LONG <- as.numeric(as.character(tacsatp_swe$SI_LONG))
   tacsatp_swe$SI_LATI <- as.numeric(as.character(tacsatp_swe$SI_LATI))
@@ -32,20 +44,38 @@
   tacsatp_swe <- tacsatp_swe[!is.na(as.numeric(as.character(tacsatp_swe$SI_LONG))) &  !is.na(as.numeric(as.character(tacsatp_swe$SI_LATI))), ]
   tacsatp_swe <- tacsatp_swe[tacsatp_swe$SI_STATE==1, ]  # keep fishing positions only
   tacsatp_swe$ctry <- "SWE"
+  }
+  
+  if(ctry=="DEU"){
+  cat(paste("Formatting for this country: TO DO! \n"))
+   ### CHRISTIAN:  TO DO ###
+  # load(file=file.path(general$main.path.param.gis, "FISHERIES", "coupled_VMS_logbooks_DEU_2015.RData"))
+  #tacsatp_deu           <- tacsat.swe
+  #tacsatp_deu$SI_LONG   <- as.numeric(as.character(tacsatp_deu$SI_LONG))
+  #tacsatp_deu$SI_LATI   <- as.numeric(as.character(tacsatp_deu$SI_LATI))
+  #tacsatp_deu$SI_STATE  <- as.numeric(as.character(tacsatp_deu$SI_STATE))
+  
+  #tacsatp_swe$LE_MET_level6 <-  ...
+  
+  #format_date <- "%Y-%m-%d %H:%M:%S" 
+  #tacsatp_deu$SI_DATIM <- as.POSIXct( tacsatp_deu$SI_DATIM, tz='GMT',   format_date)
 
+  # compute effort in min
+  #tacsatp_deu$LE_EFF_VMS <- abs(c(0, as.numeric( tacsatp_deu[-nrow( tacsatp_swe),"SI_DATIM"] -
+  #                                       tacsatp_deu[-1,"SI_DATIM"], units="hours")))
+  #start.trip <- c(1,diff( tacsatp_deu[,"FT_REF"]))
+  #tacsatp_deu$all_effort <- tacsatp_deu$LE_EFF_VMS  # save...
+  #tacsatp_deu[start.trip!=0, "LE_EFF_VMS"] <- 0  # just correct for the trip change points
+
+  #tacsatp_deu$LE_EFF_VMS <- as.numeric(as.character(tacsatp_deu$LE_EFF_VMS))
+  #tacsatp_deu <- tacsatp_deu[!is.na(as.numeric(as.character(tacsatp_deu$SI_LONG))) &  !is.na(as.numeric(as.character(tacsatp_deu$SI_LATI))), ]
+  #tacsatp_deu$nb_vessels <- 1 # a trick to retrieve the mean from the aggregate sum
+ 
+  tacsatp <- tacsatp_deu
+  }
    
-  nm <- intersect(colnames(tacsatp_den), colnames(tacsatp_swe))
-  tacsatp <- rbind.data.frame(
-                        tacsatp_den[,nm],
-                         tacsatp_swe[,nm] #,
-                         # tacsatp_ger[, nm]
-                         )
-  tacsatp <- tacsatp[c(grep("DNK", tacsatp$VE_REF), grep("DEU",tacsatp$VE_REF), grep("SWE", tacsatp$VE_REF)),]
-  tacsatp$ctry <- factor(tacsatp$ctry)
-
-
-
-
+   
+ 
 
   xrange <- range(as.numeric(as.character(tacsatp$SI_LONG)), na.rm=TRUE)
   yrange <- range(as.numeric(as.character(tacsatp$SI_LATI)), na.rm=TRUE)
@@ -77,14 +107,14 @@
   
      # keep only the vessels fishnig in the western Baltic  (and kattegat because her.3a22, and East baltic because spr.2232)
     library(maptools)
-    handmade            <- readShapePoly(file.path(inPathManagement, "wbaltic_wgs84"))  # build in ArcGIS 10.1
+    handmade            <- readShapePoly(file.path(general$main.path.param.gis, "MANAGEMENT", "wbaltic_wgs84"))  # built in ArcGIS 10.1
     the_area            <- sapply(slot(handmade, "polygons"), function(x) lapply(slot(x, "Polygons"), function(x) x@coords)) # tricky there...
     in_area             <- point.in.polygon(tacsatp[,'SI_LONG'],tacsatp[,'SI_LATI'], the_area[[1]][,1],the_area[[1]][,2])
 
     # then subset here...
-    vid_this_case_study <- as.character(unique(tacsatp$VE_REF[in_area>0]))
+    vid_this_case_study    <- as.character(unique(tacsatp$VE_REF[in_area>0]))
     cat(paste(length(vid_this_case_study), " vessels in the area over ", length(unique(tacsatp$VE_REF)), " in total" , "\n"))
-    tacsatp      <- tacsatp[tacsatp$VE_REF %in% vid_this_case_study,]
+    tacsatp                <- tacsatp[tacsatp$VE_REF %in% vid_this_case_study,]
   
    ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
    ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
@@ -108,7 +138,12 @@
   tacsatp$LE_MET_rough <- factor(substr(tacsatp$LE_MET_level6, 1,3)) # init
   levels(tacsatp$LE_MET_rough)
   ##[1] "DRB" "FPO" "GNS" "GTR" "LHP" "LLD" "LLS" "MIS" "No_" "OTB" "OTM" "OTT" "PS_" "PTB" "PTM" "SDN" "SSC"
-  levels(tacsatp$LE_MET_rough) <- c("Passive", "Passive", "Passive", "Passive", "Passive", "Passive", "Trawl","Trawl", "Trawl", "Trawl", "Seine", "Trawl", "Trawl","Seine","Seine")
+ 
+  # rename
+  levels(tacsatp$LE_MET_rough) [levels(tacsatp$LE_MET_rough) %in% c("DRB", "FPO", "GNS", "LLD", "No_", "GTR", "LHP", "LLS", "MIS" )] <- "Passive"
+  levels(tacsatp$LE_MET_rough) [levels(tacsatp$LE_MET_rough) %in% c("OTB","OTT",  "OTM", "PTB", "PTM" )]       <- "Trawl"
+  levels(tacsatp$LE_MET_rough) [levels(tacsatp$LE_MET_rough) %in% c("PS_", "SDN", "SSC")]               <- "Seine"
+    
 
   # keep level 6 and built an OTHER metier
   levels(tacsatp$LE_MET_level6)
@@ -133,7 +168,7 @@
   
 
 
-  # Aggregate the results by metier and grid ID (aggregate() can be slow: be patient)
+  # aggregate the results by metier and grid ID (aggregate() can be slow: be patient)
   feffort    <- "LE_EFF_VMS"
 
   tacsatp[,c(feffort)] <- as.numeric(as.character(tacsatp[,c(feffort)]))
@@ -144,7 +179,7 @@
   colnames(aggtacsatp)[1:3] <- c("LE_MET","grID", "ctry")
   colnames(aggtacsatp)[4]   <- "feffort"
 
-  #- Add midpoint of gridcell to dataset
+  # add midpoint of gridcell to dataset
   aggResult <- cbind(aggtacsatp, CELL_LONG=coordinates(grd)[aggtacsatp$grID,1], CELL_LATI=coordinates(grd)[aggtacsatp$grID,2])
   save(aggResult, file=file.path(outPath,"2015_aggtacsatp.RData"))
 
