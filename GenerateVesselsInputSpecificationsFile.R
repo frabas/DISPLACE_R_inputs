@@ -95,30 +95,42 @@
   if(ctry=="DEU"){
   cat(paste("Formatting for this country: TO DO! \n"))
    ### CHRISTIAN:  TO DO ###
-  # load(file=file.path(general$main.path.param.gis, "FISHERIES", "coupled_VMS_logbooks_DEU_2015.RData"))
-  #tacsatp_deu           <- tacsat.swe
-  #tacsatp_deu$SI_LONG   <- as.numeric(as.character(tacsatp_deu$SI_LONG))
-  #tacsatp_deu$SI_LATI   <- as.numeric(as.character(tacsatp_deu$SI_LATI))
-  #tacsatp_deu$SI_STATE  <- as.numeric(as.character(tacsatp_deu$SI_STATE))
+  #load(file=file.path(general$main.path.param.gis, "FISHERIES", "all_merged_weight_DEN_2015.RData"))
+  load(file=file.path(general$main.path.param.gis, "FISHERIES", "coupled_VMS_logbooks_DEU_2015.RData"))
+  tacsatp_deu           <- coupled_VMS_logbooks
   
-  #tacsatp_swe$LE_MET_level6 <-  ...
-  
-  #format_date <- "%Y-%m-%d %H:%M:%S" 
-  #tacsatp_deu$SI_DATIM <- as.POSIXct( tacsatp_deu$SI_DATIM, tz='GMT',   format_date)
-
-  # compute effort in min
-  #tacsatp_deu$LE_EFF_VMS <- abs(c(0, as.numeric( tacsatp_deu[-nrow( tacsatp_swe),"SI_DATIM"] -
-  #                                       tacsatp_deu[-1,"SI_DATIM"], units="hours")))
-  #start.trip <- c(1,diff( tacsatp_deu[,"FT_REF"]))
-  #tacsatp_deu$all_effort <- tacsatp_deu$LE_EFF_VMS  # save...
-  #tacsatp_deu[start.trip!=0, "LE_EFF_VMS"] <- 0  # just correct for the trip change points
-
-  #tacsatp_deu$LE_EFF_VMS <- as.numeric(as.character(tacsatp_deu$LE_EFF_VMS))
-  #tacsatp_deu <- tacsatp_deu[!is.na(as.numeric(as.character(tacsatp_deu$SI_LONG))) &  !is.na(as.numeric(as.character(tacsatp_deu$SI_LATI))), ]
-  #tacsatp_deu$nb_vessels <- 1 # a trick to retrieve the mean from the aggregate sum
+  # look at the data format obtained from MergingVMS2Logbooks.R => head(coupled_VMS_logbooks,2)
  
+  tacsatp_deu$SI_LONG   <- as.numeric(as.character(tacsatp_deu$SI_LONG))
+  tacsatp_deu$SI_LATI   <- as.numeric(as.character(tacsatp_deu$SI_LATI))
+  tacsatp_deu$SI_STATE  <- as.numeric(as.character(tacsatp_deu$SI_STATE))
+  tacsatp_deu           <- tacsatp_deu[!is.na(as.numeric(as.character(tacsatp_deu$SI_LONG))) &  !is.na(as.numeric(as.character(tacsatp_deu$SI_LATI))), ]
+
+  # retrieve the missing info for LEN (vessel length) and kW (vessel engine power) from logbooks EFLALO
+  load(file.path(general$main.path.param.gis, "FISHERIES",
+           #paste("eflalo_","2015",".RData",sep='')))
+           paste("logbooks_DEU_","2015",".RData",sep='')))
+      logbooks  <- logbooks[grep("DEU", as.character(logbooks$VE_REF)),]
+
+      x <- logbooks ; rm(logbooks); gc(reset=TRUE)
+
+    x              <- subset(x,FT_REF != 0)
+    vessel.length.per.vid <- x[!duplicated(x$VE_REF),c("VE_REF","VE_LEN")]
+    tacsatp_deu$VE_LEN       <- round(vessel.length.per.vid [match( tacsatp_deu$VE_REF,vessel.length.per.vid$VE_REF), "VE_LEN"], 0) # map
+
+    vessel.kw.per.vid <- x[!duplicated(x$VE_REF),c("VE_REF","VE_KW")]
+    tacsatp_deu$VE_KW       <- round(vessel.kw.per.vid [match( tacsatp_deu$VE_REF,vessel.kw.per.vid$VE_REF), "VE_KW"], 0) # map
+
+
+
+    tacsatp_deu$nb_vessels <- 1 # a trick to retrieve the mean from the aggregate sum
+    tacsatp_deu$LE_EFF_VMS <- as.numeric(as.character(tacsatp_deu$LE_EFF_VMS)) / 60 # convert in hour
+    tacsatp_deu$all_effort <- tacsatp_deu$LE_EFF_VMS  # save...
+    tacsatp_deu[tacsatp_deu$SI_STATE==2, "LE_EFF_VMS"] <- 0 # remove effort if non-fishing points
+  
   tacsatp <- tacsatp_deu
   }
+  
  
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##

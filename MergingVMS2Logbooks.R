@@ -200,6 +200,29 @@ if(CHRISTIAN){
    
    
    ##=> all_merged_value_2015.RData and all_merged_weight_2015.RData are now created in the output folder...
+  
+  
+  # rename if you like
+  if(FRANCOIS) {
+  load(file.path(namefolder, "all_merged_weight_2015.RData"))
+  coupled_VMS_logbooks <- all.merged
+  save(coupled_VMS_logbooks, file=file.path(namefolder, "coupled_VMS_logbooks_DEN_2015.RData"))
+ 
+  load(file.path(main_path_data, paste("eflalo_","2015",".RData",sep='')))
+  logbooks <- eflalo
+  save(logbooks, file=file.path(namefolder, "logbooks_DEN_2015.RData"))
+  } 
+   
+  if(CHRISTIAN) {
+  load(file.path(namefolder, "all_merged_weight_2015.RData"))
+  coupled_VMS_logbooks <- all.merged
+  save(coupled_VMS_logbooks, file=file.path(namefolder, "coupled_VMS_logbooks_DEU_2015.RData"))
+ 
+  load(file.path(main_path_data, paste("eflalo_","2015",".RData",sep='')))
+  logbooks <- eflalo
+  save(logbooks, file=file.path(namefolder, "logbooks_DEU_2015.RData"))
+  } 
+   
    
    
  #---------------------------------------------#

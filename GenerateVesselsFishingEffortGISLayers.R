@@ -15,8 +15,8 @@
 
 
   if(ctry=="DEN"){
-  load(file=file.path(general$main.path.param.gis, "FISHERIES", "coupled_VMS_logbooks_DNK_2015.RData"))
-  tacsatp_den <- all.merged
+  load(file=file.path(general$main.path.param.gis, "FISHERIES", "coupled_VMS_logbooks_DNK_2015.RData")) # get the coupled_VMS_logbooks object
+  tacsatp_den <- coupled_VMS_logbooks
   tacsatp_den <- tacsatp_den[!is.na(as.numeric(as.character(tacsatp_den$SI_LONG))) &  !is.na(as.numeric(as.character(tacsatp_den$SI_LATI))), ]
   tacsatp_den$SI_LONG <- as.numeric(as.character(tacsatp_den$SI_LONG))
   tacsatp_den$SI_LATI <- as.numeric(as.character(tacsatp_den$SI_LATI))
@@ -48,28 +48,15 @@
   if(ctry=="DEU"){
   cat(paste("Formatting for this country: TO DO! \n"))
    ### CHRISTIAN:  TO DO ###
-  # load(file=file.path(general$main.path.param.gis, "FISHERIES", "coupled_VMS_logbooks_DEU_2015.RData"))
-  #tacsatp_deu           <- tacsat.swe
-  #tacsatp_deu$SI_LONG   <- as.numeric(as.character(tacsatp_deu$SI_LONG))
-  #tacsatp_deu$SI_LATI   <- as.numeric(as.character(tacsatp_deu$SI_LATI))
-  #tacsatp_deu$SI_STATE  <- as.numeric(as.character(tacsatp_deu$SI_STATE))
-  
-  #tacsatp_swe$LE_MET_level6 <-  ...
-  
-  #format_date <- "%Y-%m-%d %H:%M:%S" 
-  #tacsatp_deu$SI_DATIM <- as.POSIXct( tacsatp_deu$SI_DATIM, tz='GMT',   format_date)
-
-  # compute effort in min
-  #tacsatp_deu$LE_EFF_VMS <- abs(c(0, as.numeric( tacsatp_deu[-nrow( tacsatp_swe),"SI_DATIM"] -
-  #                                       tacsatp_deu[-1,"SI_DATIM"], units="hours")))
-  #start.trip <- c(1,diff( tacsatp_deu[,"FT_REF"]))
-  #tacsatp_deu$all_effort <- tacsatp_deu$LE_EFF_VMS  # save...
-  #tacsatp_deu[start.trip!=0, "LE_EFF_VMS"] <- 0  # just correct for the trip change points
-
-  #tacsatp_deu$LE_EFF_VMS <- as.numeric(as.character(tacsatp_deu$LE_EFF_VMS))
-  #tacsatp_deu <- tacsatp_deu[!is.na(as.numeric(as.character(tacsatp_deu$SI_LONG))) &  !is.na(as.numeric(as.character(tacsatp_deu$SI_LATI))), ]
-  #tacsatp_deu$nb_vessels <- 1 # a trick to retrieve the mean from the aggregate sum
- 
+  load(file=file.path(general$main.path.param.gis, "FISHERIES", "coupled_VMS_logbooks_DEU_2015.RData"))  # get the coupled_VMS_logbooks object
+  tacsatp_deu <- coupled_VMS_logbooks
+  tacsatp_deu <- tacsatp_deu[!is.na(as.numeric(as.character(tacsatp_deu$SI_LONG))) &  !is.na(as.numeric(as.character(tacsatp_deu$SI_LATI))), ]
+  tacsatp_deu$SI_LONG <- as.numeric(as.character(tacsatp_deu$SI_LONG))
+  tacsatp_deu$SI_LATI <- as.numeric(as.character(tacsatp_deu$SI_LATI))
+  tacsatp_deu$SI_STATE <- as.numeric(as.character(tacsatp_deu$SI_STATE))
+  tacsatp_deu$LE_EFF_VMS <- as.numeric(as.character(tacsatp_deu$LE_EFF_VMS)) /60
+  tacsatp_deu <- tacsatp_deu[tacsatp_deu$SI_STATE==1, ]  # keep fishing positions only
+  tacsatp_deu$ctry <- "DEU"
   tacsatp <- tacsatp_deu
   }
    
