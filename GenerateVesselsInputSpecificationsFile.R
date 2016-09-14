@@ -3,7 +3,6 @@
       if(.Platform$OS.type == "windows") {
         general$application           <- "balticRTI" # ...or myfish
         general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
-        general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_" , general$application, sep=""))
        }
 
 
