@@ -7,11 +7,18 @@
        }
 
 
-
-
-  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
-  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+  
+  #!#!#!#!#!#
+  #!#!#!#!#!#
+  # choose your country
   ctry <- "DEN"
+  #!#!#!#!#!#
+  #!#!#!#!#!#
+  
+
+  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+  if(ctry=="DEN"){
   #load(file=file.path(general$main.path.param.gis, "FISHERIES", "all_merged_weight_DEN_2015.RData"))
   load(file=file.path(general$main.path.param.gis, "FISHERIES", "coupled_VMS_logbooks_DNK_2015.RData"))
   tacsatp_den           <- coupled_VMS_logbooks
@@ -29,13 +36,13 @@
   tacsatp_den$SI_STATE  <- as.numeric(as.character(tacsatp_den$SI_STATE))
   tacsatp_den           <- tacsatp_den[!is.na(as.numeric(as.character(tacsatp_den$SI_LONG))) &  !is.na(as.numeric(as.character(tacsatp_den$SI_LATI))), ]
 
-  # retrieve LEN and KW from EFLALO
-  load(file.path(inPath,
+  # retrieve the missing info for LEN (vessel length) and kW (vessel engine power) from logbooks EFLALO
+  load(file.path(general$main.path.param.gis, "FISHERIES",
            #paste("eflalo_","2015",".RData",sep='')))
            paste("logbooks_DNK_","2015",".RData",sep='')))
-      eflalo  <- eflalo[grep("DNK", as.character(eflalo$VE_REF)),]
+      logbooks  <- logbooks[grep("DNK", as.character(logbooks$VE_REF)),]
 
-      x <- eflalo ; rm(eflalo); gc(reset=TRUE)
+      x <- logbooks ; rm(logbooks); gc(reset=TRUE)
 
     x              <- subset(x,FT_REF != 0)
     vessel.length.per.vid <- x[!duplicated(x$VE_REF),c("VE_REF","VE_LEN")]
@@ -51,10 +58,12 @@
     tacsatp_den$all_effort <- tacsatp_den$LE_EFF_VMS  # save...
     tacsatp_den[tacsatp_den$SI_STATE==2, "LE_EFF_VMS"] <- 0 # remove effort if non-fishing points
   
+  tacsatp <- tacsatp_den
+  }
   
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
-  ctry <- "SWE"
+  if(ctry=="SWE"){
   #load(file=file.path(general$main.path.param.gis, "FISHERIES", "Displace2015_tacsat_swe_v2.RData"))
   load(file=file.path(general$main.path.param.gis, "FISHERIES", "coupled_VMS_logbooks_SWE_2015.RData"))
   tacsatp_swe           <- tacsat.swe
@@ -77,11 +86,16 @@
   tacsatp_swe$LE_EFF_VMS <- as.numeric(as.character(tacsatp_swe$LE_EFF_VMS))
   tacsatp_swe <- tacsatp_swe[!is.na(as.numeric(as.character(tacsatp_swe$SI_LONG))) &  !is.na(as.numeric(as.character(tacsatp_swe$SI_LATI))), ]
   tacsatp_swe$nb_vessels <- 1 # a trick to retrieve the mean from the aggregate sum
+
+  tacsatp <- tacsatp_swe
+  }
  
   
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
-  ctry <- "DEU"   ### CHRISTIAN:  TO DO ###
+  if(ctry=="DEU"){
+  cat(paste("Formatting for this country: TO DO! \n"))
+   ### CHRISTIAN:  TO DO ###
   # load(file=file.path(general$main.path.param.gis, "FISHERIES", "coupled_VMS_logbooks_DEU_2015.RData"))
   #tacsatp_deu           <- tacsat.swe
   #tacsatp_deu$SI_LONG   <- as.numeric(as.character(tacsatp_deu$SI_LONG))
@@ -104,23 +118,9 @@
   #tacsatp_deu <- tacsatp_deu[!is.na(as.numeric(as.character(tacsatp_deu$SI_LONG))) &  !is.na(as.numeric(as.character(tacsatp_deu$SI_LATI))), ]
   #tacsatp_deu$nb_vessels <- 1 # a trick to retrieve the mean from the aggregate sum
  
-  
-  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
-  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
-    # combined DNK SWE and DEU
-  
-  nm <- intersect(colnames(tacsatp_den), colnames(tacsatp_swe))
-  nm_not_in_den <- setdiff(colnames(tacsatp_swe), colnames(tacsatp_den))
-  nm_not_in_swe <- setdiff(colnames(tacsatp_den), colnames(tacsatp_swe))
-
-  tacsatp <- rbind.data.frame(
-                        tacsatp_den[,nm],
-                         tacsatp_swe[,nm] #,
-                         # tacsatp_deu[, nm]   # TO DO
-                         )
-  # keep only DNK and DEU, and SWE vessels
- tacsatp <- tacsatp[c(grep("DNK", tacsatp$VE_REF), grep("DEU",tacsatp$VE_REF), grep("SWE", tacsatp$VE_REF)),]
-
+  tacsatp <- tacsatp_deu
+  }
+ 
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   # assign the landing harbour to each ping of the trip
@@ -205,7 +205,12 @@
   tacsatp$LE_MET_rough <- factor(substr(tacsatp$LE_MET_level6, 1,3)) # init
   levels(tacsatp$LE_MET_rough)
   ##[1] "DRB" "FPO" "GNS" "GTR" "LHP" "LLD" "LLS" "MIS" "No_" "OTB" "OTM" "OTT" "PS_" "PTB" "PTM" "SDN" "SSC"
-  levels(tacsatp$LE_MET_rough) <- c("Passive", "Passive", "Passive", "Passive", "Passive", "Passive", "Trawl","Trawl", "Trawl", "Trawl", "Seine", "Trawl", "Trawl","Seine","Seine")
+ 
+  # rename
+  levels(tacsatp$LE_MET_rough) [levels(tacsatp$LE_MET_rough) %in% c("DRB", "FPO", "GNS", "LLD", "No_", "GTR", "LHP", "LLS", "MIS" )] <- "Passive"
+  levels(tacsatp$LE_MET_rough) [levels(tacsatp$LE_MET_rough) %in% c("OTB","OTT",  "OTM", "PTB", "PTM" )]       <- "Trawl"
+  levels(tacsatp$LE_MET_rough) [levels(tacsatp$LE_MET_rough) %in% c("PS_", "SDN", "SSC")]               <- "Seine"
+    
 
   # keep level 6 and built an OTHER metier
   levels(tacsatp$LE_MET_level6)
@@ -218,10 +223,10 @@
   agg_per_met_and_vid                 <- tapply(tacsatp[tacsatp$SI_STATE==1, ]$LE_EFF_VMS, list( tacsatp[tacsatp$SI_STATE==1, ]$VE_REF, tacsatp[tacsatp$SI_STATE==1, ]$LE_MET_level6), sum, na.rm=TRUE)
   #agg_per_met_and_vid[!is.na(agg_per_met_and_vid[, "PTM_SPF_16-31_0_0"]),]   # check if some vessels are polyvalent demersal-pelagic
   
-  levels(tacsatp$LE_MET_level6)[!levels(tacsatp$LE_MET_level6)%in% met_to_keep] <- "other"
+  levels(tacsatp$LE_MET_level6)[!levels(tacsatp$LE_MET_level6)%in% met_to_keep]  <- "other"
   levels(tacsatp$LE_MET_level6)[levels(tacsatp$LE_MET_level6)%in% "No_Matrix6"]  <- "other"
   
-   # debug metier names
+   # debug metier names for impossible symbols in file names
   levels(tacsatp$LE_MET_level6) <- gsub(">=", "o", levels(tacsatp$LE_MET_level6))  
   levels(tacsatp$LE_MET_level6) <- gsub("<",  "u", levels(tacsatp$LE_MET_level6))  
   levels(tacsatp$LE_MET_level6) <- gsub(">",  "o", levels(tacsatp$LE_MET_level6))  
@@ -306,7 +311,7 @@
    tacsatp_agg$"cruise speed knots"  <- 10
   
    # i.e. fuel cons
-   table.fuelcons.per.engine       <-  read.table(file= file.path(inPath, "IBM_datainput_engine_consumption.txt"), header=TRUE,sep="")
+   table.fuelcons.per.engine       <-  read.table(file= file.path(general$main.path.param.gis, "FISHERIES", "IBM_datainput_engine_consumption.txt"), header=TRUE,sep="")
    linear.model                    <-  lm(calc_cons_L_per_hr_max_rpm~ kW2, data=table.fuelcons.per.engine)  # conso = a*Kw +b   # to guess its fuel consumption at maximal speed
    tacsatp_agg$fuel.cons.h         <-  predict(linear.model, newdata=data.frame(kW2=as.numeric(as.character(tacsatp_agg$VE_KW)))) # Liter per hour
   
@@ -386,15 +391,54 @@
  
   
   # finally, export!
-   nameobj <- "vessels_specifications_per_harbour_metiers.csv"  #....and possibly per vid!
+  nameobj           <- paste("vessels_specifications_per_harbour_metiers_",ctry,".csv",sep='')  #....and possibly per vid!
   
   tacsatp_agg <- tacsatp_agg[!is.na(tacsatp_agg$SI_HARB),]
   
-  #Region,Harbor,metier,N. of vessels,Crew,mean_LOA_m,mean_GT,mean_kW,hake_kg_h,sole_kg_h,redmullet_kg_h,mantis_kg_h,fishing speed knots,cruise speed knots,fuel cons h,ave storage fish kg,fuel tank liter,trip duration h,multip fuel steaming,multip fuel fishing,multip fuel ret port fish,multip fuel inactive,range km fish ground,fuel_price_Euro/liter,weekEndStartDay,WeekEndEndDay,WorkHoursStart,WorkHoursEnd
+  #Region,Harbor,metier,N. of vessels,Crew,mean_LOA_m,mean_GT,mean_kW,hake_kg_h,sole_kg_h,redmullet_kg_h,mantis_kg_h,fishing speed knots,cruise speed knots,fuel cons h,ave storage fish kg,fuel tank liter,trip duration h,multip  fuel steaming,multip fuel fishing,multip fuel ret port fish,multip fuel inactive,range km fish ground,fuel_price_Euro/liter,weekEndStartDay,WeekEndEndDay,WorkHoursStart,WorkHoursEnd
   
    write.table(tacsatp_agg, file.path(general$main.path.param.gis, "FISHERIES", nameobj), row.names=FALSE, sep=";", quote=FALSE)
 
 
+   
+   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+  # FINAL STEP, ONCE ALL COUNTRIES INFORMED THEN COMBINE ALL COUNTRIES
+  countries <- c('DEN', 'SWE', 'DEU')
+  tacsatp   <- NULL
+  for (ctry in countries){
 
+     nameobj           <- paste("vessels_specifications_per_harbour_metiers_",ctry,".csv",sep='')  #....and possibly per vid!
+     tacsatp_this_ctry <- read.table(file.path(general$main.path.param.gis, "FISHERIES", nameobj), header=TRUE, sep=";")
+  
+     if(is.null(tacsatp)){
+        tacsatp <- tacsatp_this_ctry 
+     }else{
+  
+        nm                          <- intersect(colnames(tacsatp), colnames(tacsatp_this_ctry))
+        nm_not_in_tacsatp           <- setdiff(colnames(tacsatp_this_ctry), colnames(tacsatp))
+        nm_not_in_tacsatp_this_ctry <- setdiff(colnames(tacsatp), colnames(tacsatp_this_ctry))
 
+        tacsatp <- rbind.data.frame(
+                        tacsatp[,nm],
+                         tacsatp_this_ctry[,nm]
+                         )
+     }
+  }
+
+  # keep only DNK and DEU, and SWE vessels
+ tacsatp <- tacsatp[c(grep("DEN", tacsatp$VE_REF), grep("DEU",tacsatp$VE_REF), grep("SWE", tacsatp$VE_REF)),]
+ 
+ # finally, export!
+ nameobj <- "vessels_specifications_per_harbour_metiers.csv"  #....and possibly per vid!
+  
+  #Region,Harbor,metier,N. of vessels,Crew,mean_LOA_m,mean_GT,mean_kW,hake_kg_h,sole_kg_h,redmullet_kg_h,mantis_kg_h,fishing speed knots,cruise speed knots,fuel cons h,ave storage fish kg,fuel tank liter,trip duration h,multip fuel steaming,multip fuel fishing,multip fuel ret port fish,multip fuel inactive,range km fish ground,fuel_price_Euro/liter,weekEndStartDay,WeekEndEndDay,WorkHoursStart,WorkHoursEnd
+  
+ write.table(tacsatp_agg, file.path(general$main.path.param.gis, "FISHERIES", nameobj), row.names=FALSE, sep=";", quote=FALSE)
 
