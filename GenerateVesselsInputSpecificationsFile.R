@@ -1,22 +1,33 @@
 
+ general <- list()
+      if(.Platform$OS.type == "windows") {
+        general$application           <- "balticRTI" # ...or myfish
+        general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+        general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_" , general$application, sep=""))
+       }
 
 
-  inPath            <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis","balticRTI","FISHERIES")
-  inPathManagement  <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis","balticRTI","MANAGEMENT")
-  inPathGraph       <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis","balticRTI","GRAPH")
-  outPath           <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis","balticRTI","FISHERIES")
 
 
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ctry <- "DEN"
-  #load(file=file.path(inPath,"all_merged_weight_DEN_2015.RData"))
-  load(file=file.path(inPath,"coupled_VMS_logbooks_DNK_2015.RData"))
-  tacsatp_den <- all.merged
-  tacsatp_den$SI_LONG <- as.numeric(as.character(tacsatp_den$SI_LONG))
-  tacsatp_den$SI_LATI <- as.numeric(as.character(tacsatp_den$SI_LATI))
-  tacsatp_den$SI_STATE <- as.numeric(as.character(tacsatp_den$SI_STATE))
-  tacsatp_den <- tacsatp_den[!is.na(as.numeric(as.character(tacsatp_den$SI_LONG))) &  !is.na(as.numeric(as.character(tacsatp_den$SI_LATI))), ]
+  #load(file=file.path(general$main.path.param.gis, "FISHERIES", "all_merged_weight_DEN_2015.RData"))
+  load(file=file.path(general$main.path.param.gis, "FISHERIES", "coupled_VMS_logbooks_DNK_2015.RData"))
+  tacsatp_den           <- coupled_VMS_logbooks
+  
+  # look at the data format obtained from MergingVMS2Logbooks.R => head(coupled_VMS_logbooks,2)
+  #   VE_REF  FT_REF VE_FLT     LE_MET_level6 LE_GEAR SI_LATI SI_LONG SI_SP SI_HE SI_STATE    SI_DATE SI_TIME SI_HARB LE_KG_COD LE_KG_CSH LE_KG_DAB LE_KG_ELE LE_KG_FLE LE_KG_HAD LE_KG_HER LE_KG_HKE LE_KG_HOM LE_KG_LEM LE_KG_MAC
+  #DNK000001391 3386276 fleet1 GNS_DEF_>=157_0_0      GN   54.94 10.7087     0    76        2 13/02/2015   10:28    NA55        NA        NA        NA        NA        NA        NA        NA        NA        NA        NA     NA
+  #DNK000001391 3386276 fleet1 GNS_DEF_>=157_0_0      GN  55.024 10.7487   2.8     6        2 13/02/2015   11:28      NA        NA        NA        NA        NA        NA        NA        NA        NA        NA        NA     NA
+  #     LE_KG_MON LE_KG_MUS LE_KG_NEP LE_KG_NOP LE_KG_OYF LE_KG_PLE LE_KG_POK LE_KG_PRA LE_KG_SAN LE_KG_SOL LE_KG_SPR LE_KG_TUR LE_KG_WHB LE_KG_WHG LE_KG_WIT LE_EFF_VMS KW_HOURS flag
+  #        NA        NA        NA        NA        NA        NA        NA        NA        NA        NA        NA        NA        NA        NA        NA          0        0    4
+  #        NA        NA        NA        NA        NA        NA        NA        NA        NA        NA        NA        NA        NA        NA        NA         60      128    4
+
+  tacsatp_den$SI_LONG   <- as.numeric(as.character(tacsatp_den$SI_LONG))
+  tacsatp_den$SI_LATI   <- as.numeric(as.character(tacsatp_den$SI_LATI))
+  tacsatp_den$SI_STATE  <- as.numeric(as.character(tacsatp_den$SI_STATE))
+  tacsatp_den           <- tacsatp_den[!is.na(as.numeric(as.character(tacsatp_den$SI_LONG))) &  !is.na(as.numeric(as.character(tacsatp_den$SI_LATI))), ]
 
   # retrieve LEN and KW from EFLALO
   load(file.path(inPath,
@@ -44,12 +55,12 @@
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ctry <- "SWE"
-  #load(file=file.path(inPath,"Displace2015_tacsat_swe_v2.RData"))
-  load(file=file.path(inPath,"coupled_VMS_logbooks_SWE_2015.RData"))
-  tacsatp_swe <- tacsat.swe
-  tacsatp_swe$SI_LONG <- as.numeric(as.character(tacsatp_swe$SI_LONG))
-  tacsatp_swe$SI_LATI <- as.numeric(as.character(tacsatp_swe$SI_LATI))
-  tacsatp_swe$SI_STATE <- as.numeric(as.character(tacsatp_swe$SI_STATE))
+  #load(file=file.path(general$main.path.param.gis, "FISHERIES", "Displace2015_tacsat_swe_v2.RData"))
+  load(file=file.path(general$main.path.param.gis, "FISHERIES", "coupled_VMS_logbooks_SWE_2015.RData"))
+  tacsatp_swe           <- tacsat.swe
+  tacsatp_swe$SI_LONG   <- as.numeric(as.character(tacsatp_swe$SI_LONG))
+  tacsatp_swe$SI_LATI   <- as.numeric(as.character(tacsatp_swe$SI_LATI))
+  tacsatp_swe$SI_STATE  <- as.numeric(as.character(tacsatp_swe$SI_STATE))
   
   tacsatp_swe$LE_MET_level6 <- tacsatp_swe$VE_MET
   
@@ -70,16 +81,33 @@
   
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
-  ctry <- "GER"
-  # TO DO
-  # need "VE_LEN"     "VE_KW" as well
-  #tacsatp_ger$all_effort <- tacsatp_ger$LE_EFF_VMS  # save...
-  # tacsatp_ger$nb_vessels <- 1 # a trick to retrieve the mean from the aggregate sum
+  ctry <- "DEU"   ### CHRISTIAN:  TO DO ###
+  # load(file=file.path(general$main.path.param.gis, "FISHERIES", "coupled_VMS_logbooks_DEU_2015.RData"))
+  #tacsatp_deu           <- tacsat.swe
+  #tacsatp_deu$SI_LONG   <- as.numeric(as.character(tacsatp_deu$SI_LONG))
+  #tacsatp_deu$SI_LATI   <- as.numeric(as.character(tacsatp_deu$SI_LATI))
+  #tacsatp_deu$SI_STATE  <- as.numeric(as.character(tacsatp_deu$SI_STATE))
+  
+  #tacsatp_swe$LE_MET_level6 <-  ...
+  
+  #format_date <- "%Y-%m-%d %H:%M:%S" 
+  #tacsatp_deu$SI_DATIM <- as.POSIXct( tacsatp_deu$SI_DATIM, tz='GMT',   format_date)
+
+  # compute effort in min
+  #tacsatp_deu$LE_EFF_VMS <- abs(c(0, as.numeric( tacsatp_deu[-nrow( tacsatp_swe),"SI_DATIM"] -
+  #                                       tacsatp_deu[-1,"SI_DATIM"], units="hours")))
+  #start.trip <- c(1,diff( tacsatp_deu[,"FT_REF"]))
+  #tacsatp_deu$all_effort <- tacsatp_deu$LE_EFF_VMS  # save...
+  #tacsatp_deu[start.trip!=0, "LE_EFF_VMS"] <- 0  # just correct for the trip change points
+
+  #tacsatp_deu$LE_EFF_VMS <- as.numeric(as.character(tacsatp_deu$LE_EFF_VMS))
+  #tacsatp_deu <- tacsatp_deu[!is.na(as.numeric(as.character(tacsatp_deu$SI_LONG))) &  !is.na(as.numeric(as.character(tacsatp_deu$SI_LATI))), ]
+  #tacsatp_deu$nb_vessels <- 1 # a trick to retrieve the mean from the aggregate sum
  
   
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
-    # combined DNK SWE and GER
+    # combined DNK SWE and DEU
   
   nm <- intersect(colnames(tacsatp_den), colnames(tacsatp_swe))
   nm_not_in_den <- setdiff(colnames(tacsatp_swe), colnames(tacsatp_den))
@@ -88,7 +116,7 @@
   tacsatp <- rbind.data.frame(
                         tacsatp_den[,nm],
                          tacsatp_swe[,nm] #,
-                         # tacsatp_ger[, nm]
+                         # tacsatp_deu[, nm]   # TO DO
                          )
   # keep only DNK and DEU, and SWE vessels
  tacsatp <- tacsatp[c(grep("DNK", tacsatp$VE_REF), grep("DEU",tacsatp$VE_REF), grep("SWE", tacsatp$VE_REF)),]
@@ -114,7 +142,7 @@
    # by substituting the port names in raw input data with port names from the graph
    
  
-  port_names <- read.table(file=file.path(inPathGraph,
+  port_names <- read.table(file=file.path(general$main.path.param.gis, "GRAPH",
                                   paste("harbours.dat", sep='')), sep=";")
 
   all_ports_in_input <- levels(tacsatp$SI_HARB)
@@ -144,7 +172,7 @@
   
      # keep only the vessels fishnig in the western Baltic  (and kattegat because her.3a22, and East baltic because spr.2232)
     library(maptools)
-    handmade            <- readShapePoly(file.path(inPathManagement, "wbaltic_wgs84"))  # build in ArcGIS 10.1
+    handmade            <- readShapePoly(file.path(general$main.path.param.gis, "MANAGEMENT", "wbaltic_wgs84"))  # build in ArcGIS 10.1
     the_area            <- sapply(slot(handmade, "polygons"), function(x) lapply(slot(x, "Polygons"), function(x) x@coords)) # tricky there...
     in_area             <- point.in.polygon(tacsatp[,'SI_LONG'],tacsatp[,'SI_LATI'], the_area[[1]][,1],the_area[[1]][,2])
 
@@ -364,7 +392,7 @@
   
   #Region,Harbor,metier,N. of vessels,Crew,mean_LOA_m,mean_GT,mean_kW,hake_kg_h,sole_kg_h,redmullet_kg_h,mantis_kg_h,fishing speed knots,cruise speed knots,fuel cons h,ave storage fish kg,fuel tank liter,trip duration h,multip fuel steaming,multip fuel fishing,multip fuel ret port fish,multip fuel inactive,range km fish ground,fuel_price_Euro/liter,weekEndStartDay,WeekEndEndDay,WorkHoursStart,WorkHoursEnd
   
-   write.table(tacsatp_agg, file.path(outPath, nameobj), row.names=FALSE, sep=";", quote=FALSE)
+   write.table(tacsatp_agg, file.path(general$main.path.param.gis, "FISHERIES", nameobj), row.names=FALSE, sep=";", quote=FALSE)
 
 
 
