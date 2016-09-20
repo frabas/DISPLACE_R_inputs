@@ -1,11 +1,30 @@
+ # GENERAL SETTINGS
+
+   args <- commandArgs(trailingOnly = TRUE)
+
+   general <- list()
+
+   if (length(args) < 2) {
+     if(.Platform$OS.type == "windows") {
+       general$application           <- "balticRTI" # ...or myfish
+       general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+       general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_", general$application, sep=''))
+       general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
    
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-  general <- list()
-  general$application <- "balticRTI"
+     }
+  } else {
+       general$application           <- args[1]
+       general$main.path.param.gis   <- args[2]
+       general$main.path.ibm         <- args[3]
+       general$igraph                <- args[4]  # caution: should be consistent with existing vessels already built upon a given graph
+  }
   
-   path      <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application,  "POPULATIONS", "pops_config_files")
+  
+  
+   path      <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis",   "POPULATIONS", "pops_config_files")
    namefiles <- list.files(file.path( path))
+
+
 
  
   for (a_file in namefiles){
@@ -16,11 +35,11 @@
    my_split2 <- function(x) unlist(strsplit(x, "_"))
    
    general <- list()
-   general$main.path.param.gis   <- as.character(dat[5])
-   general$main.path.param       <- as.character(dat[7])
-   general$main.path.ibm         <- as.character(dat[9])                                      
-   general$application           <- as.character(dat[11])  
-   general$igraph                <- as.numeric(dat[13])  
+   #general$main.path.param.gis   <- as.character(dat[5])
+   #general$main.path.param       <- as.character(dat[7])
+   #general$main.path.ibm         <- as.character(dat[9])                                      
+   #general$application           <- as.character(dat[11])  
+   #general$igraph                <- as.numeric(dat[13])  
   
    dir.create(file.path(general$main.path.ibm, paste("popsspe_", general$application, sep='')))
    dir.create(file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''), "static_avai"))
@@ -41,49 +60,8 @@
    selected_szgroups          <-  as.character(my_split(dat[29]))
 
  
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-#-----utils---------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-
- # loop over the SpatialPoly
- detectingCoordInPolygonsFromSH <- function (sh, coord, name_column="poly"){
-
-     coord <- eval(parse(text=paste("cbind(coord, ",name_column,"= 0)", sep='')))
-     dd                   <- sapply(slot(sh, "polygons"), function(x) lapply(slot(x, "Polygons"), function(x) x@coords), simplify=FALSE) # tricky there...
-     if(length(dd)==1) dd <- dd[[1]]   # debug if only one level of polygons
- 
-     ids <- sapply(slot(sh, "polygons"),  function (x) x@ID)
-     
-     library(sp)
-     for(iLand in 1:length(dd)){
-      if(length(dd)>1){
-       for(i in 1:length(dd[[iLand]])){
-          print(iLand)
-          # Points on land are 1 or 2 and not is 0
-          er <- try({res   <- point.in.polygon(coord[,1],coord[,2],dd[[iLand]][[i]][,1],dd[[iLand]][[i]][,2])}, silent=TRUE)
-          if(class(er)=="try-error") res   <- point.in.polygon(coord[,1],coord[,2],dd[[iLand]][,1],dd[[iLand]][,2])
-          if(length(ids)==1) coord[which(res!=0), name_column] <- 1 else  coord[which(res!=0), name_column] <- ids[iLand]
-       }
-      } else{
-          er <- try({res   <- point.in.polygon(coord[,1],coord[,2],dd[[1]][,1],dd[[1]][,2])}, silent=TRUE)
-          if(class(er)=="try-error") res   <- point.in.polygon(coord[,1],coord[,2],dd[[1]][,1],dd[[1]][,2])
-          if(length(ids)==1) coord[which(res!=0), name_column] <- 1 else  coord[which(res!=0), name_column] <- ids[iLand]
-  
-      }
-
-     }
- return(coord)
- }
-
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
- avai_allszgroups <- NULL
- for (ly in 1: length(name_gis_file_for_total_abundance_per_polygon)){
+  avai_allszgroups <- NULL
+  for (ly in 1: length(name_gis_file_for_total_abundance_per_polygon)){
 
 
 
@@ -163,12 +141,6 @@
  # 2 - create from a GIS shape layer with attributes e.g. abundance
 
  
- 
- # WORKFLOW 1 -
-
- #....go to step 11 "Obtain the spatial distribution of the fish/shellfish population e.g. from surveys"
-
-
 
 # WORKFLOW 2 - SEMESTER-BASED----------- 
 # however, note that the seasonnality of the spatial and total effort application 
@@ -176,7 +148,7 @@
  library(doBy)
  avai <- NULL
  an <- function(x) as.numeric(as.character(x))
-for (a.semester in c("S1", "S2")){
+ for (a.semester in c("S1", "S2")){
 
     # dispatch the abundance among nodes by dividing 'abundance' per the number of included graph nodes
     abundance_this_semester                   <- coord[!is.na(coord [,name_gis_layer_field]) & coord [,name_gis_layer_field]!= 0,]

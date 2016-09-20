@@ -1,19 +1,24 @@
-
- a_case <- "balticRTI"
- 
   # GENERAL SETTINGS
-  if(a_case=="balticRTI"){
-     general <- list()
-     general$application           <- "balticRTI" # ...or myfish
-     general$igraph                <- 56
-     general$main.path.param       <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw")
-     general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
-     general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_" , general$application, sep=""))
-      
-     general$case_study_countries  <- c("DEN", "SWE", "DEU")   
-     general$a.year                <- "2015"
+
+   args <- commandArgs(trailingOnly = TRUE)
+
+   general <- list()
+
+   if (length(args) < 2) {
+     if(.Platform$OS.type == "windows") {
+       general$application           <- "balticRTI" # ...or myfish
+       general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+       general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
+       general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
+   
      }
-     
+  } else {
+       general$application           <- args[1]
+       general$main.path.param.gis   <- args[2]
+       general$main.path.ibm         <- args[3]
+       general$igraph                <- args[4]  # caution: should be consistent with existing vessels already built upon a given graph
+  }
+  
 
   dir.create(file.path(general$main.path.ibm, paste("harboursspe_", general$application, sep='')))
 
@@ -63,7 +68,7 @@
   
   ##------------------------
   # obtain a c++ multimap with stock / price for cat
-  prices_per_szcat <-  read.table(file=file.path(general$main.path.param.gis, "POPULATIONS", paste("DISPLACE_datainput_prices_per_category.csv")), sep=',',
+  prices_per_szcat <-  read.table(file=file.path(general$main.path.param.gis, "POPULATIONS", paste("Stock_prices_data.csv")), sep=';',
               header=TRUE)
   #head(prices_per_szcat)
   #stock small medium large  

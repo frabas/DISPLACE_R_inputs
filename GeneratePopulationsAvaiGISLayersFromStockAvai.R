@@ -1,27 +1,51 @@
-general                     <- list()
 
-  general$application         <- "balticRTI"
-  general$igraph              <- "56"   # for the baltic only CS.
-  general$method              <- "inverse" # for the baltic only CS.
-  general$threshold           <- 25
-  general$p                   <- 0.1
-  general$nmy                 <- "2013_2014_2015"
+   args <- commandArgs(trailingOnly = TRUE)
 
+   general <- list()
+
+   if (length(args) < 2) {
+     if(.Platform$OS.type == "windows") {
+       general$application           <- "balticRTI" # ...or myfish
+       general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+       general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
+       general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
+       general$main_path_R_inputs     <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
+     }
+  } else {
+       general$application           <- args[1]
+       general$main.path.param.gis   <- args[2]
+       general$main.path.ibm         <- args[3]
+       general$igraph                <- args[4]  # caution: should be consistent with existing vessels already built upon a given graph
+       general$main_path_R_inputs    <- args[5]
+      
+
+  }
+
+
+  if(general$application=="balticRTI"){
+  
+      general$casestudy           <- "balticRTI"             
+      species.to.keep             <- c("COD", "PLE", "WHG", "TUR", "FLE", "DAB", "SOL", "SPR", "HER")
+      general$method              <- "maximum" # for the canadian paper
+      general$threshold           <- 50
+      general$method              <- "inverse" # for the baltic only CS. because the grid mesh size if much finer
+      general$threshold           <- 25
+      general$p                   <- 0.1
+      years <- c(2013:2015)
  
-  general$main_path           <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_raw")
-  general$main_path_input     <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input")
-  general$main_path_R_inputs  <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
-  general$main_path_gis       <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_gis")
-  general$main.path.ibm       <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
+  
+  } else{
+      stop("to be defined for this app")
+  }
 
- 
+
   
   dir.create(file.path( general$main.path.ibm, paste("pop_names_",general$application ,".txt",sep='')))
   
   
   # load
-  load(file = file.path(general$main_path_gis, general$application, "POPULATIONS", "avai",
-                            paste("lst_avai_igraph", general$igraph,"_", general$nmy,"_",general$method,"_", general$threshold, ".RData",sep="")) )
+  load(file = file.path(general$main_path_gis, "POPULATIONS", "avai",
+                            paste("lst_avai_igraph", general$igraph,"_",general$method,"_", general$threshold, ".RData",sep="")) )
 
  
  
@@ -30,14 +54,16 @@ general                     <- list()
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ## STOCK NAMES !!
   
-  # balticRTI (caution: give the order for naming stocks in integer from 0 to n-1)
-  spp                        <- c("COD.2532", "COD.2224", "FLE.2223", "FLE.2425", "PLE.2123", "PLE.2432", "SOL.IIIa2223", "WHG.2232", "DAB.2232", "TUR.2232", "HER.IIIa22", "HER.2532", "SPR.2232") 
-  
+  # (caution: give the order for naming stocks in integer from 0 to n-1)
+  spp_table <-  read.table(file=file.path(general$main.path.ibm , paste("popsspe_" , general$application, sep=""), paste("pop_names_",general$application ,".txt",sep='')),
+              header=TRUE)
+  spp                        <- as.character(spp_table$spp)
+ 
   write.table(cbind(idx=0:(length(spp)-1), spp=spp),
               file=file.path( general$main.path.ibm, paste("pop_names_",general$application ,".txt",sep='')),
               quote=FALSE, col.names=TRUE, row.names=FALSE)
   write.table(cbind(idx=0:(length(spp)-1), spp=spp),
-              file=file.path(general$main_path_gis, general$application, "POPULATIONS", paste("pop_names_",general$application ,".txt",sep='')),
+              file=file.path(general$main_path_gis,  "POPULATIONS", paste("pop_names_",general$application ,".txt",sep='')),
               quote=FALSE, col.names=TRUE, row.names=FALSE)
 
   
@@ -49,7 +75,7 @@ general                     <- list()
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
 
- dir.create(path=file.path(general$main_path_gis, general$application,  "POPULATIONS", "SpatialLayers"))
+ dir.create(path=file.path(general$main_path_gis,   "POPULATIONS", "SpatialLayers"))
  
 
   get_contour_this_avai <- function (
@@ -136,7 +162,7 @@ general                     <- list()
     IDs  <- sapply(slot(sp, "polygons"), function(x) slot(x, "ID"))
     a_df <-  data.frame(GRIDCODE=sapply(contourobj, function(x) x$level) [as.numeric(IDs)], row.names=IDs)
     spdf <- SpatialPolygonsDataFrame(sp, a_df)
-    writePolyShape(spdf, file.path(general$main_path_gis, general$application, "POPULATIONS", "SpatialLayers", nameobj))
+    writePolyShape(spdf, file.path(general$main_path_gis,  "POPULATIONS", "SpatialLayers", nameobj))
 
    return()
    }
@@ -254,11 +280,11 @@ general                     <- list()
   }}      
            
   # additional info on the plot         
-  sh1 <- readShapePoly(file.path(general$main_path_gis, general$application, "MANAGEMENT", "francois_EU"))
+  sh1 <- readShapePoly(file.path(general$main_path_gis,  "MANAGEMENT", "francois_EU"))
   plot(sh1, add=TRUE, col=grey(0.5))
   legend("bottomright", legend=paste(c(spp)),
          fill=cols, ncol=2, cex=0.8, bg="white", box.col="white")
-  savePlot(file.path(general$main_path_gis, general$application, "POPULATIONS", "avai", "avai_distrib_small_medium_large.jpeg"), type="jpeg")
+  savePlot(file.path(general$main_path_gis,  "POPULATIONS", "avai", "avai_distrib_small_medium_large.jpeg"), type="jpeg")
 
 
 

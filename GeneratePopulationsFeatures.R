@@ -1,47 +1,73 @@
 
+  # GENERAL SETTINGS
+
+   args <- commandArgs(trailingOnly = TRUE)
+
+   general <- list()
+
+   if (length(args) < 2) {
+     if(.Platform$OS.type == "windows") {
+       general$application           <- "balticRTI" # ...or myfish
+       general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+       general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
+       general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
+   
+     }
+  } else {
+       general$application           <- args[1]
+       general$main.path.param.gis   <- args[2]
+       general$main.path.ibm         <- args[3]
+       general$igraph                <- args[4]  # caution: should be consistent with existing vessels already built upon a given graph
+  }
+  
+  
+   dir.create(file.path(general$main.path.ibm, paste("popsspe_", general$application, sep='')))
 
 
-general <- list()
-general$main.path.data        <- file.path("C:","Users", "fbas", "Documents", "GitHub", "DISPLACE_input_gis", "balticRTI", "POPULATIONS")
-general$main.path.param       <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw")
-general$application           <- "balticRTI"  
-
- general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_" , general$application, sep=""))
  
- dir.create(file.path(general$main.path.ibm, paste("popsspe_", general$application, sep='')))
+ if(general$application=="balticRTI"){
+    a.year        <- 2015
+    quarter_growth <- TRUE ; semester_growth <- FALSE
+    a_size_group_bin_in_cm <- 5
 
-
-if(general$application=="balticRTI")   a_size_group_bin_in_cm <- 5
-
-
+    # pop number per age group  
+    number <- read.csv(file=file.path(general$main.path.param.gis, "POPULATIONS",
+                 "Stock_abundances_at_age.csv"),
+                    sep=";", header=TRUE)     
  
-if(general$application=="balticRTI"){
- # pop number per age group 2015 
- number <- read.csv(file=file.path(general$main.path.data,
-                 "DISPLACE_datainput_abundances_at_age_Baltic_22-32_2015.csv"),
-                    sep=",",header=TRUE)     
- 
- # pop number per age group 2013 (take the following year after the start year, for validation)
- #number_yplus1 <- read.csv(file=file.path(main.path,
- #                "IBM_datainput_abundance_2013.csv"),
- #                   sep=",",header=TRUE)  ## NOT YET AVAILABLE  !!  
- number_yplus1 <-  number # data not available yet...then temporary!!
- a.year <- 2015
+    number_yplus1 <-  number # because data not available yet... 
+ } else {  # ....default
+    a.year        <- 2015
+    quarter_growth <- TRUE ; semester_growth <- FALSE
+    a_size_group_bin_in_cm <- 5
 
- quarter_growth <- TRUE ; semester_growth <- FALSE
+    # pop number per age group  
+    number <- read.csv(file=file.path(general$main.path.param.gis, "POPULATIONS",
+                 "Stock_abundances_at_age.csv"),
+                    sep=";", header=TRUE)     
+ 
+    number_yplus1 <-  number # because data not available yet... 
  }
  
 
+ # CAUTION: stock names given by first column in "Stock_abundances_at_age.csv"
+ spp                        <- as.character(number$stock)
+ table_spp                  <- cbind(0:(length(spp)-1), spp)
+ colnames(table_spp)        <- c('idx', 'spp')
+ write.table(table_spp, quote=FALSE,
+                 file=file.path(general$main.path.ibm, "POPULATIONS", paste("pop_names_", general$application,".txt",sep='')), append=FALSE,
+                   row.names=FALSE, col.names=TRUE)
+
+
+
 # pop parameters
- pa <- read.csv(file=file.path(general$main.path.data,
-                  paste("DISPLACE_datainput_stock_parameters_Baltic_22-32.csv", sep='')), 
+ pa <- read.csv(file=file.path(general$general$main.path.param.gis, "POPULATIONS",
+                  paste("Stock_biological_traits.csv", sep=';')), 
                     sep=',', header=TRUE)
  rownames(pa) <- pa$stock
  
- ## CAUTION POP ORDER SHOULD BE CONSISTENT WITH : 
- # balticRTI
- spp                        <- c("COD.2532", "COD.2224", "FLE.2223", "FLE.2425", "PLE.2123", "PLE.2432", "SOL.IIIa2223", "WHG.2232", "DAB.2232", "TUR.2232", "HER.IIIa22", "HER.2532", "SPR.2232")  
- pa <- pa[spp,]  # reorder
+ 
+ pa            <- pa[spp,]  # reorder
  pa$index_pops <- 0: (length(spp)-1)
 
 
@@ -85,7 +111,7 @@ if(general$application=="balticRTI"){
 
 
   write.table(multiplier_for_biolsce_all_pops, quote=FALSE,
-                 file=file.path(general$main.path.param, paste("multiplier_for_biolsce",case_study,".dat",sep='')), append=FALSE,
+                 file=file.path(general$main.path.ibm, paste("multiplier_for_biolsce", general$application,".dat",sep='')), append=FALSE,
                    row.names=FALSE, col.names=TRUE)
 
   }

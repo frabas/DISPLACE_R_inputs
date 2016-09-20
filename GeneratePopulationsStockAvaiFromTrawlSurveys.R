@@ -1,4 +1,65 @@
-c.listquote <- function( ... ) {
+
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
+#!!!!!!!!!GET AVAILABILITY!!!!!!!!!!!!!!#
+#!!!!!!!!!SPATIAL ALLOCATION KEY!!!!!!!!#
+#!!!!!!!!AT THE HAUL LEVEL!!!!!!!!!!!!!!#
+#!!!!!!!!!!!!PER STOCK !!!!!!!!!!!!!!!!!#
+#!!!(E.G COD IN NS, COD IN BW, etc.)!!!!#
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
+
+# => http://fr.wikipedia.org/wiki/Pond%C3%A9ration_inverse_%C3%A0_la_distance : p est un nombre positif réel, appelé le paramètre de puissance. Ici, le poids des points voisins diminue lorsque la distance augmente. Les plus grandes valeurs de p donnent une influence plus grande aux valeurs les plus proches du point interpolé. Pour 0 < p < 1 u(x) donne des pics lissés au-dessus du point interpolé xk, alors que pour p > 1 le pic devient plus pointu. 
+
+
+
+ # GENERAL SETTINGS
+
+   args <- commandArgs(trailingOnly = TRUE)
+
+   general <- list()
+
+   if (length(args) < 2) {
+     if(.Platform$OS.type == "windows") {
+       general$application           <- "balticRTI" # ...or myfish
+       general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+       general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
+       general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
+       general$main_path_R_inputs     <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
+     }
+  } else {
+       general$application           <- args[1]
+       general$main.path.param.gis   <- args[2]
+       general$main.path.ibm         <- args[3]
+       general$igraph                <- args[4]  # caution: should be consistent with existing vessels already built upon a given graph
+       general$main_path_R_inputs    <- args[5]
+ }
+
+
+  if(general$application=="balticRTI"){
+  
+      general$casestudy           <- "balticRTI"             
+      species.to.keep             <- c("COD", "PLE", "WHG", "TUR", "FLE", "DAB", "SOL", "SPR", "HER")
+      general$method              <- "maximum" # for the canadian paper
+      general$threshold           <- 50
+      general$method              <- "inverse" # for the baltic only CS. because the grid mesh size if much finer
+      general$threshold           <- 25
+      general$p                   <- 0.1
+      years <- c(2013:2015)
+ 
+  
+  } else{
+      stop("to be defined for this app")
+  }
+
+
+#------------------------  
+#------------------------  
+#------------------------  
+
+ c.listquote <- function( ... ) {
 
    args <- as.list( match.call()[ -1 ] )
    lstquote <- list( as.symbol( "list" ) );
@@ -72,50 +133,18 @@ function(lon,lat,lonRef,latRef){
   
 
 
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
-#!!!!!!!!!GET AVAILABILITY!!!!!!!!!!!!!!#
-#!!!!!!!!!SPATIAL ALLOCATION KEY!!!!!!!!#
-#!!!!!!!!AT THE HAUL LEVEL!!!!!!!!!!!!!!#
-#!!!!!!!!!!!!PER STOCK !!!!!!!!!!!!!!!!!#
-#!!!(E.G COD IN NS, COD IN BW, etc.)!!!!#
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
+#------------------------  
+#------------------------  
+#------------------------  
 
-general                     <- list()
-
-general$casestudy           <- "balticRTI"             
-species.to.keep             <- c("COD", "PLE", "WHG", "TUR", "FLE", "DAB", "SOL", "SPR", "HER")
-general$igraph              <- "56"   # for the myfish case
-general$method              <- "maximum" # for the canadian paper
-general$threshold           <- 50
-general$method              <- "inverse" # for the baltic only CS. because the grid mesh size if much finer
-general$threshold           <- 25
-general$p                   <- 0.1
-
-general$main_path           <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_raw")
-general$main_path_input     <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input")
-general$main_path_R_inputs  <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
-general$main_path_gis       <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_gis")
-# => http://fr.wikipedia.org/wiki/Pond%C3%A9ration_inverse_%C3%A0_la_distance : p est un nombre positif réel, appelé le paramètre de puissance. Ici, le poids des points voisins diminue lorsque la distance augmente. Les plus grandes valeurs de p donnent une influence plus grande aux valeurs les plus proches du point interpolé. Pour 0 < p < 1 u(x) donne des pics lissés au-dessus du point interpolé xk, alors que pour p > 1 le pic devient plus pointu. 
-
-
-
-for (nmy in c("2013_2014_2015")){
-
-
-  bits.cpue <- read.table(file.path(general$main_path_gis, general$casestudy, "POPULATIONS", paste("DISPLACE_datainput_DATRAS_CPUE_all_sp_per_length_per_haul_BITS_",nmy,".csv", sep='')), header=TRUE, sep=",")
+  bits.cpue <- read.table(file.path(general$main_path_gis, "POPULATIONS", paste("Stock_spatial_research_survey_vessel_data.csv", sep='')), header=TRUE, sep=",")
   
-  if(nmy=="2013_2014_2015") years <- c(2013:2015)
- 
   # subset for the chosen period
   bits.cpue <- bits.cpue[bits.cpue$Year %in% years,]
   bits.cpue$Year <- factor(bits.cpue$Year)
 
   # get species fao code + add missing or mispelling species e.g. PRA and SAN
-  load(file.path(general$main_path, "IBM_datainput_speciesLatinNames.rda"))
+  load(file.path(general$main_path_gis, "POPULATIONS", "Stock_latin_names.RData"))
   speciesLatinNames <- rbind.data.frame(speciesLatinNames, 
                               data.frame(species_eng="Pandalus", ff_species_latin="Pandalus", fao_code="PRA"))
   speciesLatinNames <- rbind.data.frame(speciesLatinNames, 
@@ -128,7 +157,7 @@ for (nmy in c("2013_2014_2015")){
   bits.cpue               <- bits.cpue[!is.na(bits.cpue$Species),] 
 
   ## FILES FOR BUILDING A IGRAPH
-  coord <- read.table(file=file.path(general$main_path_gis,  general$casestudy, "GRAPH", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
+  coord <- read.table(file=file.path(general$main_path_gis,  "GRAPH", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
   coord <- as.matrix(as.vector(coord))
   coord <- matrix(coord, ncol=3)
   colnames(coord) <- c('x', 'y', 'dist')
@@ -137,8 +166,8 @@ for (nmy in c("2013_2014_2015")){
   coord <- cbind(coord, 1:nrow(coord)) # keep track of the idx_node
 
   # add a semester code
- bits.cpue$Semester <- factor(bits.cpue$Quarter) # init
- levels(bits.cpue$Semester) <- c(1,2) # BTS in Q1 and Q4
+  bits.cpue$Semester <- factor(bits.cpue$Quarter) # init
+  levels(bits.cpue$Semester) <- c(1,2) # BTS in Q1 and Q4
 
 
  #------------------------  
@@ -216,11 +245,10 @@ for (nmy in c("2013_2014_2015")){
  head(bits.cpue[bits.cpue$Species=="SOL",])
 
  # save   
- dir.create(path=file.path(general$main_path_gis, general$casestudy, "POPULATIONS", "avai"))                   
+ dir.create(path=file.path(general$main_path_gis, "POPULATIONS", "avai"))                   
  save(bits.cpue, 
-   file=file.path(general$main_path_gis, general$casestudy, "POPULATIONS", "avai", paste("cpue_graph",general$igraph,"_",nmy,".RData",sep='')))
+   file=file.path(general$main_path_gis,  "POPULATIONS", "avai", paste("cpue_graph",general$igraph,"_",nmy,".RData",sep='')))
 
- } # end for
 
 
   
@@ -305,7 +333,7 @@ get_cpue_on_graph_nodes <-  function (obj=bits.cpue, coord=coord, sp=sp, S=S, ye
                 an(obj$ShootLon)[ an(names(lst.graph.pts.with.idx.in.obj[[node]])) ], 
                  an(obj$ShootLat)[ an(names(lst.graph.pts.with.idx.in.obj[[node]])) ], col=3)
               points(x=coord[node,"x"], y=coord[node,"y"], col="red") # a pt of the graph g
-         savePlot(filename = file.path(general$main_path_gis, general$casestudy, "POPULATIONS", "avai", 
+         savePlot(filename = file.path(general$main_path_gis, "POPULATIONS", "avai", 
                             paste(a.comment,"link_nodes_with_surveys_",general$threshold,".jpeg",sep="")),type ="jpeg")
 
          }
@@ -323,7 +351,7 @@ get_cpue_on_graph_nodes <-  function (obj=bits.cpue, coord=coord, sp=sp, S=S, ye
                 cex=obj[obj$Species==sp,szgroup] /max(coord[,paste(sp,".",szgroup,sep='')], obj[obj$Species==sp,szgroup])*4)
     map(add=TRUE, xlim=c(-10,25),ylim=c(50,65))
     title(szgroup)
-    savePlot(filename = file.path(general$main_path_gis, general$casestudy, "POPULATIONS", "avai",
+    savePlot(filename = file.path(general$main_path_gis,  "POPULATIONS", "avai",
                             paste(a.comment,"_",szgroup,".jpeg",sep="")),type ="jpeg")
  
    } # end vzgruop
@@ -352,7 +380,7 @@ return(coord)
 #--------------------
 set.avai <- function(lst.avai, sp, S, areas){
      obj <- get(paste("coord.",sp,".",S, sep=''), env=.GlobalEnv) # get in .GlobalEnv
-     source(file=file.path(general$main_path_R_inputs,"IBM_param_utils_longlat_to_ICESareas.r"))
+     source(file=file.path(general$main_path_R_inputs, "IBM_param_utils_longlat_to_ICESareas.r"))
      ICESareas       <- longlat_to_ICESareas(obj)
      idx.areas          <- which(ICESareas %in% areas)
      obj.in.areas <- obj[idx.areas,]
@@ -445,11 +473,11 @@ plot(ices_areas, col="grey",  add=TRUE)
 
 for (nmy in c("2013_2014_2015")){
 
- if(nmy=="2013_2014_2015")  load(file.path(general$main_path_gis, general$casestudy, "POPULATIONS", "avai", paste("cpue_graph",general$igraph,"_",nmy,".RData",sep='')))
+ if(nmy=="2013_2014_2015")  load(file.path(general$main_path_gis,  "POPULATIONS", "avai", paste("cpue_graph",general$igraph,"_",nmy,".RData",sep='')))
    
  print(nmy)
  # load a graph
- coord <- read.table(file=file.path(general$main_path_gis, general$casestudy, "GRAPH", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
+ coord <- read.table(file=file.path(general$main_path_gis, "GRAPH", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
  coord <- as.matrix(as.vector(coord))
  coord <- matrix(coord, ncol=3)
  colnames(coord) <- c('x', 'y', 'dist')
@@ -585,8 +613,8 @@ plot(x= obj[,1], y=obj[,2],  col=1, pch=16,
 
 
 # save to R
-save("lst.avai", file = file.path(general$main_path_gis, general$casestudy, "POPULATIONS", "avai",
-            paste("lst_avai_igraph", general$igraph,"_", nmy,"_",general$method,"_", general$threshold, ".RData",sep="")) )
+save("lst.avai", file = file.path(general$main_path_gis,  "POPULATIONS", "avai",
+            paste("lst_avai_igraph", general$igraph,"_", general$method, "_", general$threshold, ".RData",sep="")) )
 
 ## CAUTION the ibts and bits surveys are combinations of hauls from different scientifc vessels
 ## with potentially gear trawl with different selectivity ogives....

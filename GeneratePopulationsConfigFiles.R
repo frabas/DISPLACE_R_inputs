@@ -1,22 +1,32 @@
- # some args for the bunch of vessels to be created....
  # GENERAL SETTINGS
+
+   args <- commandArgs(trailingOnly = TRUE)
+
    general <- list()
-   if(.Platform$OS.type == "windows") {
-     general$main.path             <- file.path("C:","DISPLACE_outputs")
-     general$application           <- "balticRTI" # ...or myfish
-     general$igraph                <- 56
-     general$main.path.param       <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw")
-     general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
-     general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_" , general$application, sep=""))
-   }
+
+   if (length(args) < 2) {
+     if(.Platform$OS.type == "windows") {
+       general$application           <- "balticRTI" # ...or myfish
+       general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+       general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
+       general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
+   
+     }
+  } else {
+       general$application           <- args[1]
+       general$main.path.param.gis   <- args[2]
+       general$main.path.ibm         <- args[3]
+       general$igraph                <- args[4]  # caution: should be consistent with existing vessels already built upon a given graph
+  }
+  
 
 
-   dir.create(path=file.path(general$main.path.param.gis, "POPULATIONS", "pops_config_files"))
+ dir.create(path=file.path(general$main.path.param.gis, "POPULATIONS", "pops_config_files"))
  
 
 
-   path      <- file.path(general$main.path.param.gis, "POPULATIONS", "SpatialLayers")
-   namefiles <- list.files(file.path( path))
+ path      <- file.path(general$main.path.param.gis, "POPULATIONS", "SpatialLayers")
+ namefiles <- list.files(file.path( path))
 
 
  # parse
