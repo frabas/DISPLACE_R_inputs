@@ -208,7 +208,7 @@ getPolyAroundACoord <- function(dat, a_dist_m){
  name_gis_file_for_fishing_effort_per_polygon   <- unlist(strsplit(name_gis_file_for_fishing_effort_per_polygon, split=" "))
  name_gis_layer_field                           <- unlist(strsplit(name_gis_layer_field, split=" "))   [1] # caution
  for (a_layer in 1: length(name_gis_file_for_fishing_effort_per_polygon)) { # if more than 1 layer....
-     handmade  <- readOGR(file.path(general$main.path.param.gis,  "FISHERIES"), name_gis_file_for_fishing_effort_per_polygon[a_layer] ) 
+     handmade  <- readOGR(file.path(general$main.path.param.gis,  "FISHERIES", "SpatialLayers"), name_gis_file_for_fishing_effort_per_polygon[a_layer] ) 
                                                    #  Projection info in a .prj associated with the shp should be imported automagically.
      if(is.na( projection(handmade ))) projection(handmade ) <- CRS("+proj=longlat +datum=WGS84")   # a guess!
      if(a_layer>1){

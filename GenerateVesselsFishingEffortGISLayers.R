@@ -1,8 +1,28 @@
- general <- list()
-      if(.Platform$OS.type == "windows") {
-        general$application           <- "balticRTI" # ...or myfish
-        general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
-       }
+
+  # GENERAL SETTINGS
+
+   args <- commandArgs(trailingOnly = TRUE)
+
+   general <- list()
+
+   if (length(args) < 2) {
+     if(.Platform$OS.type == "windows") {
+       general$application           <- "balticRTI" # ...or myfish
+       general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+       general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
+       general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
+   
+     }
+  } else {
+       general$application           <- args[1]
+       general$main.path.param.gis   <- args[2]
+       general$main.path.ibm         <- args[3]
+       general$igraph                <- args[4]  # caution: should be consistent with existing vessels already built upon a given graph
+  }
+  
+  
+   dir.create(file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep='')))
+   dir.create(file.path(general$main.path.param.gis, "FISHERIES", "SpatialLayers"))
 
 
   
@@ -167,7 +187,7 @@
 
   # add midpoint of gridcell to dataset
   aggResult <- cbind(aggtacsatp, CELL_LONG=coordinates(grd)[aggtacsatp$grID,1], CELL_LATI=coordinates(grd)[aggtacsatp$grID,2])
-  save(aggResult, file=file.path(outPath,"2015_aggtacsatp.RData"))
+  save(aggResult, file=file.path(general$main.path.param.gis, "FISHERIES", "SpatialLayers","2015_aggtacsatp.RData"))
 
 
   # loop over relevant activity/metier
@@ -199,7 +219,7 @@
      # export in .shp attaching the df with the levels
      IDs  <- sapply(slot(grdc2plot, "polygons"), function(x) slot(x, "ID"))
      spdf <- SpatialPolygonsDataFrame(grdc2plot, aggResultSub)
-     writePolyShape(spdf, file.path(outPath, nameobj))
+     writePolyShape(spdf, file.path(general$main.path.param.gis, "FISHERIES", "SpatialLayers", nameobj))
      } # if nrow!=0
 
      }
