@@ -11,6 +11,7 @@
        general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
        general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
        general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
+      do_plot                        <- TRUE
    
      }
   } else {
@@ -18,6 +19,7 @@
        general$main.path.param.gis   <- args[2]
        general$main.path.ibm         <- args[3]
        general$igraph                <- args[4]  # caution: should be consistent with existing vessels already built upon a given graph
+      do_plot                        <- FALSE
   }
   
   
@@ -55,15 +57,15 @@
  table_spp                  <- cbind(0:(length(spp)-1), spp)
  colnames(table_spp)        <- c('idx', 'spp')
  write.table(table_spp, quote=FALSE,
-                 file=file.path(general$main.path.ibm, "POPULATIONS", paste("pop_names_", general$application,".txt",sep='')), append=FALSE,
+                 file=file.path(general$main.path.param.gis, "POPULATIONS", paste("pop_names_", general$application,".txt",sep='')), append=FALSE,
                    row.names=FALSE, col.names=TRUE)
 
 
 
 # pop parameters
- pa <- read.csv(file=file.path(general$general$main.path.param.gis, "POPULATIONS",
-                  paste("Stock_biological_traits.csv", sep=';')), 
-                    sep=',', header=TRUE)
+ pa <- read.csv(file=file.path(general$main.path.param.gis, "POPULATIONS",
+                  paste("Stock_biological_traits.csv", sep=',')), 
+                    sep=';', header=TRUE)
  rownames(pa) <- pa$stock
  
  
@@ -125,10 +127,12 @@ hyperstability_param <- cbind(pop=c(0:(nrow(pa)-1)), hyperstability_param=0.7) #
 write.table(hyperstability_param, quote=FALSE,
                  file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''), paste("hyperstability_param.dat",sep='')), append=FALSE,
                    row.names=FALSE, col.names=TRUE)
+   cat(paste("hyperstability_param.dat\n",sep=''))
 
 
 if(general$application =="balticRTI")         sces <- c(1: nrow(multiplier_for_biolsce_all_pops))
 
+   print(multiplier_for_biolsce_all_pops)
 
 # overall migration fluxes at 0 by default
 for (sce in sces){
@@ -162,6 +166,7 @@ for (sce in sces){
 
 
 }}
+   cat(paste("init_prop_migrants_pops_per_szgroup_biolsce.dat\n",sep=''))
 
 
 ################################
@@ -175,6 +180,7 @@ for (sce in sces){
 for (sce in sces){
 
 
+cat(paste("sce ", sce, "\n"))
 
 
  #timesteps   <- 21       # time steps 10 years with 2 semesters each 
@@ -196,6 +202,9 @@ for (sce in sces){
  
 ##### FOR-LOOP OVER POP ############
 for(x in 1:length(pa$K)){
+
+cat(paste("pop ", x-1, "\n"))
+
 #for(x in c(11,12)){
   if(!is.na(pa$index_pops[x])){
  
@@ -265,7 +274,7 @@ for(x in 1:length(pa$K)){
   }
 
   times<-t(matrix(1,timesteps,pop)*(1:timesteps))
-  plot(times,indlength)                            #plot growth curves
+  if(do_plot) plot(times,indlength)                            #plot growth curves
 
   l<-c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,1000) *a_size_group_bin_in_cm  # vector of 14 length groups of eg 10 cm bin or 5 cm
     
@@ -316,8 +325,11 @@ for(x in 1:length(pa$K)){
   Cs <-t(C)
   write(As[1:11,1:14],file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
            paste(pa$index_pops[x],"spe_percent_age_per_szgroup_biolsce",sce,".dat",sep='')),ncolumns=11, sep=" ")   #age 0-10
-  write(Cs[1:11,1:14],file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''), 
+   cat(paste("spe_percent_age_per_szgroup_biolsce",sce,".dat\n",sep=''))
+ write(Cs[1:11,1:14],file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''), 
            paste(pa$index_pops[x], "spe_percent_szgroup_per_age_biolsce",sce,".dat",sep='')),ncolumns=11, sep=" ")   #age 0-10
+   cat(paste("spe_percent_szgroup_per_age_biolsce",sce,".dat\n",sep=''))
+ 
  }
 
 
@@ -330,6 +342,7 @@ for(x in 1:length(pa$K)){
     }
     init_proprecru  <- rbind(pa$index_pops[x], proprecru) 
     write(init_proprecru[,1:14], file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),paste("init_proprecru_per_szgroup_biolsce",sce,".dat",sep='')),sep=" ",ncolumns=2, append=TRUE) 
+   cat(paste("init_proprecru_per_szgroup_biolsce",sce,".dat\n",sep=''))
    
 
 
@@ -356,6 +369,8 @@ for(x in 1:length(pa$K)){
     #init_pops<-round(init_pops)  not necessary because ind. in thousands
     write(init_pops[,1:14], file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),paste("init_pops_per_szgroup_biolsce",sce,".dat",sep='')), sep=" ",ncolumns=2, append=TRUE) 
     write(init_pops_yplus1[,1:14], file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),paste("init_pops_per_szgroup_",a.year+1,"_biolsce",sce,".dat",sep='')), sep=" ",ncolumns=2, append=TRUE) 
+   cat(paste("init_pops_per_szgroup_biolsce",sce,".dat\n",sep=''))
+ 
   } else{
   # fill in with fake numbers for implicit pops i.e.
   #  the pops for which we do not have info on N because not assessed by ICES
@@ -368,7 +383,8 @@ for(x in 1:length(pa$K)){
   write.table(cbind(rep(pa$index_pops[x],14), rep(100000,14))[1:14,],
                  file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),paste("init_pops_per_szgroup_",a.year+1,"_biolsce",sce,".dat",sep='')), append=TRUE,
                    row.names=FALSE, col.names=FALSE)
-
+   cat(paste("init_pops_per_szgroup_biolsce",sce,".dat\n",sep=''))
+ 
   }
 
   #init weight per size group
@@ -379,6 +395,7 @@ for(x in 1:length(pa$K)){
    }
     init_weight<-rbind(pa$index_pops[x],weight) 
   write(init_weight[,1:14], file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''), paste("init_weight_per_szgroup_biolsce",sce,".dat",sep='')),sep=" ",ncolumns=2, append=TRUE) 
+   cat(paste("init_weight_per_szgroup_biolsce",sce,".dat\n",sep=''))
  
 
   #build size transition matrix G
@@ -422,6 +439,7 @@ for(x in 1:length(pa$K)){
   write.table(G,  file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''), 
                     paste(pa$index_pops[x],"spe_size_transition_matrix_biolsce",sce,".dat",sep='')),
                       sep=" ",col.names=FALSE, row.names=FALSE)
+   cat(paste(pa$index_pops[x],"spe_size_transition_matrix_biolsce",sce,".dat\n",sep=''))
 
 
 
@@ -437,6 +455,7 @@ for(x in 1:length(pa$K)){
   ## EXPORT
   mort <- cbind (pa$index_pops[x], mort)
   write.table(mort[1:14,], file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''), paste("init_M_per_szgroup_biolsce",sce,".dat",sep='')), append=TRUE, sep=" ", col.names=FALSE, row.names=FALSE) 
+   cat(paste("init_M_per_szgroup_biolsce.dat\n", sep=""))
 
 
   #need a first row to describe recruitment for stable size distribution from SSB
@@ -451,6 +470,7 @@ for(x in 1:length(pa$K)){
   mat <- cbind (pa$index_pops[x], mat)
   write.table(mat[1:14,], file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''), 
    paste("init_maturity_per_szgroup_biolsce",sce,".dat",sep='')), append=TRUE, sep=" ", col.names=FALSE, row.names=FALSE) 
+   cat(paste("init_maturity_per_szgroup_biolsce.dat\n", sep=""))
 
   #browser()
   # check SSB
@@ -473,6 +493,7 @@ for(x in 1:length(pa$K)){
                    file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
                      paste("init_fecundity_per_szgroup_biolsce",sce,".dat",sep='')), append=TRUE,
                    row.names=FALSE, col.names=FALSE)
+   cat(paste("init_fecundity_per_szgroup_biolsce.dat\n", sep=""))
 
   }
 
@@ -491,18 +512,21 @@ for(x in 1:length(pa$K)){
                 file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
                  paste(pa$index_pops[x],"spe_SSB_R_parameters_biolsce",sce,".dat",sep='')),
                   append=FALSE, sep=" ", col.names=FALSE, row.names=FALSE) 
+  cat(paste(pa$index_pops[x],"spe_SSB_R_parameters_biolsce.dat\n", sep=""))
 
   # initial TAC
   write.table(pa[x,13], 
                 file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
                  paste(pa$index_pops[x],"spe_initial_tac.dat",sep='')),
-                  append=FALSE, sep=" ", col.names=FALSE, row.names=FALSE)   # pa$TAC is informed from IBM_step9_other_landings_from_STECF.r
+                  append=FALSE, sep=" ", col.names=FALSE, row.names=FALSE)   # pa$TAC is informed from
+  cat(paste(pa$index_pops[x],"spe_initial_tac.dat\n", sep=""))
 
  # fbar ages and LTMP F target and Fpercent e.g. f multiplier +/-10%  and TAC range e.g. +/-15%  and Btrigger and F-MSY 
   write.table(pa[x, c('fbar_age_min','fbar_age_max','F_target','F_percent','TAC_percent','B_trigger','FMSY')], 
                 file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
                  paste(pa$index_pops[x],"spe_fbar_amin_amax_ftarget_Fpercent_TACpercent.dat",sep='')),
                   append=FALSE, sep=" ", col.names=FALSE, row.names=FALSE) 
+  cat(paste(pa$index_pops[x],"spe_fbar_amin_amax_ftarget_Fpercent_TACpercent.dat\n", sep=""))
 
   
 } # end for
@@ -513,7 +537,9 @@ for(x in 1:length(pa$K)){
 
 } # end loop over sce
 
+cat(paste(".....stored in", general$main.path.ibm, "\n"))
 
+cat(paste(".....done\n"))
 
 
 
