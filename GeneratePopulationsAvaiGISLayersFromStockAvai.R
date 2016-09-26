@@ -6,17 +6,20 @@
    if (length(args) < 2) {
      if(.Platform$OS.type == "windows") {
        general$application           <- "balticRTI" # ...or myfish
-       general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+       general$main_path_gis         <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
        general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
        general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
-       general$main_path_R_inputs     <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
+       general$main_path_R_inputs    <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
+       do_plot                       <- TRUE
      }
   } else {
        general$application           <- args[1]
-       general$main.path.param.gis   <- args[2]
+       general$main_path_gis         <- args[2]
        general$main.path.ibm         <- args[3]
        general$igraph                <- args[4]  # caution: should be consistent with existing vessels already built upon a given graph
        general$main_path_R_inputs    <- args[5]
+       general$main_path_R_inputs     <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
+       do_plot                       <- FALSE
       
 
   }
@@ -55,18 +58,11 @@
  ## STOCK NAMES !!
   
   # (caution: give the order for naming stocks in integer from 0 to n-1)
-  spp_table <-  read.table(file=file.path(general$main.path.ibm , paste("popsspe_" , general$application, sep=""), paste("pop_names_",general$application ,".txt",sep='')),
-              header=TRUE)
+  spp_table <-  read.table(file=file.path(general$main_path_gis, "POPULATIONS", 
+                           paste("pop_names_", general$application,".txt",sep='')), header=TRUE)
   spp                        <- as.character(spp_table$spp)
  
-  write.table(cbind(idx=0:(length(spp)-1), spp=spp),
-              file=file.path( general$main.path.ibm, paste("pop_names_",general$application ,".txt",sep='')),
-              quote=FALSE, col.names=TRUE, row.names=FALSE)
-  write.table(cbind(idx=0:(length(spp)-1), spp=spp),
-              file=file.path(general$main_path_gis,  "POPULATIONS", paste("pop_names_",general$application ,".txt",sep='')),
-              quote=FALSE, col.names=TRUE, row.names=FALSE)
-
-  
+   
   
 
 
@@ -142,10 +138,12 @@
     lst <- list(NULL)
     count <- 0
     for(i in 1: length(contourobj)){
+    
       x <- contourobj[[i]]$x
       y <- contourobj[[i]]$y
      if(contourobj[[i]]$level>0){
       count <- count+1
+      library(sp)
       assign(paste("poly", i, sep=""),
         Polygon(cbind(  c(x,x[1]),
                    c(y, y[1])
@@ -153,17 +151,18 @@
       assign  (paste("Pol", i, sep=""),  Polygons(list(get(paste("poly", i, sep=""))), ID=i) )
       lst[[count]] <- get(paste("Pol", i, sep=""))
       }
-
      }
+
     sp              <- SpatialPolygons(lst, 1:length(lst))
     proj4string(sp) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
-
     # export in .shp attaching the df with the levels
-    IDs  <- sapply(slot(sp, "polygons"), function(x) slot(x, "ID"))
+    IDs  <- sapply(sp@polygons, function(x) x@ID)    
     a_df <-  data.frame(GRIDCODE=sapply(contourobj, function(x) x$level) [as.numeric(IDs)], row.names=IDs)
     spdf <- SpatialPolygonsDataFrame(sp, a_df)
+    library(maptools)
     writePolyShape(spdf, file.path(general$main_path_gis,  "POPULATIONS", "SpatialLayers", nameobj))
-
+   cat(paste("Save the GIS layer in /POPULATIONS/SpatialLayers folder....done \n"))                         
+  
    return()
    }
   
@@ -174,6 +173,7 @@
   ## CALLS
   # per body size (assuming implicit ONTOGENIC migration)
   names(lst.avai)  
+  if(general$application=="balticRTI"){
   size_cats <- list()
   size_cats[["COD.2532"]] [["small"]]  <- c("0", "1", "2", "3","4","5")
   size_cats[["COD.2532"]] [["medium"]] <- c("6","7","8")
@@ -214,13 +214,18 @@
   size_cats[["SPR.2232"]] [["small"]]  <- c("1")
   size_cats[["SPR.2232"]] [["medium"]] <- c("2")
   size_cats[["SPR.2232"]] [["large"]]  <- c("3")
- 
+   } else{
+      stop("size_cats - to be defined for this app - adapt within the R script")
+  }
+
+
  
  # the selected groups in the catch rate equation
  write(c('stock',  'comcat_per_szgroup'),
                    file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
                        paste("comcat_per_szgroup_done_by_hand.dat",sep=' ')), append=FALSE,  ncol=2,
                           sep=" ") 
+                          
  count <-0
  for (sp in 1: length(spp)){
     count <- count+1
@@ -232,7 +237,8 @@
                          quote = FALSE, sep=" ", col.names=FALSE, row.names=FALSE)
  
  }
- 
+   cat(paste("Save the selected groups for the catch rate equation....done \n"))                         
+  
  
    
   cols <- c(
@@ -250,8 +256,10 @@
             rgb(1,0.3,0.9,0.5),
             rgb(1,0.9,0.9,0.5)
              )
-  windows(5,8)
-  plot(0,0, xlim=c(9,16), ylim=c(53,60), xlab="Longitude", ylab="Latitude", col=2, type="n")
+  if(do_plot) {
+     windows(5,8)
+     plot(0,0, xlim=c(9,16), ylim=c(53,60), xlab="Longitude", ylab="Latitude", col=2, type="n")
+  }
   
   for (pid in 1:length(spp)){
     for (sz_cat in c('small', 'medium', 'large')){
@@ -270,24 +278,26 @@
  
  
      # plot it
-     lapply(get(layername), function(obj, a_level) {
+     if(do_plot) lapply(get(layername), function(obj, a_level) {
        polygon(obj$x, obj$y, col=ifelse(obj$level>0, cols[pid], rgb(0,1,1,0.0)), border = NA)
        })
   
      # export it
-     export_contour_in_shapefile (contourobj=get(layername),nameobj=layername, general)
- 
+     export_contour_in_shapefile (contourobj=get(layername), nameobj=layername, general)
+    cat(paste("contour shape file for", layername, "exported....done \n"))                         
+
   }}      
            
   # additional info on the plot         
-  sh1 <- readShapePoly(file.path(general$main_path_gis,  "MANAGEMENT", "francois_EU"))
-  plot(sh1, add=TRUE, col=grey(0.5))
-  legend("bottomright", legend=paste(c(spp)),
+  if(do_plot){
+     sh1 <- readShapePoly(file.path(general$main_path_gis,  "MANAGEMENT", "francois_EU"))
+     plot(sh1, add=TRUE, col=grey(0.5))
+     legend("bottomright", legend=paste(c(spp)),
          fill=cols, ncol=2, cex=0.8, bg="white", box.col="white")
-  savePlot(file.path(general$main_path_gis,  "POPULATIONS", "avai", "avai_distrib_small_medium_large.jpeg"), type="jpeg")
+     savePlot(file.path(general$main_path_gis,  "POPULATIONS", "avai", "avai_distrib_small_medium_large.jpeg"), type="jpeg")
+  }
 
-
-
+  cat(paste("....done \n"))
 
 
 

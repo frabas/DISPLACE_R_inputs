@@ -8,7 +8,7 @@
    if (length(args) < 2) {
      if(.Platform$OS.type == "windows") {
        general$application           <- "balticRTI" # ...or myfish
-       general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+       general$main_path_gis         <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
        general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
        general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
       do_plot                        <- TRUE
@@ -16,7 +16,7 @@
      }
   } else {
        general$application           <- args[1]
-       general$main.path.param.gis   <- args[2]
+       general$main_path_gis         <- args[2]
        general$main.path.ibm         <- args[3]
        general$igraph                <- args[4]  # caution: should be consistent with existing vessels already built upon a given graph
       do_plot                        <- FALSE
@@ -33,7 +33,7 @@
     a_size_group_bin_in_cm <- 5
 
     # pop number per age group  
-    number <- read.csv(file=file.path(general$main.path.param.gis, "POPULATIONS",
+    number <- read.csv(file=file.path(general$main_path_gis, "POPULATIONS",
                  "Stock_abundances_at_age.csv"),
                     sep=";", header=TRUE)     
  
@@ -44,7 +44,7 @@
     a_size_group_bin_in_cm <- 5
 
     # pop number per age group  
-    number <- read.csv(file=file.path(general$main.path.param.gis, "POPULATIONS",
+    number <- read.csv(file=file.path(general$main_path_gis, "POPULATIONS",
                  "Stock_abundances_at_age.csv"),
                     sep=";", header=TRUE)     
  
@@ -57,13 +57,17 @@
  table_spp                  <- cbind(0:(length(spp)-1), spp)
  colnames(table_spp)        <- c('idx', 'spp')
  write.table(table_spp, quote=FALSE,
-                 file=file.path(general$main.path.param.gis, "POPULATIONS", paste("pop_names_", general$application,".txt",sep='')), append=FALSE,
+                 file=file.path(general$main_path_gis, "POPULATIONS",
+                  paste("pop_names_", general$application,".txt",sep='')), append=FALSE,
                    row.names=FALSE, col.names=TRUE)
+ write.table(cbind(idx=0:(length(spp)-1), spp=spp),
+              file=file.path( general$main.path.ibm, paste("pop_names_",general$application ,".txt",sep='')),
+              quote=FALSE, col.names=TRUE, row.names=FALSE)
 
 
 
 # pop parameters
- pa <- read.csv(file=file.path(general$main.path.param.gis, "POPULATIONS",
+ pa <- read.csv(file=file.path(general$main_path_gis, "POPULATIONS",
                   paste("Stock_biological_traits.csv", sep=',')), 
                     sep=';', header=TRUE)
  rownames(pa) <- pa$stock
