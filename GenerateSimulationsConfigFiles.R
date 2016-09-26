@@ -1,33 +1,55 @@
- # some args for the bunch of vessels to be created....
- # GENERAL SETTINGS
+   # GENERAL SETTINGS
+
+   args <- commandArgs(trailingOnly = TRUE)
+
    general <- list()
-   if(.Platform$OS.type == "windows") {
-     general$main.path             <- file.path("C:","DISPLACE_outputs")
-     general$application           <- "balticRTI" # ...or myfish
-     general$igraph                <- 56
+
+   if (length(args) < 2) {
+     if(.Platform$OS.type == "windows") {
+       general$application           <- "balticRTI" # ...or myfish
+       general$main_path_gis         <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+       general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
+       general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
+       do_plot                       <- TRUE
+     }
+  } else {
+       general$application           <- args[1]
+       general$main_path_gis         <- args[2]
+       general$main.path.ibm         <- args[3]
+       general$igraph                <- args[4]  # caution: should be consistent with existing objects already built upon a given graph
+       do_plot                       <- FALSE
+  }
+   cat(paste("START \n"))
+
+
+ 
+ 
+   if( general$application == "balticRTI") {
      general$implicit_stocks       <- c(0, 2, 3, 7, 8, 9, 10, 11, 12) # implicit level1 = we don´t know the absolute abundance 
      general$implicit_stocks_level2<- c("") # implicit level2 = we don´t know the absolute abundance but we use the relative abudance to draw some catch rates 
-     general$main.path.param       <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw")
-     general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
-     general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_" , general$application, sep=""))
+   } else{
+      stop("adapt the script to this app")
    }
+   
 
   dir.create(file.path(general$main.path.ibm, paste("simusspe_", general$application, sep='')))
 
 
   #load
-  coord <- read.table(file=file.path(general$main.path.param.gis, "GRAPH", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
+  coord <- read.table(file=file.path(general$main_path_gis, "GRAPH", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
   dd    <- coord
   coord <- as.matrix(as.vector(coord))
   coord <- matrix(coord, ncol=3)
   colnames(coord) <- c('x', 'y', 'harb')
-  plot(coord[,1], coord[,2])
+  if(do_plot) plot(coord[,1], coord[,2])
  
  
-  graph <- read.table(file=file.path(general$main.path.param.gis, "GRAPH", paste("graph", general$igraph, ".dat", sep=""))) # build from the c++ gui
+  graph <- read.table(file=file.path(general$main_path_gis, "GRAPH", paste("graph", general$igraph, ".dat", sep=""))) # build from the c++ gui
   graph <- as.matrix(as.vector(graph))
   graph <- matrix(graph, ncol=3)
-  segments(coord[graph[,1]+1,1], coord[graph[,1]+1,2], coord[graph[,2]+1,1], coord[graph[,2]+1,2], col=4) # CAUTION: +1, because c++ to R
+  if(do_plot) segments(coord[graph[,1]+1,1], coord[graph[,1]+1,2], coord[graph[,2]+1,1], coord[graph[,2]+1,2], col=4) # CAUTION: +1, because c++ to R
+
+
 
 
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
@@ -45,7 +67,7 @@
    a_graph       <- general$igraph
    nrow_coord    <- nrow(coord)
    nrow_graph    <- nrow(graph)
-   a_port        <- idx[1]
+   a_port        <- which(coord[,'harb']!=0)[1]
    grid_res_km   <- 3
    is_individual_vessel_quotas <- 0
    check_all_stocks <- 0
@@ -139,6 +161,8 @@
    write(banned_metiers, file=namefile, ncolumns=1, append=TRUE)
   
  
+    cat(paste("Write baseline.dat ...done \n"))
+
 
 
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
@@ -149,7 +173,7 @@
   namefile  <- file.path(general$main.path.ibm, paste("simusspe_", general$application, sep=''), paste("config.dat", sep=''))
 
   # caution: give the order for naming stocks in integer from 0 to n-1
-  spp_table <-  read.table(file=file.path(general$main.path.param.gis, "POPULATIONS", paste("pop_names_", general$application ,".txt",sep='')),
+  spp_table <-  read.table(file=file.path(general$main_path_gis, "POPULATIONS", paste("pop_names_", general$application ,".txt",sep='')),
               header=TRUE)
   spp                        <- as.character(spp_table$spp)
 
@@ -187,6 +211,11 @@
    write("# implicit stocks level 2", file=namefile, ncolumns=1, append=TRUE)
    write(implicit_stocks_level2, file=namefile, ncolumns=length(implicit_stocks_level2), append=TRUE)
 
+ 
+    cat(paste("Write config.dat ...done \n"))
+
+
+ 
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ## a tstep_months_.dat               ##
@@ -266,4 +295,8 @@ write.table(idx[-1], file=file.path(general$main.path.ibm, paste("simusspe_", ge
                       col.names=FALSE, row.names=FALSE)
 
 
+
+cat(paste("Write time steps related files ...done \n"))
+   
+cat(paste(".......done \n"))
    
