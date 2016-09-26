@@ -95,7 +95,7 @@
   graph <- matrix(graph, ncol=3)
   if(do_plot) segments(coord[graph[,1]+1,1], coord[graph[,1]+1,2], coord[graph[,2]+1,1], coord[graph[,2]+1,2], col=4) # CAUTION: +1, because c++ to R
 
-   cat(paste("Read the graph....done\n"))
+  cat(paste("Read the graph....done\n"))
  
 
 
