@@ -7,42 +7,53 @@
    if (length(args) < 2) {
      if(.Platform$OS.type == "windows") {
        general$application           <- "balticRTI" # ...or myfish
-       general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+       general$main_path_gis         <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
        general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_", general$application, sep=''))
        general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
-   
+       do_plot                       <- TRUE
      }
   } else {
        general$application           <- args[1]
-       general$main.path.param.gis   <- args[2]
+       general$main_path_gis         <- args[2]
        general$main.path.ibm         <- args[3]
-       general$igraph                <- args[4]  # caution: should be consistent with existing vessels already built upon a given graph
+       general$igraph                <- args[4]  # caution: should be consistent with existing objects already built upon a given graph
+       do_plot                       <- FALSE
   }
   
   
-  
-   path      <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis",   "POPULATIONS", "pops_config_files")
+   cat(paste("START \n"))
+ 
+   # (caution: give the order for naming stocks in integer from 0 to n-1)
+   spp_table <-  read.table(file=file.path(general$main_path_gis, "POPULATIONS", 
+                           paste("pop_names_", general$application,".txt",sep='')), header=TRUE)
+   spp                        <- as.character(spp_table$spp)
+   cat(paste("Reading the stock names in", paste(general$main_path_gis, "POPULATIONS", 
+                           paste("pop_names_", general$application,".txt",sep='')),"....done \n"))
+ 
+   
+   path      <- file.path(general$main_path_gis, "POPULATIONS", "pops_config_files")
    namefiles <- list.files(file.path( path))
 
-
+  
+   cat(paste("Entering /POPULATIONS/pops_config_files folder....done \n"))
 
  
   for (a_file in namefiles){
+   cat(paste("Process ", a_file, "\n"))
  
    dat  <- readLines(file.path(path, a_file))
    
    my_split <- function(x) unlist(strsplit(x, " "))
    my_split2 <- function(x) unlist(strsplit(x, "_"))
    
-   general <- list()
+   #general <- list()
    #general$main.path.param.gis   <- as.character(dat[5])
    #general$main.path.param       <- as.character(dat[7])
    #general$main.path.ibm         <- as.character(dat[9])                                      
    #general$application           <- as.character(dat[11])  
    #general$igraph                <- as.numeric(dat[13])  
-  
    dir.create(file.path(general$main.path.ibm, paste("popsspe_", general$application, sep='')))
-   dir.create(file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''), "static_avai"))
+   dir.create(file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),  "static_avai"))
 
  
                                   
@@ -59,6 +70,9 @@
     }
    selected_szgroups          <-  as.character(my_split(dat[29]))
 
+  if(as.numeric(popids) %in%  as.numeric(spp_table$idx)){
+      cat(paste("this stock", popids, "is in the list...\n"))
+
  
   avai_allszgroups <- NULL
   for (ly in 1: length(name_gis_file_for_total_abundance_per_polygon)){
@@ -67,21 +81,22 @@
 
  # load the graph
   #load(file.path(general$main.path.igraph, paste(general$igraph, "_graphibm.RData",sep=''))) # built from the R code
-  coord <- read.table(file=file.path(general$main.path.param.gis, "GRAPH",
+  coord <- read.table(file=file.path(general$main_path_gis, "GRAPH",
              paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
   coord <- as.matrix(as.vector(coord))
   coord <- matrix(coord, ncol=3)
   coord <- cbind(coord, 1:nrow(coord))
   colnames(coord) <- c('x', 'y', 'harb', 'pt_graph')
-  plot(coord[,1], coord[,2])
+  if(do_plot) plot(coord[,1], coord[,2])
 
-  graph <- read.table(file=file.path(general$main.path.param.gis , "GRAPH",
+  graph <- read.table(file=file.path(general$main_path_gis , "GRAPH",
            paste("graph", general$igraph, ".dat", sep=""))) # build from the c++ gui
   graph <- as.matrix(as.vector(graph))
   graph <- matrix(graph, ncol=3)
-  segments(coord[graph[,1]+1,1], coord[graph[,1]+1,2], coord[graph[,2]+1,1], coord[graph[,2]+1,2], col=4) # CAUTION: +1, because c++ to R
+  if(do_plot) segments(coord[graph[,1]+1,1], coord[graph[,1]+1,2], coord[graph[,2]+1,1], coord[graph[,2]+1,2], col=4) # CAUTION: +1, because c++ to R
 
-
+   cat(paste("Read the graph....done\n"))
+ 
 
 
 #-------------------------------------------------------------------------------
@@ -101,11 +116,11 @@
 
     
     library(maptools)
-    handmade_WGS84            <- readShapePoly(file.path(general$main.path.param.gis, "POPULATIONS", name_gis_file_for_total_abundance_per_polygon[ly] ) , proj4string=CRS("+proj=longlat +datum=WGS84"))  # build in ArcGIS 10.1
+    handmade_WGS84            <- readShapePoly(file.path(general$main_path_gis, "POPULATIONS", name_gis_file_for_total_abundance_per_polygon[ly] ) , proj4string=CRS("+proj=longlat +datum=WGS84"))  # build in ArcGIS 10.1
     
     if(FALSE){ # in case not latlong but projected data instead.....
     library(rgdal)
-    handmade2           <- readOGR(file.path(general$main.path.param.gis, "POPULATIONS", "SpatialLayers"), gsub("SpatialLayers/","", name_gis_file_for_total_abundance_per_polygon[ly]) ) #  Projection info in a .prj associated with the shp should be imported automagically.
+    handmade2           <- readOGR(file.path(general$main_path_gis, "POPULATIONS", "SpatialLayers"), gsub("SpatialLayers/","", name_gis_file_for_total_abundance_per_polygon[ly]) ) #  Projection info in a .prj associated with the shp should be imported automagically.
    # How can I get the proj4 string from a shapefile .prj file? http://gis.stackexchange.com/questions/55196/how-can-i-get-the-proj4-string-or-epsg-code-from-a-shapefile-prj-file
    if(is.na( projection(handmade2))) projection(handmade2) <- CRS("+proj=longlat +datum=WGS84")   # a guess!
    library(sp)
@@ -115,7 +130,7 @@
     
     names(handmade_WGS84)  # "ID"         name_gis_layer_field  
  
-    plot(handmade_WGS84,  add=TRUE, border=as.data.frame(handmade_WGS84)[,name_gis_layer_field])
+    if(do_plot) plot(handmade_WGS84,  add=TRUE, border=as.data.frame(handmade_WGS84)[,name_gis_layer_field])
 
 
 
@@ -130,10 +145,11 @@
      levels(coord$xfold) <- xfold_gis_layer_field
   
     # check
-    plot(handmade_WGS84,  add=FALSE, border=as.data.frame(handmade_WGS84)[,name_gis_layer_field])
-    points(as.numeric(as.character(coord[, "x"])), as.numeric(as.character(coord[, "y"])), col=  1, pch=16)
-    points(as.numeric(as.character(coord[, "x"])), as.numeric(as.character(coord[, "y"])), col=  as.numeric(coord[,name_gis_layer_field])+2, pch=16)
- 
+    if(do_plot){
+       plot(handmade_WGS84,  add=FALSE, border=as.data.frame(handmade_WGS84)[,name_gis_layer_field])
+       points(as.numeric(as.character(coord[, "x"])), as.numeric(as.character(coord[, "y"])), col=  1, pch=16)
+       points(as.numeric(as.character(coord[, "x"])), as.numeric(as.character(coord[, "y"])), col=  as.numeric(coord[,name_gis_layer_field])+2, pch=16)
+    }
 
  # create the fgrounds files for DISPLACE
  # TWO WORKFLOWS ON A POPULATION EDITOR:
@@ -229,6 +245,8 @@
               paste(pid, "spe_full_avai_szgroup_nodes_semester",gsub("Q","",a.semester),".dat",sep='')),
                   col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
     
+         cat(paste("Write", pid, "spe_full_avai_szgroup_nodes_semester",gsub("Q","",a.semester),".dat....done \n"))
+  
       }
        for(pid in unique(popsspe_avai_semester[,c('pids')])){
          popsspe_avai_semester_this_pop_these_sz <- x[x$pids==pid & x$szgroups %in% selected_szgroups, c('pids','pt_graph', 'abundance')]
@@ -236,6 +254,8 @@
             file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''), "static_avai",
               paste(pid, "spe_avai_szgroup_nodes_semester",gsub("Q","",a.semester),".dat",sep='')),
                   col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
+   
+         cat(paste("Write", pid, "spe_avai_szgroup_nodes_semester",gsub("Q","",a.semester),".dat....done \n"))
     
       }
       
@@ -248,6 +268,8 @@
               paste("lst_idx_nodes_per_pop_semester",gsub("Q","",a.semester),".dat",sep='')),
                   col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
 
+      cat(paste("Write lst_idx_nodes_per_pop_semester",gsub("Q","",a.semester),".dat....done \n"))
+
    }   
    #-----------
 
@@ -256,9 +278,6 @@
                          
 
 
-  ## ADDITIONAL FILES FOR THE CATCH EQUATION
-   spp_table    <- read.table(file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''), paste("pop_names_",general$application ,".txt",sep='')), header=TRUE)
-   spp          <- as.character(spp_table$spp)
   
     for (a.semester in 1:2){
    #-----------
@@ -276,7 +295,8 @@
              paste("avai", rg, "_betas_semester", a.semester,".dat",sep='')),
                col.names=TRUE,  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")
      
-     
+           cat(paste("Write avai", rg, "_betas_semester", a.semester,".dat....done \n"))
+ 
      
      
           }
@@ -299,7 +319,8 @@
                          quote = FALSE, sep=" ", col.names=FALSE, row.names=FALSE)
  
     }
-
+ cat(paste("Write the_selected_szgroups.dat....done \n"))
+ 
    
  
  
@@ -312,9 +333,13 @@
    if(length(name_gis_file_for_total_abundance_per_polygon) != length(szgroups)) stop("Need for same number of GIS layers and sets of size groups....")
 
 
-
+ cat(paste("Process ", a_file, "....done \n"))
+  
+ } else{
+    cat(paste("....a config file is found but the stock is not in the list....config ignored\n"))
  
+ }
 } 
  
-  ####-------
+cat(paste("....done \n"))
   

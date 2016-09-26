@@ -21,7 +21,8 @@
        general$igraph                <- args[4]  # caution: should be consistent with existing vessels already built upon a given graph
       do_plot                        <- FALSE
   }
-  
+  cat(paste("START \n"))
+
   
    dir.create(file.path(general$main.path.ibm, paste("popsspe_", general$application, sep='')))
 

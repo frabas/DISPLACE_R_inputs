@@ -23,6 +23,7 @@
       
 
   }
+  cat(paste("START \n"))
 
 
   if(general$application=="balticRTI"){
@@ -297,7 +298,8 @@
      savePlot(file.path(general$main_path_gis,  "POPULATIONS", "avai", "avai_distrib_small_medium_large.jpeg"), type="jpeg")
   }
 
-  cat(paste("....done \n"))
+
+cat(paste("....done \n"))
 
 
 

@@ -24,6 +24,7 @@
        general$main_path_R_inputs     <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
        do_plot                       <- FALSE
  }
+ cat(paste("START \n"))
 
 
   if(general$application=="balticRTI"){

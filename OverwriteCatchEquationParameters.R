@@ -1,41 +1,56 @@
- 
- 
- # GENERAL SETTINGS
-  general <- list()
-  general$main.path             <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input_raw")
-  general$main.path.code        <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
-  general$main_path_input       <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input")
-  general$inPath                <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis","balticRTI","FISHERIES")
-  general$outPath               <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis","balticRTI","FISHERIES")
-  general$inPathGraph           <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis","balticRTI","GRAPH")
-  general$inPathManagement      <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis","balticRTI","MANAGEMENT")
-  general$inPathPop             <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis","balticRTI","POPULATIONS")
 
+   general <- list()
+
+   if (length(args) < 2) {
+     if(.Platform$OS.type == "windows") {
+       general$application           <- "balticRTI" # ...or myfish
+       general$main_path_gis         <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+       general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_", general$application, sep=''))
+       general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
+       general$main_path_input       <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input")
+       do_plot                       <- TRUE
+     }
+  } else {
+       general$application           <- args[1]
+       general$main_path_gis         <- args[2]
+       general$main.path.ibm         <- args[3]
+       general$igraph                <- args[4]  # caution: should be consistent with existing objects already built upon a given graph
+       general$main_path_input       <- args[5]
+       general$main_path_input       <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input")
+        do_plot                      <- FALSE
+  }
   
   
-  general$application            <- "balticRTI"
-  
-  general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_" , general$application, sep=""))
-  dir.create(file.path(general$inPathPop , "CatchRates")) 
+   cat(paste("START \n"))
+
+
+   # (caution: give the order for naming stocks in integer from 0 to n-1)
+   spp_table <-  read.table(file=file.path(general$main_path_gis, "POPULATIONS", 
+                           paste("pop_names_", general$application,".txt",sep='')), header=TRUE)
+   spp                        <- as.character(spp_table$spp)
+   cat(paste("Reading the stock names in", paste(general$main_path_gis, "POPULATIONS", 
+                           paste("pop_names_", general$application,".txt",sep='')),"....done \n"))
+ 
+ 
+  dir.create(file.path(general$main_path_gis , "POPULATIONS", "CatchRates")) 
   dir.create(file.path(general$main.path.ibm, paste("popsspe_", general$application, sep='')))
   dir.create(file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep='')))
   dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep='')))
 
-  general$case_study_countries  <- c("DEN", "SWE", "DEU")    # for the Baltic only
-  general$a.year                <- "2015"
-  general$igraph                <- 56
-  
-  
-  if(general$application=="balticRTI"){
+  if( general$application=="balticRTI"){
       year      <- "2015"
       years     <- "2013_2014_2015"
       method    <- "inverse"
       threshold <- "25"
       p         <- 0.1
-      }
-
-
- 
+      general$case_study_countries  <- c("DEN", "SWE", "DEU")    # for the Baltic only
+      general$a.year                <- "2015"
+      gis_area  <- "wbaltic_wgs84"
+    } else{
+        stop(paste("Adapt the script to your app"))  
+    
+    }
+  
  
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
@@ -47,36 +62,36 @@
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
 
   ctry <- "DNK"
-  load(file=file.path(general$inPath,"all_merged_weight_DEN_2015.RData"))
-  tacsatp_den <- all.merged
-  tacsatp_den <- tacsatp_den[!is.na(as.numeric(as.character(tacsatp_den$SI_LONG))) &  !is.na(as.numeric(as.character(tacsatp_den$SI_LATI))), ]
-  tacsatp_den$SI_LONG <- as.numeric(as.character(tacsatp_den$SI_LONG))
-  tacsatp_den$SI_LATI <- as.numeric(as.character(tacsatp_den$SI_LATI))
-  tacsatp_den$SI_STATE <- as.numeric(as.character(tacsatp_den$SI_STATE))
+  load(file=file.path(general$main_path_gis, "FISHERIES", "all_merged_weight_DEN_2015.RData"))
+  tacsatp_den            <- coupled_VMS_logbooks
+  tacsatp_den            <- tacsatp_den[!is.na(as.numeric(as.character(tacsatp_den$SI_LONG))) &  !is.na(as.numeric(as.character(tacsatp_den$SI_LATI))), ]
+  tacsatp_den$SI_LONG    <- as.numeric(as.character(tacsatp_den$SI_LONG))
+  tacsatp_den$SI_LATI    <- as.numeric(as.character(tacsatp_den$SI_LATI))
+  tacsatp_den$SI_STATE   <- as.numeric(as.character(tacsatp_den$SI_STATE))
   tacsatp_den$LE_EFF_VMS <- as.numeric(as.character(tacsatp_den$LE_EFF_VMS)) /60
-  tacsatp_den <- tacsatp_den[tacsatp_den$SI_STATE==1, ]  # keep fishing positions only
-  tacsatp_den$ctry <- "DNK"
+  tacsatp_den            <- tacsatp_den[tacsatp_den$SI_STATE==1, ]  # keep fishing positions only
+  tacsatp_den$ctry       <- "DNK"
 
 
   ctry <- "SWE"
   load(file=file.path(general$inPath,"Displace2015_tacsat_swe_v2.RData"))
-  tacsatp_swe <- tacsat.swe
-  tacsatp_swe$SI_LONG <- as.numeric(as.character(tacsatp_swe$SI_LONG))
-  tacsatp_swe$SI_LATI <- as.numeric(as.character(tacsatp_swe$SI_LATI))
-  tacsatp_swe$SI_STATE <- as.numeric(as.character(tacsatp_swe$SI_STATE))
+  tacsatp_swe            <- coupled_VMS_logbooks
+  tacsatp_swe$SI_LONG    <- as.numeric(as.character(tacsatp_swe$SI_LONG))
+  tacsatp_swe$SI_LATI    <- as.numeric(as.character(tacsatp_swe$SI_LATI))
+  tacsatp_swe$SI_STATE   <- as.numeric(as.character(tacsatp_swe$SI_STATE))
   tacsatp_swe$LE_MET_level6 <- tacsatp_swe$VE_MET  
-  format_date <- "%Y-%m-%d %H:%M:%S" 
-  tacsatp_swe$SI_DATIM <- as.POSIXct( tacsatp_swe$SI_DATIM, tz='GMT',   format_date)
+  format_date            <- "%Y-%m-%d %H:%M:%S" 
+  tacsatp_swe$SI_DATIM   <- as.POSIXct( tacsatp_swe$SI_DATIM, tz='GMT',   format_date)
   library(doBy)
-  tacsatp_swe <- orderBy(~VE_REF + SI_DATIM, tacsatp_swe)
+  tacsatp_swe            <- orderBy(~VE_REF + SI_DATIM, tacsatp_swe)
   tacsatp_swe$LE_EFF_VMS <- abs(c(0, as.numeric( tacsatp_swe[-nrow( tacsatp_swe),"SI_DATIM"] - tacsatp_swe[-1,"SI_DATIM"], units="mins") /60)) 
   start.trip <- c(1,diff( tacsatp_swe[,"FT_REF"]))
   tacsatp_swe$all_effort <- tacsatp_swe$LE_EFF_VMS  # save...
   tacsatp_swe[start.trip!=0, "LE_EFF_VMS"] <- 0  # just correct for the trip change points
   tacsatp_swe$LE_EFF_VMS <- as.numeric(as.character(tacsatp_swe$LE_EFF_VMS))
-  tacsatp_swe <- tacsatp_swe[!is.na(as.numeric(as.character(tacsatp_swe$SI_LONG))) &  !is.na(as.numeric(as.character(tacsatp_swe$SI_LATI))), ]
-  tacsatp_swe <- tacsatp_swe[tacsatp_swe$SI_STATE==1, ]  # keep fishing positions only
-  tacsatp_swe$ctry <- "SWE"
+  tacsatp_swe            <- tacsatp_swe[!is.na(as.numeric(as.character(tacsatp_swe$SI_LONG))) &  !is.na(as.numeric(as.character(tacsatp_swe$SI_LATI))), ]
+  tacsatp_swe            <- tacsatp_swe[tacsatp_swe$SI_STATE==1, ]  # keep fishing positions only
+  tacsatp_swe$ctry       <- "SWE"
 
    
   nm <- intersect(colnames(tacsatp_den), colnames(tacsatp_swe))
@@ -85,24 +100,26 @@
                          tacsatp_swe[,nm] #,
                          # tacsatp_ger[, nm]
                          )
-  tacsatp <- tacsatp[c(grep("DNK", tacsatp$VE_REF), grep("DEU",tacsatp$VE_REF), grep("SWE", tacsatp$VE_REF)),]
+  tacsatp      <- tacsatp[c(grep("DNK", tacsatp$VE_REF), grep("DEU",tacsatp$VE_REF), grep("SWE", tacsatp$VE_REF)),]
   tacsatp$ctry <- factor(tacsatp$ctry)
 
-   
+  cat(paste("Concatenate the data...done\n"))
+  
+  
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   # relevant vessels only i.e. active in the area....
   
   # keep only the vessels fishnig in the western Baltic  (and kattegat because her.3a22, and East baltic because spr.2232)
   library(maptools)
-  handmade            <- readShapePoly(file.path(general$inPathManagement, "wbaltic_wgs84"))  # build in ArcGIS 10.1
+  handmade            <- readShapePoly(file.path(general$main_path_gis, "MANAGEMENT", gis_area))  # build in ArcGIS 10.1
   the_area            <- sapply(slot(handmade, "polygons"), function(x) lapply(slot(x, "Polygons"), function(x) x@coords)) # tricky there...
   in_area             <- point.in.polygon(tacsatp[,'SI_LONG'],tacsatp[,'SI_LATI'], the_area[[1]][,1],the_area[[1]][,2])
 
   # then subset here...
   vid_this_case_study <- as.character(unique(tacsatp$VE_REF[in_area>0]))
   cat(paste(length(vid_this_case_study), " vessels in the area over ", length(unique(tacsatp$VE_REF)), " in total" , "\n"))
-  tacsatp      <- tacsatp[tacsatp$VE_REF %in% vid_this_case_study,]
+  tacsatp             <- tacsatp[tacsatp$VE_REF %in% vid_this_case_study,]
   
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
@@ -110,14 +127,15 @@
   
   # keep only the vessels fishnig in the western Baltic  (and kattegat because her.3a22, and East baltic because spr.2232)
    
-  agg     <- aggregate(tacsatp[, grep('LE_KG_', colnames(tacsatp))], list(tacsatp$VE_REF), sum, na.rm=TRUE)
-  agg$tot <- apply(agg[,-1], 1, sum, na.rm=TRUE)
+  agg        <- aggregate(tacsatp[, grep('LE_KG_', colnames(tacsatp))], list(tacsatp$VE_REF), sum, na.rm=TRUE)
+  agg$tot    <- apply(agg[,-1], 1, sum, na.rm=TRUE)
   vid_with_no_landings_for_these_stocks <- as.character(agg[agg$tot<=0, 1])
     
   # then subset here...
   cat(paste(length(vid_with_no_landings_for_these_stocks), " vessels to remove over ", length(unique(tacsatp$VE_REF)), " in total" , "\n"))
   tacsatp      <- tacsatp[!tacsatp$VE_REF %in% vid_with_no_landings_for_these_stocks,]
    
+  cat(paste("Subset the data for relevant vessels...done\n"))
 
 
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
@@ -137,7 +155,7 @@
   coord <- matrix(coord, ncol=3)
   coord <- cbind(coord, 1:nrow(coord))
   colnames(coord) <- c('x', 'y', 'harb', 'pt_graph')
-  plot(coord[,1], coord[,2])
+  if(do_plot) plot(coord[,1], coord[,2])
 
   saved_coord <- coord
 
@@ -145,7 +163,12 @@
            paste("graph", general$igraph, ".dat", sep=""))) # build from the c++ gui
   graph <- as.matrix(as.vector(graph))
   graph <- matrix(graph, ncol=3)
-  segments(coord[graph[,1]+1,1], coord[graph[,1]+1,2], coord[graph[,2]+1,1], coord[graph[,2]+1,2], col=4) # CAUTION: +1, because c++ to R
+  if(do_plot) segments(coord[graph[,1]+1,1], coord[graph[,1]+1,2], coord[graph[,2]+1,1], coord[graph[,2]+1,2], col=4) # CAUTION: +1, because c++ to R
+
+  cat(paste("Read the graph....done\n"))
+
+
+
 
 
   if(FALSE){
