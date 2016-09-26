@@ -12,36 +12,44 @@
    if (length(args) < 2) {
      if(.Platform$OS.type == "windows") {
        general$application           <- "balticRTI" # ...or myfish
-       general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+       general$main_path_gis         <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
        general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
        general$igraph                <- 56  # caution: should be consistent with existing vessels already built upon a given graph
-   
+       do_plot                       <- TRUE
      }
   } else {
        general$application           <- args[1]
-       general$main.path.param.gis   <- args[2]
+       general$main_path_gis         <- args[2]
        general$main.path.ibm         <- args[3]
        general$igraph                <- args[4]  # caution: should be consistent with existing vessels already built upon a given graph
+       do_plot                       <- FALSE
   }
+   cat(paste("START \n"))
+ 
   
-  
-   dir.create(path=file.path(general$main.path.param.gis, "FISHERIES", "vessels_config_files"))
+   dir.create(path=file.path(general$main_path_gis, "FISHERIES", "vessels_config_files"))
    dir.create(path=file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep='')))
+   
+   
+   cat(paste("Config files will be stored in /FISHERIES/vessels_config_files folder\n"))
+
   
   
-  
-   filename <- file.path(general$main.path.param.gis, "FISHERIES", "vessels_specifications_per_harbour_metiers.csv")
+   filename <- file.path(general$main_path_gis, "FISHERIES", "vessels_specifications_per_harbour_metiers.csv")
    cnts     <- count.fields(filename, sep = ";") 
    vessel_specifications <- read.table(file=filename, sep=";", header=TRUE )
    vessel_specifications <- cbind.data.frame(vessel_specifications, id=1:nrow(vessel_specifications))
    #=> CAUTION: do not leave white rows at the end of this file! otherwise will create some extra wrong config_files
-   
+   cat(paste("Read vessels_specifications_per_harbour_metiers.csv \n"))
+ 
    nb_agent_per_vessels <- 1  # caution: super-individuals to reduce the total nb of vessels to be simulated
    vessel_specifications[, "N..of.vessels"] <- ceiling(vessel_specifications[, "N..of.vessels"])/nb_agent_per_vessels
    
-   port_names <- read.table(file=file.path(general$main.path.param.gis,
+   port_names <- read.table(file=file.path(general$main_path_gis,
                                  "GRAPH",
                                   paste("harbours.dat", sep='')), sep=";")
+   cat(paste("Read harbours.dat \n"))
+ 
   # quick check
   # if(!"Dredge" %in% unique(vessel_specifications[, "metier"]) 
   #     && !"Passive" %in% unique(vessel_specifications[, "metier"]) 
@@ -59,11 +67,14 @@
     metier_names,
      file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''), "metier_names.dat"),
      quote=FALSE, row.names=FALSE, col.names=TRUE)
-     
+   cat(paste("Read metier names for the specs and write metier names in metiersspe_ folder \n"))
+   
 
    
+   cat(paste("Now, read the specs table one by one \n"))
    for (i in 1 : nrow(vessel_specifications)){
 
+    cat(paste("line",i," \n"))
       
     if(!any("vid" %in% colnames(vessel_specifications)) || 
        any("vid" %in% colnames(vessel_specifications)) && i>1 && vessel_specifications[i, "vid"]!=vessel_specifications[i-1, "vid"] ||
@@ -71,7 +82,7 @@
        # test for truly individual vessel data i.e. one vessel => one config file
     
     
-      spp_table <-  read.table(file=file.path(general$main.path.param.gis, "POPULATIONS", paste("pop_names_",general$application,".txt",sep='')),
+      spp_table <-  read.table(file=file.path(general$main_path_gis, "POPULATIONS", paste("pop_names_",general$application,".txt",sep='')),
               header=TRUE)
       spp                        <- as.character(spp_table$spp)
 
@@ -171,20 +182,21 @@
 
    # create a (intermediate) config file
    if(any("vid" %in% colnames(vessel_specifications))){
-      namefile <- file.path(general$main.path.param.gis, "FISHERIES", "vessels_config_files",
+      namefile <- file.path(general$main_path_gis, "FISHERIES", "vessels_config_files",
                paste("vessels_creator_args_",general$application,"_", as.character(vessel_specifications[i, "vid"]), "_", harbcode, "_", all_records_this_vid[imax, "metier"], ".dat", sep=''))
    } else{
-      namefile <- file.path(general$main.path.param.gis, "FISHERIES", "vessels_config_files",
+      namefile <- file.path(general$main_path_gis, "FISHERIES", "vessels_config_files",
                paste("vessels_creator_args_",general$application, "_", harbcode, "_", vessel_specifications[i, "metier"], ".dat", sep=''))
    }
  
-   
+   cat(paste("write the config file.. \n"))
+  
    write("# config file for the vessel editor: adding some vessel(s)", file=namefile)
    write("# (the shortestPaths library will have to be re-created for the graph)", file=namefile, ncolumns=1, append=TRUE)
    write("# --------------", file=namefile, ncolumns=1, append=TRUE)
   
    write("# input folder for config file", file=namefile, ncolumns=1, append=TRUE)
-   write(general$main.path.param.gis, file=namefile, ncolumns=1, append=TRUE)
+   write(general$main_path_gis, file=namefile, ncolumns=1, append=TRUE)
   
    write("# input folder for DISPLACE", file=namefile, ncolumns=1, append=TRUE)
    write(general$main.path.ibm, file=namefile, ncolumns=1, append=TRUE)
@@ -267,10 +279,12 @@
 
    }   # end test
     
+    cat(paste("write the config file...done \n"))
+
   }   # end for loop over record
     
    
- cat(paste("Create the vessel config files from the specifications.........done"))  
+ cat(paste("......done"))  
    
       
  

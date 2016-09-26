@@ -1,19 +1,26 @@
+  # GENERAL SETTINGS
 
+   args <- commandArgs(trailingOnly = TRUE)
 
-# some args for the bunch of vessels to be created....
- # GENERAL SETTINGS
    general <- list()
-   if(.Platform$OS.type == "windows") {
-     general$main.path             <- file.path("C:","DISPLACE_outputs")
-     general$application           <- "balticRTI" # ...or myfish
-     general$igraph                <- 56
-     general$main.path.param       <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw")
-     general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
-     general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_" , general$application, sep=""))
-   }
 
+   if (length(args) < 2) {
+     if(.Platform$OS.type == "windows") {
+       general$application           <- "balticRTI" # ...or myfish
+       general$main_path_gis         <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+       general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
+       general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
+       do_plot                       <- TRUE
+     }
+  } else {
+       general$application           <- args[1]
+       general$main_path_gis         <- args[2]
+       general$main.path.ibm         <- args[3]
+       general$igraph                <- args[4]  # caution: should be consistent with existing vessels already built upon a given graph
+       do_plot                       <- FALSE
+  }
+   cat(paste("START \n"))
 
-  dir.create(file.path(general$main.path.ibm, paste("popsspe_", general$application, sep='')))
 
 
 
@@ -21,7 +28,8 @@
 #-------------------------------------------------------------------------------
 
 # load
-catches_in_tons <- read.table(file.path(general$main.path.param.gis, "OTHERS", "othercatchespercountry.csv"), sep=",", header=TRUE)  # in tons
+catches_in_tons <- read.table(file.path(general$main_path_gis, "OTHERS", "othercatchespercountry.csv"), sep=",", header=TRUE)  # in tons
+   cat(paste("Read the specs othercatchespercountry.csv\n"))
 
 popnames <- as.character(catches_in_tons$POP)
 
@@ -29,7 +37,7 @@ popnames <- as.character(catches_in_tons$POP)
 #-------------------------------------------------------------------------------
 
 
-lst_layers <- list.files (file.path(general$main.path.param.gis, "POPULATIONS", "SpatialLayers"))  
+lst_layers <- list.files (file.path(general$main_path_gis, "POPULATIONS", "SpatialLayers"))  
 
 
 for (popid in 1: length(catches_in_tons$POP)){
@@ -39,27 +47,27 @@ for (popid in 1: length(catches_in_tons$POP)){
      name_gis_layer_field <- "GRIDCODE"
      
      library(maptools)
-     handmade_WGS84            <- readShapePoly(file.path(general$main.path.param.gis, "POPULATIONS", "SpatialLayers", a_file ) , proj4string=CRS("+proj=longlat +datum=WGS84"))  # build in ArcGIS 10.1
+     handmade_WGS84            <- readShapePoly(file.path(general$main_path_gis, "POPULATIONS", "SpatialLayers", a_file ) , proj4string=CRS("+proj=longlat +datum=WGS84"))  # build in ArcGIS 10.1
  
      #load
-     coord <- read.table(file=file.path(general$main.path.param.gis, "GRAPH", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
+     coord <- read.table(file=file.path(general$main_path_gis, "GRAPH", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
      coord <- as.matrix(as.vector(coord))
      coord <- matrix(coord, ncol=3)
      colnames(coord) <- c('x', 'y', 'harb')
-     plot(coord[,1], coord[,2])
+     if(do_plot) plot(coord[,1], coord[,2])
      coord <- cbind(coord, pt_graph=1:nrow(coord))
  
   
-     graph <- read.table(file=file.path(general$main.path.param.gis, "GRAPH", paste("graph", general$igraph, ".dat", sep=""))) # build from the c++ gui
+     graph <- read.table(file=file.path(general$main_path_gis, "GRAPH", paste("graph", general$igraph, ".dat", sep=""))) # build from the c++ gui
      graph <- as.matrix(as.vector(graph))
      graph <- matrix(graph, ncol=3)
-     segments(coord[graph[,1]+1,1], coord[graph[,1]+1,2], coord[graph[,2]+1,1], coord[graph[,2]+1,2], col=4) # CAUTION: +1, because c++ to R
+     if(do_plot) segments(coord[graph[,1]+1,1], coord[graph[,1]+1,2], coord[graph[,2]+1,1], coord[graph[,2]+1,2], col=4) # CAUTION: +1, because c++ to R
     
      
      # test coord for polygon inclusion
      spo                          <- SpatialPoints(coordinates(data.frame(CELL_LONG=coord[,1],
                                              CELL_LATI=coord[,2])))
-     projection(spo)              <-  CRS("+proj=longlat +datum=WGS84")
+     proj4string(spo)              <-  CRS("+proj=longlat +datum=WGS84")
      idx                          <- over(spo, handmade_WGS84, returnList=FALSE)  # idx in handmade_WGS84_reduced
      coord                        <- cbind(coord, idx[,name_gis_layer_field])
      colnames(coord)[ncol(coord)] <- name_gis_layer_field
@@ -93,9 +101,13 @@ for (popid in 1: length(catches_in_tons$POP)){
                   paste((popid)-1, 'spe_stecf_oth_land_per_month_per_node_semester', semester, ".dat", sep='')),
                  row.names=FALSE, col.names=TRUE, quote=FALSE)
 
+        cat(paste("Write ", (popid)-1, 'spe_stecf_oth_land_per_month_per_node_semester', semester, ".dat\n", sep=''))
 
 
       }
 
 
     } # end popid
+
+
+  cat(paste(".....done \n"))
