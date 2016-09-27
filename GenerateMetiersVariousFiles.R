@@ -20,25 +20,28 @@
  
    # GENERAL SETTINGS
 
+    # GENERAL SETTINGS
+
    args <- commandArgs(trailingOnly = TRUE)
 
    general <- list()
 
    if (length(args) < 2) {
-      # GENERAL SETTINGS
-      general <- list()
-      if(.Platform$OS.type == "windows") {
-        general$application           <- "balticRTI" # ...or myfish
-        general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
-        general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_" , general$application, sep=""))
-       }
-    } else{
+     if(.Platform$OS.type == "windows") {
+       general$application           <- "balticRTI" # ...or myfish
+       general$main_path_gis         <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+       general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
+       general$igraph                <- 56  # caution: should be consistent with existing vessels already built upon a given graph
+       do_plot                       <- TRUE
+     }
+  } else {
        general$application           <- args[1]
-       general$main.path.param.gis   <- args[2]
+       general$main_path_gis         <- args[2]
        general$main.path.ibm         <- args[3]
-      
-    }   
-
+       general$igraph                <- args[4]  # caution: should be consistent with existing vessels already built upon a given graph
+       do_plot                       <- FALSE
+  }
+   cat(paste("START \n"))
 
 
 
@@ -47,8 +50,9 @@
   
    a_size_group_bin_in_cm <- 5 # caution: hardcoding....
     mid                    <- a_size_group_bin_in_cm/2
+   cat(paste("caution: harcoded bin size \n"))
  
-   spp_table <-  read.table(file=file.path(general$main.path.param.gis, "POPULATIONS",
+   spp_table <-  read.table(file=file.path(general$main_path_gis, "POPULATIONS",
                                     paste("pop_names_",general$application,".txt",sep='')), header=TRUE)
    spp                        <- as.character(spp_table$spp)
 
@@ -57,7 +61,7 @@
 
   # reuse the exported metier names in GenerateVesselConfigFiles.R
     metier_names <-  read.table(
-       file=file.path(general$main.path.param.gis, "FISHERIES", "metier_names.dat"),
+       file=file.path(general$main_path_gis, "FISHERIES", "metier_names.dat"),
           header=TRUE)
 
 
@@ -68,7 +72,8 @@
           file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''),
            "met_target_names.dat"), ncolumns=2,
             sep= ' ', append=FALSE)
-
+   cat(paste("Write met_target_names.dat \n"))
+ 
   
   # by default, create a fake selectivity ogive i.e. all at 1 (and not species-specific...)
   for (met in unique(metier_names$idx) ) {
@@ -101,6 +106,7 @@
     }
     
   }
+   cat(paste("Write met_target_names.dat....done \n"))
   
   
   
@@ -125,14 +131,15 @@
              
            }
              
- 
+   cat(paste("Write metier_fspeed.dat....done \n"))
+  
       
    #########################################
    ## metierspe_mls_cat_semesterXX #########
    #########################################
     # pop parameters
-    pa <- read.csv(file=file.path(general$main.path.param.gis, "POPULATIONS",
-                  paste("DISPLACE_datainput_stock_parameters_Baltic_22-32.csv", sep='')), 
+    pa <- read.csv(file=file.path(general$main_path_gis, "POPULATIONS",
+                  paste("Stock_biological_traits.csv", sep='')), 
                     sep=',', header=TRUE)
     rownames(pa) <- pa$stock
 
@@ -166,6 +173,7 @@
      }
      
      
+   cat(paste("Write metierspe_mls_cat_semesterXX.dat....done \n"))
      
      
      
@@ -195,6 +203,7 @@
       
       }
       
+   cat(paste("Write percent_revenue_completenesses.dat....done \n"))
       
    #########################################
    ## metier_gear_widths_model_type ########
@@ -250,6 +259,9 @@
     
   }
   
+   cat(paste("Write metier_gear_widths_model_type.dat....done \n"))
+   cat(paste("Write metier_gear_widths_param_a.dat....done \n"))
+   cat(paste("Write metier_gear_widths_param_b.dat....done \n"))
    
    #########################################
    ## combined_met_types.dat ###############
@@ -283,6 +295,7 @@
            "combined_met_types.dat"), ncolumns=2,
              sep= ' ', append=TRUE)
          
+   cat(paste("Write combined_met_types.dat....done \n"))
     
     
   }
@@ -290,6 +303,7 @@
 
  
             
+ cat(paste(".......done \n"))
   
 
 

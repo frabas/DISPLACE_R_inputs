@@ -32,10 +32,14 @@
 
     a_size_group_bin_in_cm <- 5 # caution: hardcoding....
     mid                    <- a_size_group_bin_in_cm/2
- 
-   spp_table <-  read.table(file=file.path(general$main.path.param.gis, "POPULATIONS", paste("pop_names_",general$application,".txt",sep='')),
-              header=TRUE)
+   cat(paste("Caution: Hardcoding for size bins....\n"))
+
+   # (caution: give the order for naming stocks in integer from 0 to n-1)
+   spp_table <-  read.table(file=file.path(general$main_path_gis, "POPULATIONS", 
+                           paste("pop_names_", general$application,".txt",sep='')), header=TRUE)
    spp                        <- as.character(spp_table$spp)
+   cat(paste("Reading the stock names in", paste(general$main_path_gis, "POPULATIONS", 
+                           paste("pop_names_", general$application,".txt",sep='')),"....done \n"))
 
 
    dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep='')))
@@ -110,5 +114,10 @@
           file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''),
                  paste(met, "metier_selectivity_per_stock_ogives.dat",sep='')),
                    col.names=FALSE,  row.names=FALSE, sep= ' ', quote=FALSE)
+   cat( paste("Write in metiersspe: ", met, "metier_selectivity_per_stock_ogives.dat\n",sep=''))
 
   }
+
+
+cat(paste("....done\n"))
+
