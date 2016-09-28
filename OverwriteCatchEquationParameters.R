@@ -16,8 +16,7 @@
        general$main.path.ibm         <- args[3]
        general$igraph                <- args[4]  # caution: should be consistent with existing objects already built upon a given graph
        general$main_path_input       <- args[5]
-       general$main_path_input       <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_input")
-        do_plot                      <- FALSE
+       do_plot                      <- FALSE
   }
   
   
@@ -62,7 +61,7 @@
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
 
   ctry <- "DNK"
-  load(file=file.path(general$main_path_gis, "FISHERIES", "all_merged_weight_DEN_2015.RData"))
+  load(file=file.path(general$main_path_gis, "FISHERIES", "coupled_VMS_logbooks_DNK_2015.RData"))
   tacsatp_den            <- coupled_VMS_logbooks
   tacsatp_den            <- tacsatp_den[!is.na(as.numeric(as.character(tacsatp_den$SI_LONG))) &  !is.na(as.numeric(as.character(tacsatp_den$SI_LATI))), ]
   tacsatp_den$SI_LONG    <- as.numeric(as.character(tacsatp_den$SI_LONG))
@@ -74,7 +73,7 @@
 
 
   ctry <- "SWE"
-  load(file=file.path(general$inPath,"Displace2015_tacsat_swe_v2.RData"))
+  load(file=file.path(general$main_path_gis, "FISHERIES", "coupled_VMS_logbooks_SWE_2015.RData"))
   tacsatp_swe            <- coupled_VMS_logbooks
   tacsatp_swe$SI_LONG    <- as.numeric(as.character(tacsatp_swe$SI_LONG))
   tacsatp_swe$SI_LATI    <- as.numeric(as.character(tacsatp_swe$SI_LATI))
@@ -113,7 +112,7 @@
   # keep only the vessels fishnig in the western Baltic  (and kattegat because her.3a22, and East baltic because spr.2232)
   library(maptools)
   handmade            <- readShapePoly(file.path(general$main_path_gis, "MANAGEMENT", gis_area))  # build in ArcGIS 10.1
-  the_area            <- sapply(slot(handmade, "polygons"), function(x) lapply(slot(x, "Polygons"), function(x) x@coords)) # tricky there...
+  the_area            <- sapply(handmade@polygons, function(x) lapply(x@Polygons, function(x) x@coords)) # tricky there...
   in_area             <- point.in.polygon(tacsatp[,'SI_LONG'],tacsatp[,'SI_LATI'], the_area[[1]][,1],the_area[[1]][,2])
 
   # then subset here...
@@ -149,7 +148,7 @@
 
   # load the graph
   #load(file.path(general$main.path.igraph, paste(general$igraph, "_graphibm.RData",sep=''))) # built from the R code
-  coord <- read.table(file=file.path(general$inPathGraph, 
+  coord <- read.table(file=file.path(general$main_path_gis, "GRAPH", 
              paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
   coord <- as.matrix(as.vector(coord))
   coord <- matrix(coord, ncol=3)
@@ -159,7 +158,7 @@
 
   saved_coord <- coord
 
-  graph <- read.table(file=file.path(general$inPathGraph,
+  graph <- read.table(file=file.path(general$main_path_gis, "GRAPH",
            paste("graph", general$igraph, ".dat", sep=""))) # build from the c++ gui
   graph <- as.matrix(as.vector(graph))
   graph <- matrix(graph, ncol=3)
@@ -170,8 +169,9 @@
 
 
 
-
-  if(FALSE){
+   is_ping_fgrounds_exists <- file.exists(file.path(general$main.path.ibm, paste("vesselspe_", general$application, sep=''), "ping_fgrounds.RData"))
+  if(!is_ping_fgrounds_exists){
+    cat(paste("Finding neighbours....(be patient)\n"))
     #memory.limit(4000)
     library(spatstat)
     an <- function(x)  as.numeric(as.character(x))
@@ -194,10 +194,11 @@
     # add
     ping_fgrounds <- cbind(tacsatp_f, pt_graph= coord_f[N, 'pt_graph'])
     # export to save time
-    save(ping_fgrounds, file=file.path(general$outPath, "ping_fgrounds.RData"))
+    save(ping_fgrounds, file=file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep=''), "ping_fgrounds.RData"))
+    cat(paste("Save ping_fgrounds....done\n"))
   
   } else{
-       load(file=file.path(general$outPath, "ping_fgrounds.RData"))
+       load(file=file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep=''), "ping_fgrounds.RData"))
   }
 
    # check one pt
@@ -209,7 +210,7 @@
   
    # reuse the exported metier names in GenerateVesselConfigFiles.R
     metier_names <-  read.table(
-       file=file.path(general$inPath, "metier_names.dat"),
+       file=file.path(general$main_path_gis, "FISHERIES", "metier_names.dat"),
           header=TRUE)
     
    # debug metier names
@@ -231,6 +232,9 @@
    ping_fgrounds$quarter   <- quarters(as.Date(ping_fgrounds$SI_DATE))
    ping_fgrounds$semester  <- factor(ping_fgrounds$quarter) # init 
    levels(ping_fgrounds$semester) <- c("1", "1", "2", "2")
+   
+   cat(paste("Create ping_fgrounds object...done\n"))
+
  
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
@@ -243,13 +247,18 @@
 
 
   # load avai object 
-  load(file.path(general$inPathPop, "avai",
-        paste("lst_avai_igraph",general$igraph,"_",years,"_",method,"_",threshold,".RData",sep=""))) ##!!e.g.  2005-2010 !!##
+  load(file.path(general$main_path_gis, "POPULATIONS", "avai",
+        paste("lst_avai_igraph",general$igraph,"_", method,"_", threshold,".RData",sep=""))) ##!!e.g.  2005-2010 !!##
 
   # (caution: give the order for naming stocks in integer from 0 to n-1)
-  spp_table <-  read.table(file=file.path(general$inPathPop, paste("pop_names_",general$application ,".txt",sep='')),
-              header=TRUE)
+  spp_table <-  read.table(file=file.path(general$main_path_gis, "POPULATIONS", 
+                           paste("pop_names_", general$application,".txt",sep='')), header=TRUE)
   spp                        <- as.character(spp_table$spp)
+   cat(paste("Reading the stock names in", paste(general$main_path_gis, "POPULATIONS", 
+                           paste("pop_names_", general$application,".txt",sep='')),"....done \n"))
+ 
+  
+   cat(paste("Searching for the parameters of the catch equation...\n"))
 
   all.betas.vid      <- NULL  # VE_REF mean estimate
   all.gammas.met     <- NULL  # LE_MET_level6 mean estimate
@@ -262,7 +271,7 @@
                    file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
                        paste("the_selected_szgroups.dat",sep=' ')), append=FALSE,  ncol=2,
                           sep=" ")
-
+  
 
   for(rg in range_szgroup){
     assign(paste('all.deltas' ,rg, sep=''),  NULL)   # init
@@ -302,10 +311,15 @@
   
   
        selected_szgroups <-  range_szgroup #default
+       if(general$application=="balticRTI"){
        if(nm2 %in% "COD.2224") selected_szgroups <-   c(2,5,7,8,9)
        if(nm2 %in% "COD.2532") selected_szgroups <-   c(2,5,7,8,9)
        if(nm2 %in% "SPR.2232") selected_szgroups <-   c(0,1,2,3,4)
        if(nm2 %in% "HER.3a22") selected_szgroups <-   c(2,3,4,5,6)
+       } else{
+          stop("Need for adapting selected_szgroups to this application - Manual change in the script required...\n")
+
+       }
        avai[,paste(name.sp,'.nb_indiv.',range_szgroup, sep='')] <- avai[,paste(name.sp,'.nb_indiv.', selected_szgroups, sep='')] ## CAUTION HERE!
        if(nm3=="1") the_selected_szgroups <- rbind(the_selected_szgroups, cbind.data.frame(nm2, selected_szgroups))   # store for later use....
 
@@ -314,8 +328,9 @@
        write.table(cbind(nm2=nm2, selected_szgroups=selected_szgroups,
                    file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
                        paste("the_selected_szgroups.dat",sep=' ')), append=TRUE,
-                         quote = FALSE, sep=" ", col.names=FALSE, row.names=FALSE)
- 
+                         quote = FALSE, sep=" ", col.names=FALSE, row.names=FALSE))
+       cat(paste("Write the_selected_szgroups.dat...\n"))
+
      
 
        # map avai according to pt_graph
@@ -445,11 +460,12 @@
       
       xx$idx_spp         <- (which(nm2 %in% spp)  -1) 
       
+      cat(paste("Read metier_selectivity_per_stock_ogives.dat...\n"))
       xx <- lapply (split(xx, f=xx$idx_met),
                 function(x) {
                 # browser()
                             sel <- read.table(
-                                    file=file.path(general$main.path, "metiersspe",
+                                    file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''),
                                          paste(x$idx_met[1], "metier_selectivity_per_stock_ogives.dat",sep=''))
                                         )
                             sel_this_met_this_sp <- sel[x$idx_spp[1] +1,]
@@ -477,6 +493,7 @@
 
 
       # start with a poisson glm
+      cat(paste("Perform the GLM fit...\n"))
       glm1  <- glm(
                    as.formula(paste("(ceiling(cpue)) ~ VE_REF + LE_MET_level6 +",
                                paste('sel_and_avai_',range_szgroup, sep='', collapse="+"), "-1"  )),
@@ -496,6 +513,7 @@
       }  else{
       glm2 <- glm1   # but use the poisson one in case the glm.nb does not converge!
       }
+      cat(paste("GLM fit...done\n"))
 
        #http://www.unc.edu/courses/2006spring/ecol/145/001/docs/lectures/lecture27.htm
 
@@ -543,6 +561,7 @@
 
 
 
+   cat(paste("predict from the GLM fit...\n"))
 
    # get the decomposition
     pred <- predict(glm2,type="terms") # caution: in terms of cpue => not the betas
@@ -644,11 +663,11 @@
 
 
     # plot
-    graphics.off()
+    if(do_plot) graphics.off()
     for(met in levels(xx$LE_MET_level6)) {  # plot per metier
     print(met)
        xxx <- xx[xx$LE_MET_level6==met,]   # keep only the start of the curve
-       if(nrow(xxx)>0){
+       if(nrow(xxx)>0 && do_plot){
            plot(xxx$cpue, xxx$response1, ylim=c(0, max(xxx$cpue)), xlim=c(0, max(xxx$cpue)))
            coeffs1 <- coefficients(lm(xxx$response1~xxx$cpue))
            if(!is.na(coeffs1[1]) && !is.na(coeffs1[2]) ) abline(a=coeffs1[1], b=coeffs1[2])
@@ -664,7 +683,7 @@
     }
  #browser()
     # plot all
-   plot(xx$cpue, xx$response2, ylim=range(xx$cpue), xlim=range(xx$cpue))
+  if(do_plot) plot(xx$cpue, xx$response2, ylim=range(xx$cpue), xlim=range(xx$cpue))
           coeffs <- coefficients(lm(xx$response1~xx$cpue))
           if(!is.na(coeffs[1]) && !is.na(coeffs[2]) ) abline(a=coeffs[1], b=coeffs[2])
           abline(a=0, b=1, lty=2)
@@ -672,7 +691,7 @@
 
     #=> in case of a perfect model, the two lines should overlap...
     # save the plot
-    savePlot(filename=file.path(general$inPathPop, "CatchRates",
+  if(do_plot)  savePlot(filename=file.path(general$inPathPop, "CatchRates",
        paste("cpue_vs_response_from_glm_on_",nm2,"_semester", nm3,
          "_",years,"_",method, "_", threshold, "_",general$application,".jpeg",sep='')), type="jpeg")
 
@@ -681,6 +700,7 @@
     # i.e. catch= exp(beta1*vid + beta2*metier +beta3*szgroup2*1000 + beta4*szgroup3*1000 + beta5*szgroup4*1000)
     # neglecting the intercept (which should be 0 in the ideal case anyway)
     # Would be ideal to also draw the predictions in the c++ code using the confidence intervals around the estimates from mean+/-2*beta.se.
+    cat(paste("Re-arrange parameters...\n"))
     betas.vid            <- xx[!duplicated(data.frame(xx$VE_REF, xx$beta.VE_REF)), c("VE_REF", "beta.VE_REF")]
     betas.vid            <- cbind(betas.vid,  pop=nm2, semester=nm3 ) # add the pop name + semester
     all.betas.vid        <- rbind(all.betas.vid, betas.vid)
@@ -802,13 +822,15 @@
                 'all.betas.vid.se','all.gammas.met.se', paste('all.deltas.se', range_szgroup,sep='')),
               file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''), paste("betas", general$application,"_INTEGER_",
                                   general$application ,".RData", sep='')))
-
+    cat(paste("Save parameters...done\n"))
+   
 
     # the goodness of fit table
     write.table(res2,
                    file=file.path(general$inPathPop, "CatchRates",
                        paste("goodness_of_fit_table_", general$application,".csv",sep=' ')),
                          quote = FALSE, sep=" ", col.names=FALSE, row.names=FALSE)
+    cat(paste("Save GOF table...done\n"))
  
 
      # then, export PER SEMESTER:
@@ -823,6 +845,8 @@
                    file=file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep=''),
                        paste("vesselsspe_betas_semester",semester,".dat",sep='')),
                          quote = FALSE, sep=" ", col.names=TRUE, row.names=FALSE)
+      cat(paste("Write vesselsspe_betas_semester",semester,".dat...done\n"))
+  
       # s.e.
       all.betas.vid.se <-  replace(all.betas.vid.se, is.na(all.betas.vid.se), 0)
       all.betas.vid.se <-  all.betas.vid.se[order(all.betas.vid.se$VE_REF,all.betas.vid.se$semester, all.betas.vid.se$pop),] # order
@@ -830,6 +854,7 @@
                    file=file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep=''),
                        paste("vesselsspe_betas_se_semester",semester,".dat",sep='')),
                          quote = FALSE, sep=" ", col.names=TRUE, row.names=FALSE)
+      cat(paste("Write vesselsspe_betas_se_semester",semester,".dat...done\n"))
 
 
 
@@ -847,12 +872,15 @@
                     file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''),
                       paste("metierspe_betas_semester",semester,".dat",sep='')),
                          quote = FALSE, sep=" ", col.names=TRUE, row.names=FALSE)
+        cat(paste("Write metierspe_betas_semester",semester,".dat...done\n"))
+
       # s.e.
       all.gammas.met.se <- replace(all.gammas.met.se, is.na(all.gammas.met.se), 0)
         write.table(all.gammas.met.se[all.gammas.met.se$semester==semester, c('LE_MET_level6','gamma.se.LE_MET_level6')],
                     file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''),
                       paste("metierspe_betas_se_semester",semester,".dat",sep='')),
                          quote = FALSE, sep=" ", col.names=TRUE, row.names=FALSE)
+        cat(paste("Write metierspe_betas_se_semester",semester,".dat...done\n"))
 
 
       ## POP SPE----------
@@ -866,6 +894,8 @@
                     file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
                        paste("avai",rg,"_betas_semester",semester,".dat",sep='')),
                          quote = FALSE, sep=" ", col.names=TRUE, row.names=FALSE)
+        cat(paste("Write avai",rg,"_betas_semester",semester,".dat...done\n"))
+  
         # s.e.
         all.deltas.se <- get(paste('all.deltas.se',rg,sep=''))
         all.deltas.se <- replace(all.deltas.se, is.na(all.deltas.se), 0)
@@ -873,8 +903,11 @@
                     file=general$main.path.ibm, paste("popsspe_", general$application, sep=''),
                        paste("avai",rg,"_betas_se_semester",semester,".dat",sep='')),
                          quote = FALSE, sep=" ", col.names=TRUE, row.names=FALSE)
-       }
-      }
+       cat(paste("Write avai",rg,"_betas_se_semester",semester,".dat...done\n"))
+ 
+      
+       } # end rg
+      } # end semester
 
 
 

@@ -5,9 +5,6 @@
  
    # GENERAL SETTINGS
 
-  
-   # GENERAL SETTINGS
-
    args <- commandArgs(trailingOnly = TRUE)
 
    general <- list()
