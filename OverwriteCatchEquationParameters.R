@@ -1,4 +1,9 @@
 
+ 
+  # GENERAL SETTINGS
+
+   args <- commandArgs(trailingOnly = TRUE)
+
    general <- list()
 
    if (length(args) < 2) {
@@ -235,7 +240,6 @@
    
    cat(paste("Create ping_fgrounds object...done\n"))
 
- 
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
@@ -302,7 +306,6 @@
                           c("VE_REF","LE_MET_level6", "LE_EFF_VMS", "semester", "pt_graph", a_pop)
                         ]  # subset the pop
      
-
        # Instead of making the code very complicated and furthermore refactor the c++ side,
        # hereafter an easy and DANGEROUS shortcut (dangerous because confusing...) as a way for changing the szgroups used for the catch rate equation....
        # i.e. select the 5 most relevant ones for this species.
@@ -325,10 +328,10 @@
 
       
        # replace the selected groups in the catch rate equation                         
-       write.table(cbind(nm2=nm2, selected_szgroups=selected_szgroups,
+       write.table(cbind(nm2=nm2, selected_szgroups=selected_szgroups),
                    file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
                        paste("the_selected_szgroups.dat",sep=' ')), append=TRUE,
-                         quote = FALSE, sep=" ", col.names=FALSE, row.names=FALSE))
+                         quote = FALSE, sep=" ", col.names=FALSE, row.names=FALSE)
        cat(paste("Write the_selected_szgroups.dat...\n"))
 
      
@@ -350,10 +353,9 @@
        ## STRONG ASSUMPTION (just to test the effect of some cpue on pt_graph with 0 availability)
        #idx <- apply(xx[,c('nb_indiv.2', 'nb_indiv.3', 'nb_indiv.4')], 1, sum, na.rm=T)==0
        #xx[idx,a_pop] <- 0 # remove the catches!
-
        # EXPERT KNOWLEDGE: remove records if 0 landings
        idx  <- which(xx[,a_pop]<=0)
-       xx   <- xx[-idx, ] ## EXPERT KNOWLEDGE
+       if(length(idx)!=0) xx   <- xx[-idx, ] ## EXPERT KNOWLEDGE
 
 
        # compute cpue kg per hour
@@ -370,6 +372,7 @@
                  ##if(nm2=="SPR.2232") browser()
                   }
 
+ 
        if(nrow(xx)>5){
        # clean up
        xx <- xx[! (is.na(xx$cpue) | is.infinite(xx$cpue)),]
@@ -381,7 +384,7 @@
        # EXPERT KNOWLEDGE: a lot of variables for a very ugly outcome response cpue? filter out low cpue for these species...
        #if(name.sp %in% c("HER","SPR","NOP","MAC")) xx <- xx[xx$cpue>5,] # 5 kg a hour
         xx <- xx[xx$cpue>1,] # 1 kg a hour
-
+ 
        if(nrow(xx)>2){
        # get the vessel effect (beta), the metier effect (gamma) and the avai effect (delta) for this species
        # but first, decide on the metier of ref
@@ -427,7 +430,7 @@
 
       ## VISUALIZE THE SPATIAL AVAI
       if(FALSE){
-       coord           <- read.table(file=file.path(general$inPathGraph, paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
+       coord           <- read.table(file=file.path(general$main_path_gis, "GRAPH", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
        coord           <- as.matrix(as.vector(coord))
        coord           <- matrix(coord, ncol=3)
        colnames(coord) <- c('x', 'y', 'idx.port')
@@ -437,13 +440,14 @@
        a_col           <- "nb_indiv.5"   # for a given szgroup
        a_sum           <- sum(a_xx[,a_col])
        plot(xy[,1], xy[,2], pch=16, cex=sqrt((a_xx[,a_col])/a_sum)*30, xlim=c(1,15), ylim=c(52,60))
+       library(maps)
        map(add=TRUE)
        a_xx            <- xx[xx$LE_MET_level6=="PTM_SPF_16_31_0_0",] # color for a given metier to see the spatial coverage...
        xy              <- coord[a_xx$pt_graph, 1:2]
        points(xy[,1], xy[,2], pch=16, cex=sqrt((a_xx[,a_col])/a_sum)*30, col=2)
        # CAUTION: it is likely that the spatial avai is lacking of contrast
-         # 1- when the ad hoc inverse-distance used to interpolate is not optimal (taking the "maximum" seems actually perform better)
-         # 2- when a given vessel metier occur in a limited spatial coverage where the avai is likely to be almost equal!!
+         # 1- when the ad hoc inverse-distance used to interpolate is not optimal (taking the "maximum" seems actually to perform better)
+         # 2- when a given vessel metier occur in a limited spatial extent where the avai is likely to be almost equal!!
        # => as the point 2 is likely then main part of the effect on the catch rates is actually explained by the vessel-metier combination and not by the avai.....
        }
 
@@ -682,18 +686,20 @@
 
     }
  #browser()
-    # plot all
-  if(do_plot) plot(xx$cpue, xx$response2, ylim=range(xx$cpue), xlim=range(xx$cpue))
+     
+  if(do_plot) {
+          plot(xx$cpue, xx$response2, ylim=range(xx$cpue), xlim=range(xx$cpue))
           coeffs <- coefficients(lm(xx$response1~xx$cpue))
           if(!is.na(coeffs[1]) && !is.na(coeffs[2]) ) abline(a=coeffs[1], b=coeffs[2])
           abline(a=0, b=1, lty=2)
           title(nm2)
-
+          }
+          
     #=> in case of a perfect model, the two lines should overlap...
     # save the plot
-  if(do_plot)  savePlot(filename=file.path(general$inPathPop, "CatchRates",
+  if(do_plot)  savePlot(filename=file.path(general$main_gis_path, "POPULATIONS", "CatchRates",
        paste("cpue_vs_response_from_glm_on_",nm2,"_semester", nm3,
-         "_",years,"_",method, "_", threshold, "_",general$application,".jpeg",sep='')), type="jpeg")
+         "_",method, "_", threshold, "_",general$application,".jpeg",sep='')), type="jpeg")
 
 
     # The betas coeffs should then be used in the IBM catch equation
@@ -734,9 +740,9 @@
       assign (paste('all.deltas.se',rg,sep=''), all.deltas.se) # send back...
       }
 
-    } else{ cat("this stock has been filtered out...\n")}
-    } else{ cat("this stock has been filtered out...\n")}
-    } else{ cat("this stock is not found in the merged table...\n")}
+    } else{ cat(paste("this stock ",nm2," has been filtered out...\n"))  }
+    } else{  cat(paste("this stock ",nm2," has been filtered out...\n")) }
+    } else{  cat(paste("this stock ",nm2," has been filtered out...\n")) }
     }  # end semester
 
   } # end for loop spp
@@ -827,7 +833,7 @@
 
     # the goodness of fit table
     write.table(res2,
-                   file=file.path(general$inPathPop, "CatchRates",
+                   file=file.path(general$main_path_gis, "POPULATIONS", "CatchRates",
                        paste("goodness_of_fit_table_", general$application,".csv",sep=' ')),
                          quote = FALSE, sep=" ", col.names=FALSE, row.names=FALSE)
     cat(paste("Save GOF table...done\n"))
@@ -900,7 +906,7 @@
         all.deltas.se <- get(paste('all.deltas.se',rg,sep=''))
         all.deltas.se <- replace(all.deltas.se, is.na(all.deltas.se), 0)
            write.table(all.deltas.se[all.deltas.se$semester==semester, c('pop','delta.sel_and_avai_')],
-                    file=general$main.path.ibm, paste("popsspe_", general$application, sep=''),
+                    file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
                        paste("avai",rg,"_betas_se_semester",semester,".dat",sep='')),
                          quote = FALSE, sep=" ", col.names=TRUE, row.names=FALSE)
        cat(paste("Write avai",rg,"_betas_se_semester",semester,".dat...done\n"))
@@ -910,5 +916,6 @@
       } # end semester
 
 
+cat(paste("..........done\n"))
 
 
