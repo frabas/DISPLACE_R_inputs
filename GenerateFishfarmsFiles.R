@@ -24,24 +24,39 @@
 
   dir.create(file.path(general$main.path.ibm, paste("fishfarmsspe_", general$application, sep='')))
 
+  # load
+  coord <- read.table(file=file.path(general$main_path_gis, "GRAPH", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
+  dd    <- coord
+  coord <- as.matrix(as.vector(coord))
+  coord <- matrix(coord, ncol=3)
+  colnames(coord) <- c('x', 'y', 'harb')
+  if(do_plot) plot(coord[,1], coord[,2])
+
+  graph <- read.table(file=file.path(general$main_path_gis, "GRAPH", paste("graph", general$igraph, ".dat", sep=""))) # build from the c++ gui
+  graph <- as.matrix(as.vector(graph))
+  graph <- matrix(graph, ncol=3)
+  if(do_plot) segments(coord[graph[,1]+1,1], coord[graph[,1]+1,2], coord[graph[,2]+1,1], coord[graph[,2]+1,2], col=4) # CAUTION: +1, because c++ to R
   
-   # read
-   fishfarms_features   <-  read.table(file.path(general$main_path_gis,"FISHFARMS", "fishfarms_features.csv"), sep=";", header=TRUE)
+  cat(paste("Read graph...done\n"))
+
+
+
+  # read
+  fishfarms_features   <-  read.table(file.path(general$main_path_gis,"FISHFARMS", "fishfarms_features.csv"), sep=";", header=TRUE)
   cat(paste("Read fishfarms specs...done\n"))
 
-   # find the nearest graph node
-   cat(paste("Finding neighbours....\n"))
-   library(spatstat)
-   an <- function(x)  as.numeric(as.character(x))
-   coord_f            <- coord[coord[,'harb']==0,]  
-    X                 <- ppp(x=an(fishfarms_features$long), y=an(fishfarms_features$lat),
-                         xrange=range(an(fishfarms_features$long)), yrange=range(an(fishfarms_features$lat)))
-    Y                 <- ppp(x=coord_f[,"x"], y=coord_f[,"y"],
-                                xrange=range(coord_f[,"x"]), yrange=range(coord_f[,"y"]))
-    N                 <- nncross (X=X, Y=Y)$which # caution: just euclidean distance on coord
-    fishfarms_features <- cbind(fishfarms_features, pt_graph= N)
-
-  
+  # find the nearest graph node
+  cat(paste("Finding neighbours....\n"))
+  library(spatstat)
+  an <- function(x)  as.numeric(as.character(x))
+  coord_f            <- coord[coord[,'harb']==0,]  
+   X                 <- ppp(x=an(fishfarms_features$long), y=an(fishfarms_features$lat),
+                        xrange=range(an(fishfarms_features$long)), yrange=range(an(fishfarms_features$lat)))
+   Y                 <- ppp(x=coord_f[,"x"], y=coord_f[,"y"],
+                               xrange=range(coord_f[,"x"]), yrange=range(coord_f[,"y"]))
+   N                 <- nncross (X=X, Y=Y)$which # caution: just euclidean distance on coord
+   fishfarms_features <- cbind(fishfarms_features, pt_graph= N)
+    
   some_fishfarms_features           <- fishfarms_features[,c('pt_graph', 'size_km2')] 
   colnames(some_fishfarms_features) <- c('idx_node', 'size_km2')
   

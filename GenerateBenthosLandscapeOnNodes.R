@@ -1,3 +1,31 @@
+# GENERAL SETTINGS
+
+   args <- commandArgs(trailingOnly = TRUE)
+
+   general <- list()
+
+   if (length(args) < 2) {
+     if(.Platform$OS.type == "windows") {
+       general$application           <- "balticRTI" # ...or myfish
+       general$main_path_gis         <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+       general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_", general$application, sep=''))
+       general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
+       do_plot                       <- TRUE
+     }
+  } else {
+       general$application           <- args[1]
+       general$main_path_gis         <- args[2]
+       general$main.path.ibm         <- args[3]
+       general$igraph                <- args[4]  # caution: should be consistent with existing objects already built upon a given graph
+       do_plot                       <- FALSE
+  }
+  
+  
+  #if(general$application=="adriatic")   name_GIS_file <- "Benthos_GSA17"
+  #if(general$application=="balticRTI")  name_GIS_file <- "landscapes.tif"
+  if(general$application=="balticRTI")  name_GIS_file <- "habitat_landscapes" # this name used by the Objects Editor ui
+  
+   cat(paste("START \n"))
 
 ## INFORM THE BENTHOS SPATIALLY ON NODES 
 # should be useful to model the dynamic of the benthic communities
@@ -10,38 +38,26 @@
 # 2. attach benthos abundances
 # 3. attach a mortality function
 # 4. attach a recovery function
-
- a_case <- "balticRTI"
- 
-  # GENERAL SETTINGS
-  if(a_case=="balticRTI"){
-     general <- list()
-     general$application           <- "balticRTI" # ...or myfish
-     general$igraph                <- 56
-     general$main.path.param       <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_raw")
-     general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
-     general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_" , general$application, sep=""))
-      
-     general$case_study_countries  <- c("DEN", "SWE", "DEU")   
-     general$a.year                <- "2015"
-     }
      
+  
   dir.create(file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep='')))
   dir.create(file.path(general$main.path.ibm, "graphsspe"))
                                                     
   #load
-  coord <- read.table(file=file.path(general$main.path.param.gis, "GRAPH", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
+  coord <- read.table(file=file.path(general$main_path_gis, "GRAPH", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
+  dd    <- coord
   coord <- as.matrix(as.vector(coord))
   coord <- matrix(coord, ncol=3)
   colnames(coord) <- c('x', 'y', 'harb')
-  plot(coord[,1], coord[,2])
+  if(do_plot) plot(coord[,1], coord[,2])
 
-
- 
-  graph <- read.table(file=file.path(general$main.path.param.gis, "GRAPH", paste("graph", general$igraph, ".dat", sep=""))) # build from the c++ gui
+  graph <- read.table(file=file.path(general$main_path_gis, "GRAPH", paste("graph", general$igraph, ".dat", sep=""))) # build from the c++ gui
   graph <- as.matrix(as.vector(graph))
   graph <- matrix(graph, ncol=3)
-  segments(coord[graph[,1]+1,1], coord[graph[,1]+1,2], coord[graph[,2]+1,1], coord[graph[,2]+1,2], col=4) # CAUTION: +1, because c++ to R
+  if(do_plot) segments(coord[graph[,1]+1,1], coord[graph[,1]+1,2], coord[graph[,2]+1,1], coord[graph[,2]+1,2], col=4) # CAUTION: +1, because c++ to R
+  
+  cat(paste("Read graph...done\n"))
+
  
   ##---------------------------------------------------------------------------##
   ##---------------------------------------------------------------------------##
@@ -51,31 +67,77 @@
   ##---------------------------------------------------------------------------##
   ##---------------------------------------------------------------------------##
  
+  ## FROM A SHAPE FILE (OR A RASTER FILE)
+  
+  #------------------
+  # SHAPE-----------
+  #------------------
+   library(maptools)
+   anf                  <- function(x) as.numeric(as.character(x))
+
+   ## load shape.......
+   landscapes       <- readShapePoly(file.path(general$main_path_gis, "HABITATS", name_GIS_file),
+                                       proj4string=CRS("+proj=longlat +datum=WGS84")    )    # probably need an update of rgdal here....
+   cat(paste("Read GIS shape file (this one must include a CATEGORY field)...done\n"))
+
+   coord            <- cbind(x=anf(coord[,'x']), y=anf(coord[,'y']))
+  
+   # convert to UTM
+   library(sp)
+   library(rgdal)
+   spo <- SpatialPoints(cbind(as.numeric(as.character(coord[,'x'])), as.numeric(as.character(coord[,'y']))),
+                       proj4string=CRS("+proj=longlat +datum=WGS84"))
 
 
+  # use the magic 'over' function to see in which polygon it is located
+  idx                           <- over(spo, landscapes); #print(idx)
+  coord                         <- cbind.data.frame(as.data.frame(coord), landscapes_code=NA)
+  coord$landscapes_code         <- as.character(idx$CATEGORY)
+  cat(paste("overlay...done\n"))
+
+
+  
+   # assign 0 to the NA code
+   coord[is.na(coord$landscapes_code), 'landscapes_code'] <- 0
+  
+   # a visual check
+   if(do_plot) plot(coord[,1], coord[,2], col=coord[,3])
+
+ 
+ 
+  # EXPORT FOR C++------------
+  write(coord[, 'landscapes_code'], file=file.path(general$main.path,"graphsspe", paste("coord", general$igraph,"_with_landscape.dat", sep='')), ncol=1)
+  nrow(coord)
+  ncol(coord)
+  cat(paste("Write coordXX_with_landscape.dat in /graphsspe...done\n"))
+  #----------------------------
+
+
+
+
+  if(FALSE){ # RASTER layer currently not handled by the DISPLACE Objects Editor
   #------------------
   # RASTER-----------
   #------------------
    library(maptools)
    library(raster)
-   polPath              <- "C:/BENTHIS/BalanceMaps"
    anf                  <- function(x) as.numeric(as.character(x))
-   sh_coastlines        <- readShapePoly(file.path(polPath,"francois_EU"))
-
+  
    ## use point-raster overlay.......
    library(raster)
-   landscapes       <- raster(file.path(polPath, "landscapes.tif"))    # probably need an update of rgdal here....
+   landscapes       <- raster(file.path(general$main_path_gis, "HABITATS", name_GIS_file))    # probably need an update of rgdal here....
  
   
-   coord           <- cbind(x=anf(coord[,'x']), y=anf(coord[,'y']))
+   coord            <- cbind(x=anf(coord[,'x']), y=anf(coord[,'y']))
   
    # convert to UTM
    library(sp)
    library(rgdal)
    SP <- SpatialPoints(cbind(as.numeric(as.character(coord[,'x'])), as.numeric(as.character(coord[,'y']))),
                        proj4string=CRS("+proj=longlat +datum=WGS84"))
-   coord <- cbind.data.frame(coord,
-                 spTransform(SP, CRS(paste("+proj=utm +zone=34 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0", sep=''))))    # convert to UTM
+   a_utm_zone <- "34"
+   coord      <- cbind.data.frame(coord,
+                                  spTransform(SP, CRS(paste("+proj=utm +zone=",a_utm_zone," +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0", sep=''))))    # convert to UTM
 
 
    dd <- extract (landscapes, coord[,3:4]) # get the landscape on the coord points!
@@ -119,7 +181,7 @@
   nrow(coord)
   ncol(coord)
   #----------------------------
-
+  } # end if raster
                                                 
   
   ##---------------------------------------------------------------------------##
@@ -181,24 +243,24 @@
 ##----------------------------------------------------------------------------##
 ##----------------------------------------------------------------------------##
 
- ## FROM THE BALANCE map
-   landscape_per_node <- read.table(file=file.path(general$main.path.ibm, "graphsspe", 
+ ## FROM THE GRAPH file map
+ landscape_per_node <- read.table(file=file.path(general$main.path.ibm, "graphsspe", 
            paste("coord", general$igraph,"_with_landscape.dat", sep='')))
 
-   # translate the coding, just for info...
+   # translate the coding, CAUTION just a fake example here...
    bottom   <- substr(as.numeric(as.character(landscape_per_node[,1])), 1,1)
    photic   <- substr(as.numeric(as.character(landscape_per_node[,1])), 2,2)
    salinity <- substr(as.numeric(as.character(landscape_per_node[,1])), 3,3)
 
 
    bottom_levels <- factor(bottom)
-   levels(bottom_levels) <- c('NA', 'Bedrock', 'Hard Bottom', 'Sand', 'Hard Clay', 'Mud')
+   levels(bottom_levels) <- c('Deep', 'Not_deep')
 
    photic_levels <- factor(photic)
    levels(photic_levels) <- c('NA','Photic', 'Aphotic')
 
    salinity_levels <- factor(salinity)
-   levels(salinity_levels) <- c('NA', '0-5psu', '5-7.5psu', '7.5-11psu', '11-18psu', '18-30psu', '>30psu')
+   levels(salinity_levels) <- c('NA', '<30psu', '>30psu')
 
    landscape_per_node <- cbind.data.frame (landscape_per_node, landscape=paste(bottom_levels, photic_levels, salinity_levels, sep="_"))
 
@@ -234,7 +296,7 @@
  
  
  # reuse the exported metier names in GenerateVesselConfigFiles.R
-    metier_names <-  read.table(
+ metier_names <-  read.table(
        file=file.path(general$main.path.ibm,  paste("metiersspe_", general$application, sep=''), "metier_names.dat"),
           header=TRUE)
   
