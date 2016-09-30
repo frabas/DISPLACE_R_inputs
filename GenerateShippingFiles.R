@@ -25,6 +25,28 @@
   dir.create(file.path(general$main.path.ibm, paste("shipsspe_", general$application, sep='')))
 
 
+  # read
+   shipsspe_features   <-  read.table(file.path(general$main_path_gis,"SHIPPING", "shipsspe_features.csv"), sep=";", header=TRUE)
+   shipsspe_lanes_lat  <-  read.table(file.path(general$main_path_gis,"SHIPPING", "shipsspe_lanes_lat.csv"), sep=";", header=TRUE)
+   shipsspe_lanes_lon  <-  read.table(file.path(general$main_path_gis,"SHIPPING", "shipsspe_lanes_lon.csv"), sep=";" , header=TRUE)
+   cat(paste("Read shipping specs...done\n"))
+
+  # write
+  write.table(shipsspe_features,   
+            file=file.path(general$main.path.ibm, paste("shipsspe_", general$application, sep=''), 
+              paste("shipsspe_features.dat",sep='')),
+                  col.names=FALSE,  row.names=FALSE, sep= '|', quote=FALSE, append=FALSE)
+  write.table(shipsspe_lanes_lat,   
+            file=file.path(general$main.path.ibm, paste("shipsspe_", general$application, sep=''), 
+              paste("shipsspe_lanes_lat.dat",sep='')),
+                  col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
+  write.table(shipsspe_lanes_lon,   
+            file=file.path(general$main.path.ibm, paste("shipsspe_", general$application, sep=''), 
+              paste("shipsspe_lanes_lon.dat",sep='')),
+                  col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
+   cat(paste("Write shipping-related files...done\n"))
+
+
 
 
   cat(paste("..........done\n"))
