@@ -72,13 +72,13 @@
    grid_res_km   <- 3
    is_individual_vessel_quotas <- 0
    check_all_stocks <- 0
-   Go_Fishing_DTree <- ""
+   Go_Fishing_DTree <- "GoFishing_Example.dt.csv"
    Choose_Ground_DTree <- ""
    Start_Fishing_DTree <- ""
    Change_Ground_DTree <- ""
    Stop_Fishing_DTree  <- ""
    Change_Port_DTree   <- ""
-   Use_Dtrees          <- 0
+   Use_Dtrees          <- 1
    tariff_pop          <- ""
    freq_update_tariff_code <- ""
    arbitrary_breaks_for_tariff <- ""
@@ -348,6 +348,27 @@ file.copy(
           
 
 cat(paste("Transfer graph related files ...done \n"))
+
+
+
+dir.create(file.path(general$main.path.ibm, paste("dtrees")))
+
+write("#TreeVersion: 6", file.path(general$main.path.ibm, paste("dtrees"),"GoFishing_Example.dt.csv"))
+write("#TreeType: GoFishing", file.path(general$main.path.ibm, paste("dtrees"),"GoFishing_Example.dt.csv"), append=TRUE)
+write("# id,variable,posx,posy,nchld,children...,value", file.path(general$main.path.ibm, paste("dtrees"),"GoFishing_Example.dt.csv"), append=TRUE)
+write("0,todayIs,2564,2378,2,1,0,2,1,0", file.path(general$main.path.ibm, paste("dtrees"),"GoFishing_Example.dt.csv"), append=TRUE)
+write("1,probability,2465,2543,0,0.8", file.path(general$main.path.ibm, paste("dtrees"),"GoFishing_Example.dt.csv"), append=TRUE)
+write("2,probability,2633,2544,0,0", file.path(general$main.path.ibm, paste("dtrees"),"GoFishing_Example.dt.csv"), append=TRUE)
+ 
+cat(paste("Create an example GoFishing dtree ...done \n"))
+
+
+dir.create(file.path(general$main.path.ibm, paste("timeseries")))
+dir.create(file.path(general$main.path.ibm, paste("externalforcing_", general$application, sep='')))
+
+
+
+cat(paste("Create missing folders...done \n"))
 
 
 cat(paste(".......done \n"))
