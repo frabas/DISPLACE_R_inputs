@@ -28,7 +28,7 @@
 #-------------------------------------------------------------------------------
 
 # load
-catches_in_tons <- read.table(file.path(general$main_path_gis, "OTHERS", "othercatchespercountry.csv"), sep=",", header=TRUE)  # in tons
+catches_in_tons <- read.table(file.path(general$main_path_gis, "OTHERS", "othercatchespercountry.csv"), sep=";", header=TRUE)  # in tons
    cat(paste("Read the specs othercatchespercountry.csv\n"))
 
 popnames <- as.character(catches_in_tons$POP)

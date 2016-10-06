@@ -24,7 +24,6 @@ if (length(args) < 2) {
  }
 
 dir.create(file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep='')))
-dir.create(file.path(general$main.path.ibm, paste("popssspe_", general$application, sep='')))
 dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep='')))
 
 
@@ -140,13 +139,13 @@ getPolyAroundACoord <- function(dat, a_dist_m){
   #-------------------------------------------------------------------------------
   # GET ALL THE NODES IN THE RANGE OF THE VESSEL SPECIFIC HARBOURS
 
-  harbours <- read.table(file.path(general$main.path.param.gis, "GRAPH", name_file_ports), sep=";", row.names=NULL)
+  harbours <- read.table(file.path(general$main.path.param.gis, "GRAPH", name_file_ports), sep=";", row.names=NULL, header=TRUE)
   harbours <- harbours[harbours[,1] %in% visited_ports,]
   harbours <- cbind.data.frame(harbours, ID=1:nrow(harbours))
   # convert to UTM
   library(sp)
   library(rgdal)
-  SP       <- SpatialPoints(cbind(as.numeric(as.character(harbours[,'x'])), as.numeric(as.character(harbours[,'y']))),
+  SP       <- SpatialPoints(cbind(as.numeric(as.character(harbours[,'lon'])), as.numeric(as.character(harbours[,'lat']))),
                        proj4string=CRS("+proj=longlat +ellps=WGS84"))
   UTMzone  <- 32
   harbours <- cbind.data.frame(harbours,
@@ -338,6 +337,8 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
 
     fgrounds <- rbind.data.frame(fgrounds, fgrounds_this_quarter)
  }
+  cat(paste("fgrounds_this_quarter....OK", "\n"))
+  
 
  # duplicate per vessel id  (i.e. assuming the same parameterisation for all the vesselids)
  fgrounds  <- fgrounds[fgrounds$freq_feffort!=0,] # remove if 0
@@ -350,6 +351,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
  # duplicate per metier id (i.e. assuming the same relative effort distribution per polygon for all the metierids)
  fgrounds_allvessels_allmet <- NULL
  for(met in metierids){
+  cat(paste(met, "\n"))
   fgrounds_allvessels_allmet <- rbind.data.frame(fgrounds_allvessels_allmet, cbind(fgrounds_allvessels, met))
  }
 
@@ -383,6 +385,8 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
                col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, sep= ' ', quote=FALSE, append=do_append)
     #-----------
 
+   cat(paste("vesselsspe_fgrounds_quarter",gsub("Q","",a.quarter),".dat....OK", "\n"))
+   cat(paste("vesselsspe_freq_fgrounds_quarter",gsub("Q","",a.quarter),".dat....OK", "\n"))
 
 
 
@@ -391,8 +395,8 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
     # vesselsspe_harbours_quarter[xx].dat
     # vesselsspe_freq_harbours_quarter[xx].dat
      ## get back the port name
-    port_names <- read.table(file.path(general$main.path.param.gis, "GRAPH", name_file_ports), sep=";", row.names=NULL)
-    port_names$pt_graph   <- saved_coord[match(port_names$idx.port, saved_coord[,"harb"]), "pt_graph"]
+    port_names <- read.table(file.path(general$main.path.param.gis, "GRAPH", name_file_ports), sep=";", row.names=NULL, header=TRUE)
+    port_names$pt_graph   <- saved_coord[match(port_names$idx_port, saved_coord[,"harb"]), "pt_graph"]
     rownames(port_names)  <- port_names[,1]
     
     visited               <- expand.grid( port_names[visited_ports, "pt_graph"], vesselids) # retrieve the corresponding pt_graph
@@ -421,6 +425,8 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
         if(nrow(dd)!=0) {print ("NAs in visited_freq"); browser()}
    #----------
 
+    cat(paste("vesselsspe_harbours_quarter",gsub("Q","",a.quarter),".dat....OK", "\n"))
+    cat(paste("vesselsspe_freq_harbours_quarter",gsub("Q","",a.quarter),".dat....OK", "\n"))
 
 
    #-----------
@@ -461,6 +467,8 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
       dd <- vesselsspe_freq_possible_metiers_quarter [is.na(vesselsspe_freq_possible_metiers_quarter[,c('freq')]) , ]
         if(nrow(dd)!=0){print ("NAs in vesselsspe_freq_possible_metiers_quarter"); browser()}
 
+       cat(paste(vid,"_possible_metiers_quarter",gsub("Q","",a.quarter),".dat....OK", "\n"))
+       cat(paste(vid,"_freq_possible_metiers_quarter",gsub("Q","",a.quarter),".dat....OK", "\n"))
      } # end vid
      #----------
 
@@ -486,6 +494,9 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
            file=file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep=''),
              paste(vid,"_gshape_cpue_per_stk_on_nodes_quarter",gsub("Q","",a.quarter),".dat",sep='')),
                col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
+    
+       cat(paste(vid,"_gshape_cpue_per_stk_on_nodes_quarter",gsub("Q","",a.quarter),".dat....OK", "\n"))
+ 
     }
    # DNK000XXX_gscale_cpue_per_stk_on_nodes_quarter  # plan A
     #-----------
@@ -506,6 +517,8 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
            file=file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep=''),
              paste(vid,"_gscale_cpue_per_stk_on_nodes_quarter",gsub("Q","",a.quarter),".dat",sep='')),
                col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
+ 
+       cat(paste(vid,"_gscale_cpue_per_stk_on_nodes_quarter",gsub("Q","",a.quarter),".dat....OK", "\n"))
     }
     #-----------
 
@@ -531,6 +544,9 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
            file=file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep=''),
              paste(vid,"_cpue_per_stk_on_nodes_quarter",gsub("Q","",a.quarter),".dat",sep='')),
                col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
+    
+       cat(paste(vid,"_cpue_per_stk_on_nodes_quarter",gsub("Q","",a.quarter),".dat....OK", "\n"))
+    
     }
    #-----------
 
@@ -545,6 +561,8 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
            file=file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep=''),
              paste("vesselsspe_features_quarter",gsub("Q","",a.quarter),".dat",sep='')),
                col.names=FALSE,  row.names=FALSE, quote=FALSE, append=do_append, sep = "|")
+  
+       cat(paste("vesselsspe_features_quarter",gsub("Q","",a.quarter),".dat....OK", "\n"))
    #-----------
 
 
@@ -587,6 +605,9 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
            file=file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep=''),
              paste("vesselsspe_percent_tacs_per_pop_semester",a.semester,".dat",sep='')),
                col.names=TRUE,  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")
+   
+         cat(paste("vesselsspe_percent_tacs_per_pop_semester",a.semester,".dat....OK", "\n"))
+ 
    #-----------
 
 
@@ -604,7 +625,8 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
              paste("vesselsspe_betas_semester", a.semester,".dat",sep='')),
                col.names=ifelse(do_append, FALSE, TRUE),  row.names=FALSE, quote=FALSE, append=do_append, sep = " ")
   
-
+         cat(paste("vesselsspe_betas_semester",a.semester,".dat....OK", "\n"))
+ 
 
 
  }
@@ -621,6 +643,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
              paste("fuel_price_per_vessel_size.dat",sep='')),
                col.names=TRUE,  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")
 
+       cat(paste("fuel_price_per_vessel_size.dat....OK", "\n"))
  }
 
 
@@ -653,6 +676,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
              paste("initial_fishing_credits_per_vid.dat",sep='')),
                col.names=TRUE,  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")
 
+       cat(paste("initial_fishing_credits_per_vid.dat....OK", "\n"))
 
  cat(paste("............done for", namefile, "\n"))
 
@@ -664,11 +688,13 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
  ## LASTLY,
    # fix the files to avoid vessel fishing in harbour (!)
    # but do not remove a vessel by inadvertance....
+   
+ 
  for (a.quarter in c("Q1","Q2","Q3","Q4")){
 
-    port_names             <- read.table(file.path(general$main.path.param.gis, "GRAPH", name_file_ports), sep=";", row.names=NULL)
+    port_names             <- read.table(file.path(general$main.path.param.gis, "GRAPH", name_file_ports), sep=";", row.names=NULL, header=TRUE)
     rownames(port_names)   <- port_names[,1]   
-    port_names$pt_graph    <- saved_coord[match(port_names$idx.port, saved_coord[,"harb"]), "pt_graph"]
+    port_names$pt_graph    <- saved_coord[match(port_names$idx_port, saved_coord[,"harb"]), "pt_graph"]
     port_names$pt_graph    <- as.numeric(as.character(port_names$pt_graph)) - 1 ##!!! FOR C++ !!!##
 
     # 1

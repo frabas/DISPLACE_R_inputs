@@ -488,6 +488,7 @@ if(do_plot){
  for (sp in as.character(spp)){ # per species
    for (S in 1:2){              # per semester
       if(sp %in% unique(bits.cpue$Species)){
+       cat(paste("This will take some time to look at sp ", sp, "...\n"))
        assign(paste("bits.coord.",sp,".",S,sep=''),
             get_cpue_on_graph_nodes (obj=bits.cpue, coord=coord, sp=sp, S=S, survey="bits", general=general),  envir =.GlobalEnv )}                 
        assign(paste("coord.",sp,".",S,sep=''), get(paste("bits.coord.",sp,".",S,sep='')),  envir =.GlobalEnv  )          

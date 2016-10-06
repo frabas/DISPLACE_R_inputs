@@ -240,6 +240,12 @@
    
    cat(paste("Create ping_fgrounds object...done\n"))
 
+
+   # restrict the data to the set of metiers under study
+    metier_names  <- read.table( file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''), "metier_names.dat"), header=TRUE)
+    ping_fgrounds <- ping_fgrounds[ping_fgrounds$LE_MET_level6 %in% as.character(metier_names$name),]
+    ping_fgrounds$LE_MET_level6 <- factor(ping_fgrounds$LE_MET_level6)
+
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##

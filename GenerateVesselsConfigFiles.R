@@ -29,6 +29,7 @@
   
    dir.create(path=file.path(general$main_path_gis, "FISHERIES", "vessels_config_files"))
    dir.create(path=file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep='')))
+   dir.create(path=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep='')))
    
    
    cat(paste("Config files will be stored in /FISHERIES/vessels_config_files folder\n"))
@@ -67,7 +68,7 @@
     metier_names,
      file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''), "metier_names.dat"),
      quote=FALSE, row.names=FALSE, col.names=TRUE)
-   cat(paste("Read metier names for the specs and write metier names in metiersspe_ folder \n"))
+   cat(paste("Read metier names from the Vessels specs and write metier names in metiersspe_ folder \n"))
    
 
    
@@ -139,7 +140,7 @@
   
      #  dd <- read.table ("C:\\Users\\fbas\\Documents\\GitHub\\DISPLACE_input_adriatic\\harboursspe_adriatic\\names_harbours.dat", header=T)
     # unique(as.character(vessel_specifications$Harbor))[! unique(as.character(vessel_specifications$Harbor)) %in% dd$name]
-   if(!all(visited_ports %in% rownames(port_names))){  
+   if(!all(visited_ports %in% port_names[,1])){  
       stop("Inconsistencies in port names!")
      }
     name_file_ports            <- "harbours.dat" 

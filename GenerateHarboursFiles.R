@@ -27,11 +27,11 @@
   ### build quick and dirty fake harbour files
 
   port_names <- read.table(file=file.path(general$main_path_gis,  "GRAPH",
-                                  paste("harbours.dat", sep='')), sep=";")
+                                  paste("harbours.dat", sep='')), sep=";", row.names=NULL, header=TRUE)
   cat(paste("Read port names...done\n"))
  
   # a quick check of consistent port_names file
-  max_idx <- max(port_names$idx.port)
+  max_idx <- max(port_names$idx_port)
   c(1:max_idx)[ ! c(1:max_idx) %in% port_names$idx.port ]  # should return integer(0)
 
 

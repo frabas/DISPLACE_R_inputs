@@ -18,7 +18,6 @@
        general$main.path.ibm         <- args[3]
        general$igraph                <- args[4]  # caution: should be consistent with existing vessels already built upon a given graph
        general$main_path_R_inputs    <- args[5]
-       general$main_path_R_inputs     <- file.path("C:", "Users", "fbas", "Documents", "GitHub", "DISPLACE_R_inputs")
        do_plot                       <- FALSE
       
 
@@ -44,6 +43,7 @@
 
 
   
+  dir.create(file.path( general$main.path.ibm))
   dir.create(file.path( general$main.path.ibm, paste("pop_names_",general$application ,".txt",sep='')))
   
   

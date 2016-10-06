@@ -24,7 +24,8 @@
   cat(paste("START \n"))
 
   
-   dir.create(file.path(general$main.path.ibm, paste("popsspe_", general$application, sep='')))
+  dir.create(file.path(general$main.path.ibm))
+  dir.create(file.path(general$main.path.ibm, paste("popsspe_", general$application, sep='')))
 
 
  

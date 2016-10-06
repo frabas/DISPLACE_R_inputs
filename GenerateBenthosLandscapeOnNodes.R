@@ -300,22 +300,22 @@
        file=file.path(general$main.path.ibm,  paste("metiersspe_", general$application, sep=''), "metier_names.dat"),
           header=TRUE)
   
- max_met <-  max(as.numeric(metier_names[,2]))
+ max_met <-  max(as.numeric(metier_names[,1]))
 
- if(!file.exists(file.path(general$main_path_gis, "prop_loss_on_habitat_after_one_passage_per_metier_per_sz.csv"))){
- for(met in 0: max_met){
-   loss_after_one_passage_this_metier <- cbind.data.frame(
+ if(!file.exists(file.path(general$main_path_gis, "HABITATS", "prop_loss_on_habitat_after_one_passage_per_metier_per_sz.csv"))){
+   for(met in 0: max_met){
+     loss_after_one_passage_this_metier <- cbind.data.frame(
                                                  landscape=rep(codes, each=2),
                                                  loss_after_one_passage=0.20  # 20% (fake)
                                                  ) 
-   write.table(loss_after_one_passage_this_metier, file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''),
+     write.table(loss_after_one_passage_this_metier, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
                         paste(met,"loss_after_one_passage_per_landscape_per_func_group.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
- }
+     }
  } else{
    loss <- read.table(file.path(general$main_path_gis, "HABITATS", "prop_loss_on_habitat_after_one_passage_per_metier_per_sz.csv"), header=TRUE, sep=";")
    for(met in 0: max_met){
         loss_after_one_passage_this_metier <- loss[loss$metier==met, c('landscape', 'loss_after_one_passage')]
-        write.table(loss_after_one_passage_this_metier, file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''),
+        write.table(loss_after_one_passage_this_metier, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
                         paste(met,"loss_after_one_passage_per_landscape_per_func_group.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
    
    }
@@ -331,7 +331,7 @@
 
 
 
-   if(!file.exists(file.path(general$main_path_gis, "prop_loss_on_habitat_after_one_passage_per_metier_per_sz.csv"))){
+   if(!file.exists(file.path(general$main_path_gis, "HABITATS", "prop_loss_on_habitat_after_one_passage_per_metier_per_sz.csv"))){
        estimates_biomass_per_cell_per_funcgr_per_landscape <- cbind.data.frame(landscape=rep(codes, each=2), biomass_per_cell=10000)  # ??
        write.table(estimates_biomass_per_cell_per_funcgr_per_landscape, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
                         paste("estimates_biomass_per_cell_per_funcgr_per_landscape.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
@@ -341,4 +341,11 @@
                         paste("estimates_biomass_per_cell_per_funcgr_per_landscape.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
   
   }
+
+
+
+
+cat(paste(".....stored in", general$main.path.ibm, "/benthossspe \n"))
+
+cat(paste(".....done\n"))
 
