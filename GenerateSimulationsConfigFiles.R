@@ -25,7 +25,8 @@
  
  
    if( general$application == "balticRTI") {
-     general$implicit_stocks       <- c(0, 2, 3, 7, 8, 9, 10, 11, 12) # implicit level1 = we don´t know the absolute abundance 
+     #general$implicit_stocks       <- c(0, 2, 3, 7, 8, 9, 10, 11, 12) # implicit level1 = we don´t know the absolute abundance 
+     general$implicit_stocks       <- c("") # implicit level1 = we don´t know the absolute abundance 
      general$implicit_stocks_level2<- c("") # implicit level2 = we don´t know the absolute abundance but we use the relative abudance to draw some catch rates 
    } else{
       stop("adapt the script to this app")
@@ -327,6 +328,22 @@ file.copy(
 file.copy(
           from=file.path(general$main_path_gis, "GRAPH", paste("code_area_for_graph",general$igraph,"_points.dat", sep='') ),
           to=file.path(general$main.path.ibm, paste("graphsspe", sep=''),  paste("code_area_for_graph",general$igraph,"_points.dat", sep='') )
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("nodes_in_polygons_a_graph",general$igraph,"_quarter1.dat", sep='') ),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''),  paste("nodes_in_polygons_a_graph",general$igraph,"_quarter1.dat", sep='') )
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("nodes_in_polygons_a_graph",general$igraph,"_quarter2.dat", sep='') ),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''),  paste("nodes_in_polygons_a_graph",general$igraph,"_quarter2.dat", sep='') )
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("nodes_in_polygons_a_graph",general$igraph,"_quarter3.dat", sep='') ),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''),  paste("nodes_in_polygons_a_graph",general$igraph,"_quarter3.dat", sep='') )
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("nodes_in_polygons_a_graph",general$igraph,"_quarter4.dat", sep='') ),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''),  paste("nodes_in_polygons_a_graph",general$igraph,"_quarter4.dat", sep='') )
           )
           
 

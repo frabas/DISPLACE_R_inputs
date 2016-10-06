@@ -65,9 +65,9 @@
   # export metier names
    metier_names <-  cbind.data.frame(idx=0: (length(levels(vessel_specifications$LE_MET))-1),  name=levels(vessel_specifications$LE_MET))
    write.table(
-    metier_names,
-     file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''), "metier_names.dat"),
-     quote=FALSE, row.names=FALSE, col.names=TRUE)
+     metier_names,
+       file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''), "metier_names.dat"),
+       quote=FALSE, row.names=FALSE, col.names=TRUE)
    cat(paste("Read metier names from the Vessels specs and write metier names in metiersspe_ folder \n"))
    
 

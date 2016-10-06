@@ -60,9 +60,7 @@
 
 
   # reuse the exported metier names in GenerateVesselConfigFiles.R
-    metier_names <-  read.table(
-       file=file.path(general$main_path_gis, "FISHERIES", "metier_names.dat"),
-          header=TRUE)
+    metier_names  <- read.table( file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''), "metier_names.dat"), header=TRUE)
 
 
    #########################################
