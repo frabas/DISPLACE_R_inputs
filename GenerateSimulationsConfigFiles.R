@@ -298,5 +298,40 @@ write.table(idx[-1], file=file.path(general$main.path.ibm, paste("simusspe_", ge
 
 cat(paste("Write time steps related files ...done \n"))
    
+
+# the graph-related files are needed....
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("coord",general$igraph,".dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("coord",general$igraph,".dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("graph",general$igraph,".dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("graph",general$igraph,".dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_quarter1.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter1.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_quarter2.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter2.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_quarter3.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter3.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("code_area_for_graph",general$igraph,"_points.dat", sep='') ),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''),  paste("code_area_for_graph",general$igraph,"_points.dat", sep='') )
+          )
+          
+
+cat(paste("Transfer graph related files ...done \n"))
+
+
 cat(paste(".......done \n"))
    
