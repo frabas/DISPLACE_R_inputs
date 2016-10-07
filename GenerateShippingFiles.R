@@ -26,11 +26,13 @@
 
 
   # read
-   shipsspe_features   <-  read.table(file.path(general$main_path_gis,"SHIPPING", "shipsspe_features.csv"), sep=";", header=TRUE)
-   shipsspe_lanes_lat  <-  read.table(file.path(general$main_path_gis,"SHIPPING", "shipsspe_lanes_lat.csv"), sep=";", header=TRUE)
-   shipsspe_lanes_lon  <-  read.table(file.path(general$main_path_gis,"SHIPPING", "shipsspe_lanes_lon.csv"), sep=";" , header=TRUE)
+   shipsspe_features        <-  read.table(file.path(general$main_path_gis,"SHIPPING", "shipsspe_features.csv"), sep=";", header=TRUE)
+   shipsspe_lanes_longlat   <-  read.table(file.path(general$main_path_gis,"SHIPPING", "shipsspe_lanes_longlat.csv"), sep=";", header=TRUE)
    cat(paste("Read shipping specs...done\n"))
 
+   shipsspe_lanes_lat <-  shipsspe_lanes_longlat[, c('ship_lane_number', 'lat_dec')]
+   shipsspe_lanes_lon <-  shipsspe_lanes_longlat[, c('ship_lane_number', 'lon_dec')]
+   
   # write
   write.table(shipsspe_features,   
             file=file.path(general$main.path.ibm, paste("shipsspe_", general$application, sep=''), 
