@@ -112,7 +112,7 @@ ssbr <- function (alpha, beta, ssb) {
 if(general$application=="balticRTI"){
   multiplier_for_biolsce_all_pops  <- expand.grid(biolsce_maturity=1, biolsce_M=c(1), biolsce_weight=c(1), biolsce_init_pops=1, biolsce_init_pops=1, 
                                          biolsce_fecundity=1, biolsce_Linfs=c(1, 0.9), biolsce_Ks=c(1), biolsce_recru=c(1), biolsce_mig=c(0), 
-                                          pop=c('PLE.2432'))   # see SS3 model settings in ICES WKBALTCOD 2015
+                                          pop=c('COD.2532'))   # see SS3 model settings in ICES WKBALTCOD 2015
 
 
   multiplier_for_biolsce_all_pops <- cbind(sce=1: (nrow(multiplier_for_biolsce_all_pops)/length(unique(multiplier_for_biolsce_all_pops$pop))), multiplier_for_biolsce_all_pops)

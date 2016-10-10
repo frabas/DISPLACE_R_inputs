@@ -176,7 +176,7 @@
                                    vessel_specifications[i, "WorkHoursEnd"]
                                    ) 
    step_in_share              <- rep(vessel_specifications[i, "N..of.vessels"]/ sum(vessel_specifications[, "N..of.vessels"], na.rm=TRUE), nb_stocks) # i.e. 100 % of each TAC per stock will be booked for these new vessels
-   vesselsspe_betas           <- log(fixed_cpue_per_stock*nb_agent_per_vessels +0.01 )  # catch rate log(kg per hour) from the Marche region # stock name 0:Hake, 1:Sole, 2: Mullet, 3: Mantis  CAUTION: log(0)=-Inf !
+   vesselsspe_betas           <- log(fixed_cpue_per_stock*nb_agent_per_vessels +0.01 )  # catch rate log(kg per hour)  CAUTION: log(0)=-Inf !
    create_file_for_fuel_price_per_vessel_size <- TRUE
    some_fuel_price_per_vessel_size            <- c(0.4,0.4,0.4,0.4,0.4)  # euro per litre
    step_in_share_credits                      <- vessel_specifications[i, "N..of.vessels"]/ sum(vessel_specifications[, "N..of.vessels"]) # i.e. % of the credits will be booked for these new vessels

@@ -26,7 +26,7 @@
  
    if( general$application == "balticRTI") {
      #general$implicit_stocks       <- c(0, 2, 3, 7, 8, 9, 10, 11, 12) # implicit level1 = we don´t know the absolute abundance 
-     general$implicit_stocks       <- c("") # implicit level1 = we don´t know the absolute abundance 
+     general$implicit_stocks       <- c("") # implicit level1 = we don´t know the absolute abundance e.g. pop0 COD.2532
      general$implicit_stocks_level2<- c("") # implicit level2 = we don´t know the absolute abundance but we use the relative abudance to draw some catch rates 
    } else{
       stop("adapt the script to this app")
