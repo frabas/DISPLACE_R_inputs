@@ -746,7 +746,10 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
       # mean estimates
       nb_met         <- (nrow(metier_names))
       nb_stk         <- length(spp)
-      metiersspe_gamma_semester <- cbind.data.frame( rep(0:(nb_met-1), each=nb_stk), rep(-20, length= nb_met*nb_stk)    )
+      # Note that we assume exp(vesseleffect+metiereffect+stockdensityeffect*sel) in the catch equation 
+      # so you will have to put -20 if this actually metier not catching this stock at all....for now we put 0
+      metiereffect <- 0
+      metiersspe_gamma_semester <- cbind.data.frame( rep(0:(nb_met-1), each=nb_stk), rep(metiereffect, length= nb_met*nb_stk)    )
       colnames(metiersspe_gamma_semester) <- c('LE_MET_level6', 'gamma.LE_MET_level6')
 
       # save .dat files
