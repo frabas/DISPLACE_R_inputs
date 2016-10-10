@@ -2,7 +2,7 @@
    # GENERAL SETTINGS
    general <- list()
    if(.Platform$OS.type == "windows") {
-     general$application           <- "balticRTI" # ...or myfish etc.
+     general$application           <- "testexample" # ...or myfish etc.
      general$main.path.param       <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
      general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
    }

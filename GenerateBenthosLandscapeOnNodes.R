@@ -6,7 +6,7 @@
 
    if (length(args) < 2) {
      if(.Platform$OS.type == "windows") {
-       general$application           <- "balticRTI" # ...or myfish
+       general$application           <- "testexample" # ...or myfish
        general$main_path_gis         <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
        general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_", general$application, sep=''))
        general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
@@ -22,8 +22,8 @@
   
   
   #if(general$application=="adriatic")   name_GIS_file <- "Benthos_GSA17"
-  #if(general$application=="balticRTI")  name_GIS_file <- "landscapes.tif"
-  if(general$application=="balticRTI")  name_GIS_file <- "habitat_landscapes" # this name used by the Objects Editor ui
+  #if(general$application=="testexample")  name_GIS_file <- "landscapes.tif"
+  if(general$application=="testexample")  name_GIS_file <- "habitat_landscapes" # this name used by the Objects Editor ui
   
    cat(paste("START \n"))
 

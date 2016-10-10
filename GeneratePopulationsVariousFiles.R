@@ -6,7 +6,7 @@
 
    if (length(args) < 2) {
      if(.Platform$OS.type == "windows") {
-       general$application           <- "balticRTI" # ...or myfish
+       general$application           <- "testexample" # ...or myfish
        general$main_path_gis         <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
        general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_", general$application, sep=''))
        general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
@@ -44,7 +44,7 @@
  
     for (a.semester in c(1,2)){
  
-      if(general$application=="balticRTI"){
+      if(general$application=="testexample"){
         relative_stability_this_sp <- cbind(ctry=c('DEN', 'DEU', 'SWE'), percent=c(33, 33, 33)) # not used if no individual quotas... 
         } else{
         stop('Relative stability key needs to be defined for your own app')

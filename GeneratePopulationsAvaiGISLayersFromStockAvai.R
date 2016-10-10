@@ -5,7 +5,7 @@
 
    if (length(args) < 2) {
      if(.Platform$OS.type == "windows") {
-       general$application           <- "balticRTI" # ...or myfish
+       general$application           <- "testexample" # ...or myfish
        general$main_path_gis         <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
        general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
        general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
@@ -25,9 +25,9 @@
   cat(paste("START \n"))
 
 
-  if(general$application=="balticRTI"){
+  if(general$application=="testexample"){
   
-      general$casestudy           <- "balticRTI"             
+      general$casestudy           <- "testexample"             
       species.to.keep             <- c("COD", "PLE", "WHG", "TUR", "FLE", "DAB", "SOL", "SPR", "HER")
       general$method              <- "maximum" # for the canadian paper
       general$threshold           <- 50
@@ -174,7 +174,7 @@
   ## CALLS
   # per body size (assuming implicit ONTOGENIC migration)
   names(lst.avai)  
-  if(general$application=="balticRTI"){
+  if(general$application=="testexample"){
   size_cats <- list()
   size_cats[["COD.2532"]] [["small"]]  <- c("0", "1", "2", "3","4","5")
   size_cats[["COD.2532"]] [["medium"]] <- c("6","7","8")

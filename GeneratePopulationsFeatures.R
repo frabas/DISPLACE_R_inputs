@@ -7,7 +7,7 @@
 
    if (length(args) < 2) {
      if(.Platform$OS.type == "windows") {
-       general$application           <- "balticRTI" # ...or myfish
+       general$application           <- "testexample" # ...or myfish
        general$main_path_gis         <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
        general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
        general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
@@ -29,7 +29,7 @@
 
 
  
- if(general$application=="balticRTI"){
+ if(general$application=="testexample"){
     a.year        <- 2015
     quarter_growth <- TRUE ; semester_growth <- FALSE
     a_size_group_bin_in_cm <- 5
@@ -109,7 +109,7 @@ ssbr <- function (alpha, beta, ssb) {
 
 
 # build a matrix of (biological) scenarios
-if(general$application=="balticRTI"){
+if(general$application=="testexample"){
   multiplier_for_biolsce_all_pops  <- expand.grid(biolsce_maturity=1, biolsce_M=c(1), biolsce_weight=c(1), biolsce_init_pops=1, biolsce_init_pops=1, 
                                          biolsce_fecundity=1, biolsce_Linfs=c(1, 0.9), biolsce_Ks=c(1), biolsce_recru=c(1), biolsce_mig=c(0), 
                                           pop=c('COD.2532'))   # see SS3 model settings in ICES WKBALTCOD 2015
@@ -136,7 +136,7 @@ write.table(hyperstability_param, quote=FALSE,
    cat(paste("hyperstability_param.dat\n",sep=''))
 
 
-if(general$application =="balticRTI")         sces <- c(1: nrow(multiplier_for_biolsce_all_pops))
+if(general$application =="testexample")         sces <- c(1: nrow(multiplier_for_biolsce_all_pops))
 
    print(multiplier_for_biolsce_all_pops)
 
