@@ -130,20 +130,22 @@
     
     names(handmade_WGS84)  # "ID"         name_gis_layer_field  
  
-    if(do_plot) plot(handmade_WGS84,  add=TRUE, border=as.data.frame(handmade_WGS84)[,name_gis_layer_field])
+    if(do_plot) plot(handmade_WGS84,  add=TRUE, border=as.data.frame(handmade_WGS84)[,name_gis_layer_field]+1)
 
 
 
     # test coord for polygon inclusion
      spo                          <- SpatialPoints(coordinates(data.frame(CELL_LONG=coord[,1],
                                              CELL_LATI=coord[,2])), proj4string=CRS("+proj=longlat +datum=WGS84"))
-     idx                          <- over(spo, handmade_WGS84, returnList=FALSE)  # idx in handmade_WGS84_reduced
-     coord                        <- cbind(coord, idx[,name_gis_layer_field])
+     idx                          <- over(spo, handmade_WGS84, returnList=TRUE)  # idx in handmade_WGS84_reduced
+     idx_retrieved                <- unlist(lapply(idx, function (x) max(x[,name_gis_layer_field]))) # caution: we assume density on GRIDCODE 5 > density GRIDCODE 4 > density GRIDCODE 3 etc. 
+     coord                        <- cbind(coord, idx_retrieved)
      colnames(coord)[ncol(coord)] <- name_gis_layer_field
 
      coord               <- cbind.data.frame(coord, xfold=factor(coord[,name_gis_layer_field])) # init
-     levels(coord$xfold) <- xfold_gis_layer_field
-  
+     levels(coord$xfold) <- c(0, 1:(length(unique(idx_retrieved))-1)) # caution
+     if(length(xfold_gis_layer_field)== length(levels(coord$xfold)))  levels(coord$xfold) <- xfold_gis_layer_field # robust substitution
+     
     # check
     if(do_plot){
        plot(handmade_WGS84,  add=FALSE, border=as.data.frame(handmade_WGS84)[,name_gis_layer_field])
@@ -167,7 +169,7 @@
  for (a.semester in c("S1", "S2")){
 
     # dispatch the abundance among nodes by dividing 'abundance' per the number of included graph nodes
-    abundance_this_semester                   <- coord[!is.na(coord [,name_gis_layer_field]) & coord [,name_gis_layer_field]!= 0,]
+    abundance_this_semester                   <- coord[!is.na(coord [,name_gis_layer_field]) & !is.infinite(coord [,name_gis_layer_field]) & coord [,name_gis_layer_field]!= 0,]
     abundance_this_semester                   <- cbind.data.frame(abundance_this_semester, semester=a.semester, 
                                                   abundance= factor( an(abundance_this_semester [,name_gis_layer_field]) * an(abundance_this_semester [,"xfold"])    )) # init
     abundance_this_semester$abundance         <- factor(abundance_this_semester$abundance)
