@@ -308,14 +308,14 @@
                                                  landscape=rep(codes, each=2),
                                                  loss_after_one_passage=0.20  # 20% (fake)
                                                  ) 
-     write.table(loss_after_one_passage_this_metier, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
+     write.table(loss_after_one_passage_this_metier, file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''),
                         paste(met,"loss_after_one_passage_per_landscape_per_func_group.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
      }
  } else{
    loss <- read.table(file.path(general$main_path_gis, "HABITATS", "prop_loss_on_habitat_after_one_passage_per_metier_per_sz.csv"), header=TRUE, sep=";")
    for(met in 0: max_met){
         loss_after_one_passage_this_metier <- loss[loss$metier==met, c('landscape', 'loss_after_one_passage')]
-        write.table(loss_after_one_passage_this_metier, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
+        write.table(loss_after_one_passage_this_metier, file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''),
                         paste(met,"loss_after_one_passage_per_landscape_per_func_group.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
    
    }

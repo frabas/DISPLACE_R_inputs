@@ -138,7 +138,7 @@
     # pop parameters
     pa <- read.csv(file=file.path(general$main_path_gis, "POPULATIONS",
                   paste("Stock_biological_traits.csv", sep='')), 
-                    sep=',', header=TRUE)
+                    sep=';', header=TRUE)
     rownames(pa) <- pa$stock
 
     
