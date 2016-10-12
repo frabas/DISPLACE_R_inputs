@@ -364,7 +364,9 @@ cat(paste("Create an example GoFishing dtree ...done \n"))
 
 
 dir.create(file.path(general$main.path.ibm, paste("timeseries")))
+file.create(file.path(general$main.path.ibm, paste("timeseries"), "ts.txt"))  # for commit 
 dir.create(file.path(general$main.path.ibm, paste("externalforcing_", general$application, sep='')))
+file.create(file.path(general$main.path.ibm, paste("externalforcing_", general$application, sep=''), "empty.txt"))
 
 
 
