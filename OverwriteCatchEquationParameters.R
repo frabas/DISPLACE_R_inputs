@@ -8,7 +8,7 @@
 
    if (length(args) < 2) {
      if(.Platform$OS.type == "windows") {
-       general$application           <- "balticRTI" # ...or myfish
+       general$application           <- "testexample" # ...or myfish
        general$main_path_gis         <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
        general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_", general$application, sep=''))
        general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
@@ -41,7 +41,7 @@
   dir.create(file.path(general$main.path.ibm, paste("vesselsspe_", general$application, sep='')))
   dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep='')))
 
-  if( general$application=="balticRTI"){
+  if( general$application=="testexample"){
       year      <- "2015"
       years     <- "2013_2014_2015"
       method    <- "inverse"
@@ -277,11 +277,7 @@
 
   range_szgroup <-  c('0', '2', '3', '5', '7')   # this actually cannot be changed because this naming is used in DISPLACE c++
   the_selected_szgroups <- NULL
-  write(c('nm2',  'selected_szgroups'), # init
-                   file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
-                       paste("the_selected_szgroups.dat",sep=' ')), append=FALSE,  ncol=2,
-                          sep=" ")
-  
+   
 
   for(rg in range_szgroup){
     assign(paste('all.deltas' ,rg, sep=''),  NULL)   # init
@@ -320,7 +316,7 @@
   
   
        selected_szgroups <-  range_szgroup #default
-       if(general$application=="balticRTI"){
+       if(general$application=="testexample"){
        if(nm2 %in% "COD.2224") selected_szgroups <-   c(2,5,7,8,9)
        if(nm2 %in% "COD.2532") selected_szgroups <-   c(2,5,7,8,9)
        if(nm2 %in% "SPR.2232") selected_szgroups <-   c(0,1,2,3,4)
@@ -330,15 +326,7 @@
 
        }
        avai[,paste(name.sp,'.nb_indiv.',range_szgroup, sep='')] <- avai[,paste(name.sp,'.nb_indiv.', selected_szgroups, sep='')] ## CAUTION HERE!
-       if(nm3=="1") the_selected_szgroups <- rbind(the_selected_szgroups, cbind.data.frame(nm2, selected_szgroups))   # store for later use....
-
-      
-       # replace the selected groups in the catch rate equation                         
-       write.table(cbind(nm2=nm2, selected_szgroups=selected_szgroups),
-                   file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
-                       paste("the_selected_szgroups.dat",sep=' ')), append=TRUE,
-                         quote = FALSE, sep=" ", col.names=FALSE, row.names=FALSE)
-       cat(paste("Write the_selected_szgroups.dat...\n"))
+       if(nm3=="1") the_selected_szgroups <- rbind(the_selected_szgroups, cbind.data.frame(spp_table$idx[spp_table$spp==nm2], selected_szgroups))   # store for later use....
 
      
 
@@ -410,7 +398,19 @@
        sum_this_sp       <- sum_this_sp[!is.na(sum_this_sp)]
        if(length(sum_this_sp[sum_this_sp>1]) <= 1){
           print("only one met: need some fake (but relevant) metier to contrast the glm!!!!")
-          browser()
+          stop("Not relevant to continue from these insufficient data - Are you running from the testexample? if yes, you can skip this script")
+          #browser()
+       } else{
+            # overwrite the selected groups form the new catch rate equation                         
+            write(c('nm2',  'selected_szgroups'), # init
+                   file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
+                       paste("the_selected_szgroups.dat",sep=' ')), append=FALSE,  ncol=2,
+                          sep=" ")
+            write.table(cbind(nm2=nm2, selected_szgroups=selected_szgroups),
+                   file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
+                       paste("the_selected_szgroups.dat",sep=' ')), append=TRUE,
+                         quote = FALSE, sep=" ", col.names=FALSE, row.names=FALSE)
+            cat(paste("Write the_selected_szgroups.dat...\n"))
        }
        
        
@@ -455,7 +455,7 @@
          # 1- when the ad hoc inverse-distance used to interpolate is not optimal (taking the "maximum" seems actually to perform better)
          # 2- when a given vessel metier occur in a limited spatial extent where the avai is likely to be almost equal!!
        # => as the point 2 is likely then main part of the effect on the catch rates is actually explained by the vessel-metier combination and not by the avai.....
-       }
+     }
 
 
 
