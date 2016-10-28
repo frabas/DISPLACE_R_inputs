@@ -105,7 +105,7 @@ for (i in idx){
 }
                                  
 
- write.table(cbind(node=idx,  name=sapply(rownames(port_names), function (x) paste(unlist(strsplit(x, " ")), collapse="_"))    ),
+ write.table(cbind(node=idx,  name=sapply(as.character(port_names$port_name), function (x) paste(unlist(strsplit(x, " ")), collapse="_"))    ),
     file= file.path(general$main.path.ibm, paste("harboursspe_", general$application, sep=''),  "names_harbours.dat"), row.names=FALSE, col.names=TRUE, quote=FALSE)
 
  cat(paste("Write names_harbours.dat in /harboursspe...done\n"))

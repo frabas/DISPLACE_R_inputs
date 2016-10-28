@@ -7,17 +7,18 @@
 
    if (length(args) < 2) {
      if(.Platform$OS.type == "windows") {
-       general$application           <- "testexample" # ...or myfish
-       general$main_path_gis         <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+       general$application           <- "balticRTI" # ...or myfish
+       general$main_path_gis         <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis_all", general$application)
        general$main.path.ibm         <- file.path("C:","Users","fbas","Documents","GitHub",paste("DISPLACE_input_", general$application, sep=''))
        general$igraph                <- 56  # caution: should be consistent with existing objects already built upon a given graph
-   
+       fit_to_GRID                   <- TRUE   
      }
   } else {
        general$application           <- args[1]
        general$main_path_gis         <- args[2]
        general$main.path.ibm         <- args[3]
        general$igraph                <- args[4]  # caution: should be consistent with existing vessels already built upon a given graph
+       fit_to_GRID                   <- FALSE
   }
    cat(paste("START \n"))
 
@@ -30,7 +31,7 @@
   
   #!#!#!#!#!#
   #!#!#!#!#!#
-  # choose your country
+  # choose your country (and adapt below accordingly)
   ctry <- "DEN"
   #!#!#!#!#!#
   #!#!#!#!#!#
@@ -86,7 +87,15 @@
   }
    
    
- 
+  # subset for the area of interest
+  if(fit_to_GRID && general$application=="balticRTI"){
+     library(maptools)
+     handmade            <- readShapePoly(file.path(general$main_path_gis, "MANAGEMENT", "wbaltic_wgs84"))  # built in ArcGIS 10.1
+     the_area            <- sapply(slot(handmade, "polygons"), function(x) lapply(slot(x, "Polygons"), function(x) x@coords))
+     in_area             <- point.in.polygon(as.numeric(as.character(tacsatp[,'SI_LONG'])), as.numeric(as.character(tacsatp[,'SI_LATI'])), the_area[[1]][,1],the_area[[1]][,2])
+     tacsatp             <- tacsatp[in_area==1,]
+  }
+     
 
   xrange <- range(as.numeric(as.character(tacsatp$SI_LONG)), na.rm=TRUE)
   yrange <- range(as.numeric(as.character(tacsatp$SI_LATI)), na.rm=TRUE)
@@ -160,7 +169,12 @@
   levels(tacsatp$LE_MET_rough) [levels(tacsatp$LE_MET_rough) %in% c("OTB","OTT",  "OTM", "PTB", "PTM" )]                             <- "Trawl"
   levels(tacsatp$LE_MET_rough) [levels(tacsatp$LE_MET_rough) %in% c("PS_", "SDN", "SSC")]                                            <- "Seine"
     
-
+  tacsatp$LE_MET_level6 <- factor(tacsatp$LE_MET_level6)  
+  if(fit_to_GRID){
+  # alter the level 6 to fit the GRID fleet segment definition i.e. a combination of a gear and a target assemblage (!=level6)
+   levels(tacsatp$LE_MET_level6) <-  unlist(lapply(strsplit(as.character(levels(tacsatp$LE_MET_level6)), split="_"), function (x) paste(x[1], x[2], sep='_'))) # rename by simplifying for GRID
+  }
+  
   # keep level 6 and built an OTHER metier
   levels(tacsatp$LE_MET_level6)
   agg_per_met                 <- tapply(tacsatp[tacsatp$SI_STATE==1, ]$LE_EFF_VMS, list(tacsatp[tacsatp$SI_STATE==1, ]$LE_MET_level6), sum, na.rm=TRUE)
@@ -200,7 +214,7 @@
 
   # add midpoint of gridcell to dataset
   aggResult <- cbind(aggtacsatp, CELL_LONG=coordinates(grd)[aggtacsatp$grID,1], CELL_LATI=coordinates(grd)[aggtacsatp$grID,2])
-  save(aggResult, file=file.path(general$main_path_gis, "FISHERIES", "SpatialLayers","2015_aggtacsatp.RData"))
+  if(!fit_to_GRID) save(aggResult, file=file.path(general$main_path_gis, "FISHERIES", "SpatialLayers","2015_aggtacsatp.RData"))
 
 
   # loop over relevant activity/metier
