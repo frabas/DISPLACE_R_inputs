@@ -62,29 +62,30 @@
 
    dyn_alloc_sce <- c('baseline focus_on_high_profit_grounds')
    dyn_pop_sce   <- c('baseline')
-   biolsce       <- 1
-   Frequency     <- 3
-   Frequency2    <- 3
-   a_graph       <- general$igraph
-   nrow_coord    <- nrow(coord)
-   nrow_graph    <- nrow(graph)
-   a_port        <- which(coord[,'harb']!=0)[1]
-   grid_res_km   <- 3
-   is_individual_vessel_quotas <- 0
-   check_all_stocks <- 0
-   Go_Fishing_DTree <- "GoFishing_Example.dt.csv"
-   Choose_Ground_DTree <- ""
-   Start_Fishing_DTree <- ""
-   Change_Ground_DTree <- ""
-   Stop_Fishing_DTree  <- ""
-   Change_Port_DTree   <- ""
-   Use_Dtrees          <- 1
-   tariff_pop          <- ""
-   freq_update_tariff_code <- ""
-   arbitrary_breaks_for_tariff <- ""
-   total_amount_credited <- ""
-   tariff_annual_       <- ""
-   banned_metiers       <- ""
+   biolsce       <- 1                            # for static (i.e. external to displace) scenarios e.g. different bio parameterisation for growth, etc.
+   fleetsce      <- 1                            # for static (i.e. external to displace) scenarios  e.g. different monthly catch pattenrs for 'other' landings, etc.
+   Frequency     <- 3                            # code for setting frequency for applying the growth transition matrix  CAUTION!! this is assuming the parameterisation GeneratePopulationsFeatures.R is coherent to it
+   Frequency2    <- 3                            # code for setting frequency for applying the distpatching procedure to stocks 
+   a_graph       <- general$igraph               # an integer...
+   nrow_coord    <- nrow(coord)                  # might be automatically filled in...
+   nrow_graph    <- nrow(graph)                  # might be automatically filled in...
+   a_port        <- which(coord[,'harb']!=0)[1]  # should be a node idx corresponding to a port!
+   grid_res_km   <- 3                            # just for visualisation purpose of the node in the GUI
+   is_individual_vessel_quotas <- 0              # 0/1
+   check_all_stocks <- 0                         # play a role when scenario on vessels looking at fish prices before making their decision
+   Go_Fishing_DTree <- "GoFishing_Example.dt.csv"# can be left empty or filled in with a dtree file name...
+   Choose_Ground_DTree <- ""                     # can be left empty or filled in with a dtree file name...
+   Start_Fishing_DTree <- ""                     # can be left empty or filled in with a dtree file name...
+   Change_Ground_DTree <- ""                     # can be left empty or filled in with a dtree file name...
+   Stop_Fishing_DTree  <- ""                     # can be left empty or filled in with a dtree file name...
+   Change_Port_DTree   <- ""                     # can be left empty or filled in with a dtree file name...
+   Use_Dtrees          <- 1                      # 0/1 Use or Not use
+   tariff_pop          <- ""                     # tbc...
+   freq_update_tariff_code <- ""                 # tbc...
+   arbitrary_breaks_for_tariff <- ""             # tbc...
+   total_amount_credited <- ""                   # tbc...
+   tariff_annual_       <- ""                    # tbc...
+   banned_metiers       <- ""                    # relevant with area_closures and monthly_area_closures dyn. options
    
    write("# dyn_alloc_sce", file=namefile)
    write(dyn_alloc_sce, file=namefile, ncolumns=1, append=TRUE)
@@ -94,6 +95,9 @@
 
    write("# biolsce", file=namefile, ncolumns=1, append=TRUE)
    write(biolsce, file=namefile, ncolumns=1, append=TRUE)
+
+   write("# fleetsce", file=namefile, ncolumns=1, append=TRUE)
+   write(fleetsce, file=namefile, ncolumns=1, append=TRUE)
 
    write("# Frequency to apply growth (0:daily; 1:weekly; 2:monthly; 3:quarterly; 4:semester)", file=namefile, ncolumns=1, append=TRUE)
    write(Frequency, file=namefile, ncolumns=1, append=TRUE)
@@ -311,18 +315,50 @@ file.copy(
           )
 file.copy(
           from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_quarter1.dat", sep='')),
-          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter1.dat", sep=''))
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_month1.dat", sep=''))
           )
 file.copy(
-          from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_quarter2.dat", sep='')),
+          from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month2.dat", sep='')),
           to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter2.dat", sep=''))
           )
 file.copy(
-          from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_quarter3.dat", sep='')),
+          from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month3.dat", sep='')),
           to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter3.dat", sep=''))
           )
 file.copy(
-          from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep='')),
+          from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month4.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month5.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month6.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month7.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month8.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month9.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month10.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month11.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month12.dat", sep='')),
           to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep=''))
           )
 file.copy(

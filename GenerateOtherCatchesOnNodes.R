@@ -46,10 +46,11 @@ for (popid in 1: length(catches_in_tons$POP)){
      a_file <-  a_file[grep(".shp", a_file)]
      name_gis_layer_field <- "GRIDCODE"
      
+     # get the spatial distribution of the stock that will obviously constraint where the depletion can actually occur
      library(maptools)
      handmade_WGS84            <- readShapePoly(file.path(general$main_path_gis, "POPULATIONS", "SpatialLayers", a_file ) , proj4string=CRS("+proj=longlat +datum=WGS84"))  # build in ArcGIS 10.1
  
-     #load
+     #load the locations of the graph
      coord <- read.table(file=file.path(general$main_path_gis, "GRAPH", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
      coord <- as.matrix(as.vector(coord))
      coord <- matrix(coord, ncol=3)
@@ -75,15 +76,17 @@ for (popid in 1: length(catches_in_tons$POP)){
      coord <- coord[!is.na(coord [,name_gis_layer_field]),]
  
  
+    # if there are some locations included then....
     if(nrow(coord)!=0){
 
+       # retrieve the 'other' landings...
        total_catches_this_year_in_kg <- sum(catches_in_tons[catches_in_tons$POP==popnames[popid], -c(1:2)], na.rm=TRUE)
     
-       # dispatch
-       coord <- cbind(coord, landings= total_catches_this_year_in_kg/nrow(coord)/12) # catches are evenly dispatched among the relevant nodes and given 12 months
+       # ...and dispatch (just an assumption, one can do otherwise provided the data format is respected)
+       coord <- cbind(coord, landings= total_catches_this_year_in_kg/nrow(coord)/12) # e.g. catches are evenly dispatched among the relevant nodes and given 12 months
 
        # save .dat files
-       coord[,'pt_graph'] <-  as.numeric(as.character(coord[,'pt_graph'])) - 1 ##!!! OFFSET FOR C++ !!!##
+       coord[,'pt_graph'] <-  as.numeric(as.character(coord[,'pt_graph'])) - 1 ##!!! OFFSET FOR C++ !!!##    because R to c++
        library(doBy)
        coord<- orderBy(~pt_graph, data=coord)
     } else{
@@ -92,16 +95,17 @@ for (popid in 1: length(catches_in_tons$POP)){
 
 
     # save and export to multimap c++ for this pop
-   for (semester in c("1", "2")){
+    # assuming for the testexample that the same amount in kg is depleted each month on the same location
+   for (month in c("1", "2", "3","4", "5", "6", "7", "8", "9", "10", "11", "12")){
 
               # save for a multimap in c++  pt_graph / landings kg per month (to be used every months)
             # to fill in the pop attribute
         write.table(round(coord[, c('pt_graph', 'landings')]),
                file= file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
-                  paste((popid)-1, 'spe_stecf_oth_land_per_month_per_node_semester', semester, ".dat", sep='')),
+                  paste((popid)-1, 'spe_stecf_oth_land_per_month_per_node_month', month, ".dat", sep='')),
                  row.names=FALSE, col.names=TRUE, quote=FALSE)
 
-        cat(paste("Write ", (popid)-1, 'spe_stecf_oth_land_per_month_per_node_semester', semester, ".dat\n", sep=''))
+        cat(paste("Write ", (popid)-1, 'spe_stecf_oth_land_per_month_per_node_month', month, ".dat\n", sep=''))
 
 
       }
