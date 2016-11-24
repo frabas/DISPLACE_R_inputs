@@ -122,6 +122,19 @@ if(general$application=="testexample"){
                  file=file.path(general$main.path.ibm, paste("multiplier_for_biolsce", general$application,".dat",sep='')), append=FALSE,
                    row.names=FALSE, col.names=TRUE)
 
+  } else{
+   multiplier_for_biolsce_all_pops  <- expand.grid(biolsce_maturity=1, biolsce_M=c(1), biolsce_weight=c(1), biolsce_init_pops=1, biolsce_init_pops=1, 
+                                         biolsce_fecundity=1, biolsce_Linfs=c(1), biolsce_Ks=c(1), biolsce_recru=c(1), biolsce_mig=c(0), 
+                                          pop=c('NA'))  
+
+
+  multiplier_for_biolsce_all_pops <- cbind(sce=1: (nrow(multiplier_for_biolsce_all_pops)/length(unique(multiplier_for_biolsce_all_pops$pop))), multiplier_for_biolsce_all_pops)
+
+
+  write.table(multiplier_for_biolsce_all_pops, quote=FALSE,
+                 file=file.path(general$main.path.ibm, paste("multiplier_for_biolsce", general$application,".dat",sep='')), append=FALSE,
+                   row.names=FALSE, col.names=TRUE)
+
   }
   
     
@@ -136,9 +149,8 @@ write.table(hyperstability_param, quote=FALSE,
    cat(paste("hyperstability_param.dat\n",sep=''))
 
 
-if(general$application =="testexample")         sces <- c(1: nrow(multiplier_for_biolsce_all_pops))
-
-   print(multiplier_for_biolsce_all_pops)
+sces <- c(1: nrow(multiplier_for_biolsce_all_pops))
+print(multiplier_for_biolsce_all_pops)
 
 # overall migration fluxes at 0 by default
 for (sce in sces){
@@ -218,12 +230,12 @@ cat(paste("pop ", x-1, "\n"))
   K               <-pa$K[x]                #K Bertalanffy
   Linf            <-pa$Linf[x]             #Linf Bertalanfy 
   l50             <-pa$L50[x]              #L50
-  d               <-NA                #d*L^e fecundity
+  d               <-NA                     #d*L^e fecundity
   e               <-NA
   stock           <-pa$stock[x]
   aa              <-pa$a[x]                #aa*(l+5)^bb/1000
   bb              <-pa$b[x]              
-  a_SSB           <-pa$alpha[x]             #Ricker
+  a_SSB           <-pa$alpha[x]            #Ricker param (unless the given value is >2000 then activating a shortcut to add a fixed nb of recruits in absolute value)
   b_SSB           <-pa$beta[x]           
   r_age           <-pa$r_age[x]
 
