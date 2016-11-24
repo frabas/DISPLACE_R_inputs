@@ -40,7 +40,7 @@
  
   
   } else{
-      stop("to be defined for this app - please look at the R script and adapt for this app")
+      stop("to be defined for this app - please look at the R script and adapt for this app - anyway this is an optional step - see the doc for an explanation")
   }
 
 

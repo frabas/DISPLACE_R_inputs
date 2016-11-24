@@ -39,7 +39,7 @@
    
    path      <- file.path(general$main_path_gis, "POPULATIONS", "pops_config_files")
    namefiles <- list.files(file.path( path))
-
+   namefiles <- namefiles[grep(general$application, namefiles)]
   
    cat(paste("Entering /POPULATIONS/pops_config_files folder....done \n"))
 
@@ -141,6 +141,7 @@
                                              CELL_LATI=coord[,2])), proj4string=CRS("+proj=longlat +datum=WGS84"))
      idx                          <- over(spo, handmade_WGS84, returnList=TRUE)  # idx in handmade_WGS84_reduced
      idx_retrieved                <- unlist(lapply(idx, function (x) max(x[,name_gis_layer_field]))) # caution: we assume density on GRIDCODE 5 > density GRIDCODE 4 > density GRIDCODE 3 etc. 
+     if(all(is.infinite(idx_retrieved)))  stop("Not a single overlap found between the pop GIS layer(s) and the DISPLACE graph area extent - Are you using disconnected data?")
      coord                        <- cbind(coord, idx_retrieved)
      colnames(coord)[ncol(coord)] <- name_gis_layer_field
 

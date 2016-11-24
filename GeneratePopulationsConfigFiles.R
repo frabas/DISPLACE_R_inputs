@@ -73,7 +73,7 @@
    a_comment <- popid
    namefile  <- file.path(general$main_path_gis, "POPULATIONS", "pops_config_files", paste(a_comment, "pops_creator_args_",  general$application, ".dat", sep=''))
  
-   write("# config file for the vessel editor: adding some vessel(s)", file=namefile)
+   write("# config file for the Object editor: adding some population(s)", file=namefile)
    write("# (the shortestPaths library will have to be re-created for the graph)", file=namefile, ncolumns=1, append=TRUE)
    write("# --------------", file=namefile, ncolumns=1, append=TRUE)
 
@@ -81,7 +81,7 @@
    write(general$main_path_gis, file=namefile, ncolumns=1, append=TRUE)
 
    write("# output folder for parameterisation file", file=namefile, ncolumns=1, append=TRUE)
-   write(general$main.path.param, file=namefile, ncolumns=1, append=TRUE)
+   write(general$main.path.ibm, file=namefile, ncolumns=1, append=TRUE)
 
    write("# input folder for DISPLACE", file=namefile, ncolumns=1, append=TRUE)
    write(general$main.path.ibm, file=namefile, ncolumns=1, append=TRUE)
