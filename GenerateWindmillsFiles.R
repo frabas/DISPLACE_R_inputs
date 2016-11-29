@@ -22,7 +22,7 @@
   cat(paste("START\n"))
   
 
-  dir.create(file.path(general$main.path.ibm, paste("fishfarmsspe_", general$application, sep='')))
+  dir.create(file.path(general$main.path.ibm, paste("windmillsspe_", general$application, sep='')))
 
   # load
   coord <- read.table(file=file.path(general$main_path_gis, "GRAPH", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
@@ -42,37 +42,36 @@
 
 
   # read
-  fishfarms_features   <-  read.table(file.path(general$main_path_gis,"FISHFARMS", "fishfarms_features.csv"), sep=";", header=TRUE)
-  cat(paste("Read fishfarms specs...done\n"))
+  windmills_features   <-  read.table(file.path(general$main_path_gis,"WINDMILLS", "windmills_features.csv"), sep=";", header=TRUE)
+  cat(paste("Read windmills specs...done\n"))
 
   # find the nearest graph node
   cat(paste("Finding neighbours....\n"))
   library(spatstat)
   an <- function(x)  as.numeric(as.character(x))
   coord_f            <- coord[coord[,'harb']==0,]  
-   X                 <- ppp(x=an(fishfarms_features$long), y=an(fishfarms_features$lat),
-                        xrange=range(an(fishfarms_features$long)), yrange=range(an(fishfarms_features$lat)))
+   X                 <- ppp(x=an(windmills_features$long), y=an(windmills_features$lat),
+                        xrange=range(an(windmills_features$long)), yrange=range(an(windmills_features$lat)))
    Y                 <- ppp(x=coord_f[,"x"], y=coord_f[,"y"],
                                xrange=range(coord_f[,"x"]), yrange=range(coord_f[,"y"]))
    N                 <- nncross (X=X, Y=Y)$which # caution: just euclidean distance on coord
-   fishfarms_features <- cbind(fishfarms_features, pt_graph= N)
+   windmills_features <- cbind(windmills_features, pt_graph= N)
     
-  some_fishfarms_features           <- fishfarms_features[,c('pt_graph', 'size_km2')] 
-  colnames(some_fishfarms_features) <- c('idx_node', 'size_km2')
+  some_windmills_features           <- windmills_features[,c('pt_graph', 'size_km2')] 
+  colnames(some_windmills_features) <- c('idx_node', 'size_km2')
   
   
   ## aggregate per graph node given c++ object are created on nodes only
-  some_fishfarms_features <- tapply(some_fishfarms_features$size_km2, some_fishfarms_features$idx_node, sum)
-  some_fishfarms_features <- cbind.data.frame(rownames(some_fishfarms_features), some_fishfarms_features)
-  colnames(some_fishfarms_features) <- c('idx_node', 'size_km2')
-
+  some_windmills_features <- tapply(some_windmills_features$size_km2, some_windmills_features$idx_node, sum)
+  some_windmills_features <- cbind.data.frame(rownames(some_windmills_features), some_windmills_features)
+  colnames(some_windmills_features) <- c('idx_node', 'size_km2')
   
   # write
-  write.table(some_fishfarms_features,   
-            file=file.path(general$main.path.ibm, paste("fishfarmsspe_", general$application, sep=''), 
-              paste("size_per_farm.dat",sep='')),
+  write.table(some_windmills_features,   
+            file=file.path(general$main.path.ibm, paste("windmillsspe_", general$application, sep=''), 
+              paste("size_per_windmill.dat",sep='')),
                   col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
-  cat(paste("Write fishfarms-related files...done\n"))
+  cat(paste("Write windmills-related files...done\n"))
 
 
 
