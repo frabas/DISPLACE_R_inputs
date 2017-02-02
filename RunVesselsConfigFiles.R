@@ -42,6 +42,7 @@ dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$applica
   
 
  count <- 0
+ metierspe_betas_all <- NULL
  for (namefile in namefiles){ # LOOP OVER CONFIG FILES
    cat(paste("Treatment for", namefile, "\n"))
    count <- count+1
@@ -82,11 +83,33 @@ dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$applica
    vessel_features                              <- as.numeric(my_split(dat[46]))
    step_in_share                                <- as.numeric(my_split(dat[48]))
    if(length(step_in_share)!=nb_stocks) stop("Check config file for vessel creator - length(step_in_share)")
+
+   # from this vessel, add catch equation vessel effect
    vesselsspe_betas                             <- as.numeric(my_split(dat[50]))
    if(length(vesselsspe_betas)!=nb_stocks) stop("Check config file for vessel creator - length(vesselsspe_betas)")
-   create_file_for_fuel_price_per_vessel_size   <-  as.logical(dat[52])
-   some_fuel_price_per_vessel_size              <-  as.numeric(my_split(dat[54]))
-   step_in_share_credits                        <-  as.numeric(dat[56])
+
+   # from this vessel, add catch equation metier effect informed for the vessel´s metiers (caution, we expect the same whatever the vessel if we talk about the same metiers)
+   metierspe_betas                              <- as.numeric(my_split(dat[52]))
+   if(length(nb_stocks)>1) for(st in 2: length(nb_stocks)) metierspe_betas <- c(metierspe_betas,  as.numeric(my_split(dat[52]+(st-1))))
+   metierspe_betas                              <- matrix(metierspe_betas, ncol=length(metierids), nrow=(nb_stocks), byrow=TRUE)
+   colnames(metierspe_betas)                    <- metierids
+   metierspe_betas                              <- cbind( as.numeric(rep(colnames(metierspe_betas), each=nrow(metierspe_betas))) , c( metierspe_betas) ) 
+                                                  # =>final format: met idx / met effect along st
+   if(!is.null(metierspe_betas_all))
+      {
+       metierspe_betas_all            <- rbind(metierspe_betas_all, metierspe_betas[!(metierspe_betas[,1] %in% metierspe_betas_all[,1]), ]) # add only if not already present
+       } else{
+       metierspe_betas_all            <- rbind(metierspe_betas_all, metierspe_betas) # add 
+       }
+                                    
+   # from this vessel, add catch equation sizegroup effect (caution, we expect the same whatever the vessel)
+   avaispe_betas                                <- as.numeric(my_split(dat[52+nrow(metierspe_betas)+2]))
+   if(length(nb_stocks)>1) for(st in 2: length(nb_stocks)) avaispe_betas <- c(avaispe_betas,  as.numeric(my_split(dat[52+nrow(metierspe_betas)+2]+(st-1))))
+   avaispe_betas                             <- matrix(avaispe_betas, ncol=14, nrow=(nb_stocks), byrow=TRUE)
+   
+   create_file_for_fuel_price_per_vessel_size   <-  as.logical(dat[52+nrow(metierspe_betas)+nrow(avaispe_betas)+2])
+   some_fuel_price_per_vessel_size              <-  as.numeric(my_split(dat[52+nrow(metierspe_betas)+nrow(avaispe_betas)+4]))
+   step_in_share_credits                        <-  as.numeric(dat[52+nrow(metierspe_betas)+nrow(avaispe_betas)+6])
 
 
 #-------------------------------------------------------------------------------
@@ -628,7 +651,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
          cat(paste("vesselsspe_betas_semester",a.semester,".dat....OK", "\n"))
  
 
-
+ 
  }
 
  # WORKFLOW 2 - ADDITIONAL FILE(S)-----------
@@ -748,10 +771,16 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
       nb_stk         <- length(spp)
       # Note that we assume exp(vesseleffect+metiereffect+stockdensityeffect*sel) in the catch equation 
       # so you will have to put -20 if this actually metier not catching this stock at all....for now we put 0
-      metiereffect <- 0
-      metiersspe_gamma_semester <- cbind.data.frame( rep(0:(nb_met-1), each=nb_stk), rep(metiereffect, length= nb_met*nb_stk)    )
+      
+      metiersspe_gamma_semester <- as.data.frame(metierspe_betas_all)
       colnames(metiersspe_gamma_semester) <- c('LE_MET_level6', 'gamma.LE_MET_level6')
+      if(length(unique(metiersspe_gamma_semester[,'LE_MET_level6'])) != nb_met)   stop("missing metier(s) for info on metier effects")
 
+      # reorder:
+      library(doBy)
+      metiersspe_gamma_semester <- orderBy(~LE_MET_level6, data=metiersspe_gamma_semester)
+      
+     
       # save .dat files
        write.table(metiersspe_gamma_semester,
            file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''),

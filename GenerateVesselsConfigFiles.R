@@ -173,8 +173,16 @@
                                    vessel_specifications[i, "WorkHoursStart"],
                                    vessel_specifications[i, "WorkHoursEnd"]
                                    ) 
-   step_in_share              <- rep(vessel_specifications[i, "N..of.vessels"]/ sum(vessel_specifications[, "N..of.vessels"], na.rm=TRUE), nb_stocks) # i.e. 100 % of each TAC per stock will be booked for these new vessels
+   step_in_share              <- rep(vessel_specifications[i, "N..of.vessels"]/ sum(vessel_specifications[, "N..of.vessels"], na.rm=TRUE), nb_stocks) 
+                                       # i.e. 100 % of each TAC per stock will be booked for these new vessels
+   # catch equation parameters: totcatch_inkgperhour_thisspecies = exp( vesselspe_sp + metierspe_sp + (avaispe_sp_szgr * avai_sp_szgr *1000 * gearsel_szgr ) )
+   # by default, only the vessel effect is !=0....
    vesselsspe_betas           <- log(fixed_cpue_per_stock*nb_agent_per_vessels +0.01 )  # catch rate log(kg per hour)  CAUTION: log(0)=-Inf !
+   # ....but we could imagine informing metier effect here:
+   metiersspe_betas           <- matrix(rep(0, length(metierids)), nrow=length(spp), ncol=length(metierids))    # 0 means not adding to the effect 
+                                                                                        # (but metiers are having catch if >=0, so consider putting -20 if the metier is not catching the species)
+   # ....and we could also imagine informing sizegroup avai effect here:
+   avaisspe_betas             <- matrix(rep(0, 14), nrow=length(spp), ncol=14)          # 0 means not adding to the effect 
    create_file_for_fuel_price_per_vessel_size <- TRUE
    some_fuel_price_per_vessel_size            <- c(0.4,0.4,0.4,0.4,0.4)  # euro per litre
    step_in_share_credits                      <- vessel_specifications[i, "N..of.vessels"]/ sum(vessel_specifications[, "N..of.vessels"]) # i.e. % of the credits will be booked for these new vessels
@@ -267,6 +275,12 @@
    write("# vessel effect (per stock) in the catch rate equation ", file=namefile, ncolumns=1, append=TRUE)
    write(as.character(as.numeric(vesselsspe_betas)), file=namefile, ncolumns=length(as.character(as.numeric(vesselsspe_betas))), append=TRUE)
   
+   write("# metier effect (per stock) in the catch rate equation ", file=namefile, ncolumns=1, append=TRUE)
+   write.table(metiersspe_betas, file=namefile, row.names = FALSE, col.names = FALSE, quote=FALSE, append=TRUE)
+ 
+   write("# avai effect (per size group per stock) in the catch rate equation ", file=namefile, ncolumns=1, append=TRUE)
+   write.table(avaisspe_betas, file=namefile, row.names = FALSE, col.names = FALSE, quote=FALSE, append=TRUE)
+ 
    write("# create the file for fuel price per vessel size  ",file=namefile, ncolumns=1, append=TRUE)
    write(create_file_for_fuel_price_per_vessel_size, file=namefile, ncolumns=length(create_file_for_fuel_price_per_vessel_size), append=TRUE)
   

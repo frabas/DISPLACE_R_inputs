@@ -381,7 +381,7 @@ set.avai <- function(lst.avai, sp, S, areas){
      obj.in.areas <- replace(obj.in.areas, is.infinite(obj.in.areas), NA)
      obj.in.areas[,c(5:18)] <-
                 sweep(obj.in.areas[,c(5:18)], 2,
-                   apply(obj.in.areas[,c(5:18)], 2, sum, na.rm=TRUE), FUN="/")
+                   apply(obj.in.areas[,c(5:18)], 2, sum, na.rm=TRUE), FUN="/") # CAUTION: Assuming equal grid resolution
      name.areas <- 'undefined'
      if(sp %in% c("WHG", "SPR", "TUR", "DAB")){  # special case: west and east baltic merged
         if(all(c("IVa", "IVb", "IVc") %in% areas)) name.areas <- 'nsea'
