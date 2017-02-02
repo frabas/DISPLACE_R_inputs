@@ -202,92 +202,92 @@
    write("# (the shortestPaths library will have to be re-created for the graph)", file=namefile, ncolumns=1, append=TRUE)
    write("# --------------", file=namefile, ncolumns=1, append=TRUE)
   
-   write("# input folder for config file", file=namefile, ncolumns=1, append=TRUE)
+   write("# [input_folder_for_config_file]", file=namefile, ncolumns=1, append=TRUE)
    write(general$main_path_gis, file=namefile, ncolumns=1, append=TRUE)
   
-   write("# input folder for DISPLACE", file=namefile, ncolumns=1, append=TRUE)
+   write("# [input_folder_for_DISPLACE]", file=namefile, ncolumns=1, append=TRUE)
    write(general$main.path.ibm, file=namefile, ncolumns=1, append=TRUE)
   
-   write("# name of the application",file=namefile, ncolumns=1, append=TRUE)
+   write("# [name_of_the_application]",file=namefile, ncolumns=1, append=TRUE)
    write(general$application, file=namefile, ncolumns=1, append=TRUE)
   
-   write("# name of the graph for this application", file=namefile, ncolumns=1, append=TRUE)
+   write("# [name_of_the_graph_for_this_application]", file=namefile, ncolumns=1, append=TRUE)
    write(general$igraph,file=namefile, ncolumns=1, append=TRUE)
    
-   write("# append to existing vessel files", file=namefile, ncolumns=1, append=TRUE)
+   write("# [append_to_existing_vessel_files]", file=namefile, ncolumns=1, append=TRUE)
    write(do_append,file=namefile, ncolumns=1, append=TRUE)
   
-   write("# name gis file for total effort per polygon",file=namefile, ncolumns=1, append=TRUE)
+   write("# [name_gis_file_for_total_effort_per_polygon]",file=namefile, ncolumns=1, append=TRUE)
    write(name_gis_file_for_fishing_effort_per_polygon, file=namefile,  ncolumns=length(name_gis_file_for_fishing_effort_per_polygon), append=TRUE)
  
-   write("# name_gis_layer_field",file=namefile, ncolumns=1, append=TRUE)
+   write("# [name_gis_layer_field]", file=namefile, ncolumns=1, append=TRUE)
    write(name_gis_layer_field, file=namefile, ncolumns=length(name_gis_layer_field), append=TRUE)
  
-   write("# is_gis_layer_field_relative_numbers",file=namefile, ncolumns=1, append=TRUE)
+   write("# [is_gis_layer_field_relative_numbers]", file=namefile, ncolumns=1, append=TRUE)
    write(is_gis_layer_field_relative_numbers, file=namefile, ncolumns=1, append=TRUE)
  
-   write("# xfold_gis_layer_field",file=namefile, ncolumns=1, append=TRUE)
+   write("# [xfold_gis_layer_field]", file=namefile, ncolumns=1, append=TRUE)
    write(xfold_gis_layer_field, file=namefile, ncolumns=length(xfold_gis_layer_field), append=TRUE)
  
-   write("# vesselids", file=namefile, ncolumns=1, append=TRUE)
+   write("# [vesselids]", file=namefile, ncolumns=1, append=TRUE)
    write(vesselids, file=namefile, ncolumns=length(vesselids), append=TRUE)
  
-   write("# vessel_range_km", file=namefile, ncolumns=1, append=TRUE)
+   write("# [vessel_range_km]", file=namefile, ncolumns=1, append=TRUE)
    write(vessel_range_km, file=namefile, ncolumns=1, append=TRUE)
      
-   write("# metierids", file=namefile, ncolumns=1, append=TRUE)
+   write("# [metierids]", file=namefile, ncolumns=1, append=TRUE)
    write(metierids, file=namefile, ncolumns=length(metierids), append=TRUE)
    
-   write("# metierids_frequencies", file=namefile, ncolumns=1, append=TRUE)
+   write("# [metierids_frequencies]", file=namefile, ncolumns=1, append=TRUE)
    write(metierids_frequencies, file=namefile, ncolumns=length(metierids_frequencies), append=TRUE)
    
-   write("# visited_ports (look at the names in harbours.dat in /harboursspe)", file=namefile, ncolumns=1, append=TRUE)
+   write("# [visited_ports_but_look_at_names_in_harbours.dat_in_harboursspe_folder]", file=namefile, ncolumns=1, append=TRUE)
    write(as.character(visited_ports), file=namefile, ncolumns=length(as.character(visited_ports)), append=TRUE)
    
-   write("# visited_ports_frequencies", file=namefile, ncolumns=1, append=TRUE)
+   write("# [visited_ports_frequencies]", file=namefile, ncolumns=1, append=TRUE)
    write(visited_ports_frequencies, file=namefile, ncolumns=length(visited_ports_frequencies), append=TRUE)
    
-   write("# name_file_ports", file=namefile, ncolumns=1, append=TRUE)
+   write("# [name_file_ports]", file=namefile, ncolumns=1, append=TRUE)
    write(name_file_ports, file=namefile, ncolumns=1, append=TRUE)
       
-   write("# nb fish or shellfish stocks (should be consistent with /popsspe)",file=namefile, ncolumns=1, append=TRUE)
+   write("# [nb_fish_or_shellfish_stocks_which_should_be_consistent_with_popsspe_folder]",file=namefile, ncolumns=1, append=TRUE)
    write(nb_stocks, file=namefile, ncolumns=length(nb_stocks), append=TRUE)
   
-   write("# fixed cpue per stock on fgrounds(plan B)", file=namefile, ncolumns=1, append=TRUE)
+   write("# [fixed_cpue_per_stock_on_fgrounds_for_planB]", file=namefile, ncolumns=1, append=TRUE)
    write(as.character(as.numeric(fixed_cpue_per_stock)), file=namefile, ncolumns=length(as.character(as.numeric(fixed_cpue_per_stock))), append=TRUE)
   
-   write("# Gamma (shape parameter) cpue per stock on fgrounds (plan A but for implicit stocks or out of range nodes)", file=namefile, ncolumns=1, append=TRUE)
+   write("# [Gamma_shape_parameter_for_cpue_per_stock_on_fgrounds_for_planA_but_for_implicit_stocks_or_out_of_range_nodes]", file=namefile, ncolumns=1, append=TRUE)
    write(as.character(as.numeric(gshape_cpue_per_stock)), file=namefile, ncolumns=length(as.character(as.numeric(gshape_cpue_per_stock))), append=TRUE)
   
-   write("# Gamma (scale parameter) cpue per stock on fgrounds(plan A but for implicit stocks or out of range nodes)", file=namefile, ncolumns=1, append=TRUE)
+   write("# [Gamma_scale_parameter_for_cpue_per_stock_on_fgrounds_for_planA_but_for_implicit_stocks_or_out_of_range_nodes]", file=namefile, ncolumns=1, append=TRUE)
    write(as.character(as.numeric(gscale_cpue_per_stock)), file=namefile, ncolumns=length(as.character(as.numeric(gscale_cpue_per_stock))), append=TRUE)
   
-   write("# vessel features (speed, fuelconsrate, length, kW, carrying_capacity, tank_capacity, nb_pings_per_trip, shape_in_btw, scale_in_btw, av.trip.duration)",
+   write("# [vessel_features_speed_fuelconsrate_length_kW_carryingcapacity_tankcapacity_nbpingspertrip_shapeinbtw_scaleinbtw_avtripduration]",
    file=namefile, ncolumns=1, append=TRUE)
   
-   write("#  mult_fuelcons_when_steaming, mult_fuelcons_when_fishing, mult_fuelcons_when_returning, mult_fuelcons_when_inactive) ",
+   write("# [multfuelconswhensteaming_multfuelconswhenfishing_multfuelconswhenreturning_multfuelconswheninactive]",
      file=namefile, ncolumns=1, append=TRUE)         
    write(vessel_features, file=namefile, ncolumns=length(vessel_features), append=TRUE)
   
-   write("# percent step in share for TAC (per stock) for these incoming vessels (only used if existing vessels)",file=namefile, ncolumns=1, append=TRUE)
+   write("# [percent_step_in_share_for_TAC_per_stock_for_these_incoming_vessels_but_only_used_if_existing_vessels_already]",file=namefile, ncolumns=1, append=TRUE)
    write(step_in_share, file=namefile, ncolumns=length(step_in_share), append=TRUE)
    
-   write("# vessel effect (per stock) in the catch rate equation ", file=namefile, ncolumns=1, append=TRUE)
+   write("# [vessel_effect_per_stock_in_the_catch_rate_equation]", file=namefile, ncolumns=1, append=TRUE)
    write(as.character(as.numeric(vesselsspe_betas)), file=namefile, ncolumns=length(as.character(as.numeric(vesselsspe_betas))), append=TRUE)
   
-   write("# metier effect (per stock) in the catch rate equation ", file=namefile, ncolumns=1, append=TRUE)
+   write("# [metier_effect_per_stock_in_the_catch_rate_equation]", file=namefile, ncolumns=1, append=TRUE)
    write.table(metiersspe_betas, file=namefile, row.names = FALSE, col.names = FALSE, quote=FALSE, append=TRUE)
  
-   write("# avai effect (per size group per stock) in the catch rate equation ", file=namefile, ncolumns=1, append=TRUE)
+   write("# [avai_effect_per_size_group_per_stock_in_the_catch_rate_equation]", file=namefile, ncolumns=1, append=TRUE)
    write.table(avaisspe_betas, file=namefile, row.names = FALSE, col.names = FALSE, quote=FALSE, append=TRUE)
  
-   write("# create the file for fuel price per vessel size  ",file=namefile, ncolumns=1, append=TRUE)
+   write("# [create_the_file_for_fuel_price_per_vessel_size]", file=namefile, ncolumns=1, append=TRUE)
    write(create_file_for_fuel_price_per_vessel_size, file=namefile, ncolumns=length(create_file_for_fuel_price_per_vessel_size), append=TRUE)
   
-   write("# some fuel price per vessel size (Euro per litre) ",file=namefile, ncolumns=1, append=TRUE)
+   write("# [some_fuel_prices_per_vessel_size_euro_per_litre]",file=namefile, ncolumns=1, append=TRUE)
    write(some_fuel_price_per_vessel_size, file=namefile, ncolumns=length(some_fuel_price_per_vessel_size), append=TRUE)
   
-   write("# i% fishing credits taken from incomers (for RTI management) ", file=namefile, ncolumns=1, append=TRUE)
+   write("# [percent_fishing_credits_taken_by_incomers_for_RTI_management]", file=namefile, ncolumns=1, append=TRUE)
    write(step_in_share_credits, file=namefile, ncolumns=length(step_in_share_credits), append=TRUE)
 
    }   # end test

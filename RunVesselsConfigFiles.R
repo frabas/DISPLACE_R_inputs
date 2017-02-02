@@ -51,46 +51,42 @@ dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$applica
 
    my_split  <- function(x) unlist(strsplit(x, " "))
    my_split2 <- function(x) unlist(strsplit(x, "_"))
-
-   #general <- list()
-   #general$main.path.param.gis   <- as.character(dat[5])
-   #general$application           <- as.character(dat[9])
-   
-   do_append                     <- as.logical(dat[13])
+ 
+   do_append                     <- as.logical(dat[which(dat=="# [append_to_existing_vessel_files]")+1])
    if (count==1) do_append <- FALSE # NOT ADDED TO PREVIOUS FILE......
 
 
-   name_gis_file_for_fishing_effort_per_polygon <- dat[15]
-   name_gis_layer_field                         <- dat[17]
-   is_gis_layer_field_relative_numbers          <- dat[19]
-   xfold_gis_layer_field                        <- as.numeric(my_split(dat[21]))
-   vesselids                                    <- as.character(my_split(dat[23]))
-   vessel_range_km                              <- as.numeric(dat[25])
-   metierids                                    <- as.numeric(my_split(dat[27]))
-   metierids_frequencies                        <- as.numeric(my_split(dat[29]))
+   name_gis_file_for_fishing_effort_per_polygon <- dat[which(dat=="# [name_gis_file_for_total_effort_per_polygon]")+1]
+   name_gis_layer_field                         <- dat[which(dat=="# [name_gis_layer_field]")+1]
+   is_gis_layer_field_relative_numbers          <- dat[which(dat=="# [is_gis_layer_field_relative_numbers]")+1]
+   xfold_gis_layer_field                        <- as.numeric( dat[which(dat=="# [xfold_gis_layer_field]")+1] )
+   vesselids                                    <- as.character(my_split( dat[which(dat=="# [vesselids]")+1] ))
+   vessel_range_km                              <- as.numeric( dat[which(dat=="# [vessel_range_km]")+1] )
+   metierids                                    <- as.numeric(my_split( dat[which(dat=="# [metierids]")+1] )) 
+   metierids_frequencies                        <- as.numeric(my_split( dat[which(dat=="# [metierids_frequencies]")+1] ))
    if(length(metierids)!=length(metierids_frequencies)) stop("Check config file for vessel creator - length(metierids)")
-   visited_ports                                <- as.character(my_split(dat[31]))
-   visited_ports_frequencies                    <- as.numeric(my_split(dat[33]))
+   visited_ports                                <- as.character(my_split( dat[which(dat=="# [visited_ports_but_look_at_names_in_harbours.dat_in_harboursspe_folder]")+1] ))
+   visited_ports_frequencies                    <- as.numeric(my_split( dat[which(dat=="# [visited_ports_frequencies]")+1] ))
    if(length(visited_ports)!=length(visited_ports_frequencies)) stop("Check config file for vessel creator - length(visited_ports)")
-   name_file_ports                              <-  dat[35]
-   nb_stocks                                    <- as.numeric(my_split(dat[37]))
-   fixed_cpue_per_stock                         <- as.numeric(my_split(dat[39]))
+   name_file_ports                              <- dat[which(dat=="# [name_file_ports]")+1]
+   nb_stocks                                    <- as.numeric(my_split( dat[which(dat=="# [nb_fish_or_shellfish_stocks_which_should_be_consistent_with_popsspe_folder]")+1] ))
+   fixed_cpue_per_stock                         <- as.numeric(my_split( dat[which(dat=="# [fixed_cpue_per_stock_on_fgrounds_for_planB]")+1] ))
    if(length(fixed_cpue_per_stock)!=nb_stocks) stop("Check config file for vessel creator - length(fixed_cpue_per_stock)")
-   gshape_cpue_per_stock                        <- as.numeric(my_split(dat[41]))
+   gshape_cpue_per_stock                        <- as.numeric(my_split( dat[which(dat=="# [Gamma_shape_parameter_for_cpue_per_stock_on_fgrounds_for_planA_but_for_implicit_stocks_or_out_of_range_nodes]")+1]))
    if(length(gshape_cpue_per_stock)!=nb_stocks) stop("Check config file for vessel creator - length(gshape_cpue_per_stock)")
-   gscale_cpue_per_stock                        <- as.numeric(my_split(dat[43]))
+   gscale_cpue_per_stock                        <- as.numeric(my_split( dat[which(dat=="# [Gamma_scale_parameter_for_cpue_per_stock_on_fgrounds_for_planA_but_for_implicit_stocks_or_out_of_range_nodes]")+1]))
    if(length(gscale_cpue_per_stock)!=nb_stocks) stop("Check config file for vessel creator - length(gscale_cpue_per_stock)")
-   vessel_features                              <- as.numeric(my_split(dat[46]))
-   step_in_share                                <- as.numeric(my_split(dat[48]))
+   vessel_features                              <- as.numeric(my_split( dat[which(dat=="# [vessel_features_speed_fuelconsrate_length_kW_carryingcapacity_tankcapacity_nbpingspertrip_shapeinbtw_scaleinbtw_avtripduration]")+2] ))
+   step_in_share                                <- as.numeric(my_split( dat[which(dat=="# [percent_step_in_share_for_TAC_per_stock_for_these_incoming_vessels_but_only_used_if_existing_vessels_already]")+1] ))
    if(length(step_in_share)!=nb_stocks) stop("Check config file for vessel creator - length(step_in_share)")
-
+                                                  
    # from this vessel, add catch equation vessel effect
-   vesselsspe_betas                             <- as.numeric(my_split(dat[50]))
+   vesselsspe_betas                             <- as.numeric(my_split(dat[which(dat=="# [vessel_effect_per_stock_in_the_catch_rate_equation]")+1] ))
    if(length(vesselsspe_betas)!=nb_stocks) stop("Check config file for vessel creator - length(vesselsspe_betas)")
 
    # from this vessel, add catch equation metier effect informed for the vessel´s metiers (caution, we expect the same whatever the vessel if we talk about the same metiers)
-   metierspe_betas                              <- as.numeric(my_split(dat[52]))
-   if(length(nb_stocks)>1) for(st in 2: length(nb_stocks)) metierspe_betas <- c(metierspe_betas,  as.numeric(my_split(dat[52]+(st-1))))
+   metierspe_betas                              <-  as.numeric(my_split(dat[which(dat=="# [metier_effect_per_stock_in_the_catch_rate_equation]")+1] ))
+   if(length(nb_stocks)>1) for(st in 2: length(nb_stocks)) metierspe_betas <- c(metierspe_betas,  as.numeric(my_split(which(dat=="# [metier_effect_per_stock_in_the_catch_rate_equation]")+1+(st-1))))
    metierspe_betas                              <- matrix(metierspe_betas, ncol=length(metierids), nrow=(nb_stocks), byrow=TRUE)
    colnames(metierspe_betas)                    <- metierids
    metierspe_betas                              <- cbind( as.numeric(rep(colnames(metierspe_betas), each=nrow(metierspe_betas))) , c( metierspe_betas) ) 
@@ -103,13 +99,13 @@ dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$applica
        }
                                     
    # from this vessel, add catch equation sizegroup effect (caution, we expect the same whatever the vessel)
-   avaispe_betas                                <- as.numeric(my_split(dat[52+nrow(metierspe_betas)+2]))
-   if(length(nb_stocks)>1) for(st in 2: length(nb_stocks)) avaispe_betas <- c(avaispe_betas,  as.numeric(my_split(dat[52+nrow(metierspe_betas)+2]+(st-1))))
+   avaispe_betas                                <-  as.numeric(my_split(dat[which(dat=="# [avai_effect_per_size_group_per_stock_in_the_catch_rate_equation]")+1] ))
+   if(length(nb_stocks)>1) for(st in 2: length(nb_stocks)) avaispe_betas <- c(avaispe_betas,  as.numeric(my_split( dat[which(dat=="# [avai_effect_per_size_group_per_stock_in_the_catch_rate_equation]")+1+(st-1)] )) )
    avaispe_betas                             <- matrix(avaispe_betas, ncol=14, nrow=(nb_stocks), byrow=TRUE)
    
-   create_file_for_fuel_price_per_vessel_size   <-  as.logical(dat[52+nrow(metierspe_betas)+nrow(avaispe_betas)+2])
-   some_fuel_price_per_vessel_size              <-  as.numeric(my_split(dat[52+nrow(metierspe_betas)+nrow(avaispe_betas)+4]))
-   step_in_share_credits                        <-  as.numeric(dat[52+nrow(metierspe_betas)+nrow(avaispe_betas)+6])
+   create_file_for_fuel_price_per_vessel_size   <-  as.logical(dat[which(dat=="# [create_the_file_for_fuel_price_per_vessel_size]")+1])
+   some_fuel_price_per_vessel_size              <-  as.numeric(my_split(dat[which(dat=="# [some_fuel_prices_per_vessel_size_euro_per_litre]")+1]))
+   step_in_share_credits                        <-  as.numeric(dat[which(dat=="# [percent_fishing_credits_taken_by_incomers_for_RTI_management]")+1])
 
 
 #-------------------------------------------------------------------------------
