@@ -274,46 +274,6 @@
 
                           
                          
-
-
-  
-    for (a.semester in 1:2){
-   #-----------
-   #-----------
-    ## POP SPE----------
-      for(rg in c('0', '2', '3', '5', '7')){
-        # export betas specific to the avai szgroup given this pop (caution: remenber the scaling i.e *1000)
-        # mean estimates
-         popsspe_delta_semester <- cbind.data.frame(0:(length(spp)-1), rep(0, length(0:(length(spp)-1))) )
-         colnames(popsspe_delta_semester) <- c('pop', 'delta.nb_indiv')
-
-        # save .dat files
-        write.table(popsspe_delta_semester,
-           file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
-             paste("avai", rg, "_betas_semester", a.semester,".dat",sep='')),
-               col.names=TRUE,  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")
-     
-           cat(paste("Write avai", rg, "_betas_semester", a.semester,".dat....done \n"))      
-        } # end rg
-   } # end a.semester
-
-
-    # the selected groups in the catch rate equation
-    write(c('nm2',  'selected_szgroups'),
-                   file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
-                       paste("the_selected_szgroups.dat",sep=' ')), append=FALSE,  ncol=2,
-                          sep=" ")
-                         
-    for(sp in (0:(length(spp)-1))){
-       write.table(cbind(nm2=sp, selected_szgroups=c(0, 2, 3, 5, 7)),
-                   file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
-                       paste("the_selected_szgroups.dat",sep=' ')), append=TRUE,
-                         quote = FALSE, sep=" ", col.names=FALSE, row.names=FALSE)
- 
-    }  # end sp
- cat(paste("Write the_selected_szgroups.dat....done \n"))
- 
-   
  
  
  

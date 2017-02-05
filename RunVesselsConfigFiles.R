@@ -752,7 +752,8 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
 
 
     cat(paste("lastly, produce additional files e.g. related to the catch equation", "\n"))
-   ## ADDITIONAL FILES FOR THE CATCH EQUATION
+    cat(paste("metier effect in the catch equation", "\n"))
+   ## ADDITIONAL FILES FOR THE CATCH EQUATION - METIER EFFECT
    spp_table    <- read.table(file=file.path(general$main.path.param.gis, "POPULATIONS", paste("pop_names_",general$application ,".txt",sep='')), header=TRUE)
    spp          <- as.character(spp_table$spp)
    metier_names <- read.table( file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''), "metier_names.dat"), header=TRUE)
@@ -787,6 +788,52 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
  
 
  } # end a.semester
+
+
+
+
+   cat(paste("metier effect in the catch equation", "\n"))
+   ## ADDITIONAL FILES FOR THE CATCH EQUATION - AVAI EFFECT
+   selected_szgroups        <- c('0', '2', '3', '5', '7')  # DISPLACE hardcoding
+   colnames (avaispe_betas) <- 0:(ncol(avaispe_betas)-1)
+    for (a.semester in 1:2){
+   #-----------
+   #-----------
+    ## POP SPE----------
+      for(rg in selected_szgroups){
+        # export betas specific to the avai szgroup given this pop (caution: remenber the scaling i.e *1000)
+        # mean estimates
+         #popsspe_delta_semester <- cbind.data.frame(0:(length(spp)-1), rep(0, length(0:(length(spp)-1))) )
+         popsspe_delta_semester <- cbind.data.frame(0:(length(spp)-1), avaispe_betas[,rg])
+         colnames(popsspe_delta_semester) <- c('pop', 'delta.nb_indiv')
+
+        # save .dat files
+        write.table(popsspe_delta_semester,
+           file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
+             paste("avai", rg, "_betas_semester", a.semester,".dat",sep='')),
+               col.names=TRUE,  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")
+     
+           cat(paste("Write avai", rg, "_betas_semester", a.semester,".dat....done \n"))      
+        } # end rg
+   } # end a.semester
+
+
+    # the selected groups in the catch rate equation
+    write(c('nm2',  'selected_szgroups'),
+                   file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
+                       paste("the_selected_szgroups.dat",sep=' ')), append=FALSE,  ncol=2,
+                          sep=" ")
+                         
+    for(sp in (0:(length(spp)-1))){
+       write.table(cbind(nm2=sp, selected_szgroups=selected_szgroups),
+                   file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
+                       paste("the_selected_szgroups.dat",sep=' ')), append=TRUE,
+                         quote = FALSE, sep=" ", col.names=FALSE, row.names=FALSE)
+ 
+    }  # end sp
+ cat(paste("Write the_selected_szgroups.dat....done \n"))
+ 
+ 
 
 
 cat("Remenber that because some new fgrounds are created \n you will have (in DISPLACE GUI) to derive a new graph with a new shortestPath library (say 57 by loading the graph 56 and then create the shortestPaths) \n and also create a new baseline.dat /simusspe with the right missing port idx (say 9979) (absence of the right index for the port makes the ui crash)\n")
