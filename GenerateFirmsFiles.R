@@ -40,7 +40,7 @@
   write.table(some_firms_features,   
             file=file.path(general$main.path.ibm, paste("firmsspe_", general$application, sep=''), 
               paste("firms_specs.dat",sep='')),
-                  col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
+                  col.names=FALSE,  row.names=FALSE, sep= '|', quote=FALSE, append=FALSE)
   cat(paste("Write firms-related files...done\n"))
 
 
