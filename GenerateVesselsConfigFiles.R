@@ -171,7 +171,8 @@
                                    vessel_specifications[i, "weekEndStartDay"],
                                    vessel_specifications[i, "WeekEndEndDay"],
                                    vessel_specifications[i, "WorkHoursStart"],
-                                   vessel_specifications[i, "WorkHoursEnd"]
+                                   vessel_specifications[i, "WorkHoursEnd"],
+                                   vessel_specifications[i, "firm_id"]
                                    ) 
    step_in_share              <- rep(vessel_specifications[i, "N..of.vessels"]/ sum(vessel_specifications[, "N..of.vessels"], na.rm=TRUE), nb_stocks) 
                                        # i.e. 100 % of each TAC per stock will be booked for these new vessels
@@ -265,7 +266,7 @@
    write("# [vessel_features_speed_fuelconsrate_length_kW_carryingcapacity_tankcapacity_nbpingspertrip_shapeinbtw_scaleinbtw_avtripduration]",
    file=namefile, ncolumns=1, append=TRUE)
   
-   write("# [multfuelconswhensteaming_multfuelconswhenfishing_multfuelconswhenreturning_multfuelconswheninactive]",
+   write("# [multfuelconswhensteaming_multfuelconswhenfishing_multfuelconswhenreturning_multfuelconswheninactive_firmid]",
      file=namefile, ncolumns=1, append=TRUE)         
    write(vessel_features, file=namefile, ncolumns=length(vessel_features), append=TRUE)
   
@@ -297,7 +298,7 @@
   }   # end for loop over record
     
    
- cat(paste("......done"))  
+ cat(paste("......done.  stored in /FISHERIES/vessels_config_files folder"))  
    
       
  
