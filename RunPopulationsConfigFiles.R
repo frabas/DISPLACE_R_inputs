@@ -257,6 +257,29 @@
     
       }
       
+     
+      # Diffuse N coefficients - here, avai used as a proxy for long/short residence time
+       for(pid in unique(popsspe_avai_semester[,c('pids')])){
+         popsspe_coeffs_semester_this_pop <- x[x$pids==pid, c('pids','pt_graph', 'abundance')]
+         popsspe_coeffs_semester_this_pop$quant <- cut( popsspe_coeffs_semester_this_pop$abundance+.00000001,
+                       breaks=quantile(popsspe_coeffs_semester_this_pop$abundance, prob=c(0, 0.5,0.75, 1))) # just arbitrary values for this example!
+         popsspe_coeffs_semester_this_pop$quant [is.na(popsspe_coeffs_semester_this_pop$quant )] <- levels(popsspe_coeffs_semester_this_pop$quant)[1] # AVOID NAs by all means!
+         
+         popsspe_coeffs_semester_this_pop$coeff <- popsspe_coeffs_semester_this_pop$quant
+         levels(popsspe_coeffs_semester_this_pop$coeff) <- c(0.5,0.1,0.05) # just arbitrary for this example!
+          
+         write.table(popsspe_coeffs_semester_this_pop[,c('pt_graph', 'coeff')],  # the szgroup dim is implicit....
+            file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''), "static_avai", 
+              paste(pid, "spe_field_of_coeff_diffusion_this_pop_nodes_semester",gsub("Q","",a.semester),".dat",sep='')),
+                  col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
+    
+         cat(paste("Write", pid, "spe_field_of_coeff_diffusion_this_pop_nodes_semester",gsub("Q","",a.semester),".dat....done \n"))
+  
+      }
+     
+     
+     
+     
       
       # stock presence/absence distribution
       distrib <- popsspe_avai_semester_no_sz[,c('pids', 'pt_graph')]
