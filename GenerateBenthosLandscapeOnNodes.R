@@ -279,7 +279,28 @@
   ##---------------------------------------------------------------------------##
   
   
-  # TO DO
+  # logistic recovery rate (r, month-1) for habitat and functional group
+  
+   # for the time being,
+   # creating files with fake copy/paste info
+   # and assuming at least two functional groups (--> will be a multimap in c++)
+
+
+ if(!file.exists(file.path(general$main_path_gis, "HABITATS", "logistic_recovery_rates_per_month_per_funcgr.csv"))){
+     logistic_recovery_rates_per_month_per_funcgr <- cbind.data.frame(
+                                                 landscape=rep(codes, each=2), # assuming 2 func grps
+                                                 logistic_recovery_rate_per_month=0.4  # 20% (fake)
+                                                 ) 
+     write.table(logistic_recovery_rates_per_month_per_funcgr, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
+                        paste("logistic_recovery_rates_per_month_per_funcgr.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
+ } else{
+   recovery <- read.table(file.path(general$main_path_gis, "HABITATS", "logistic_recovery_rates_per_month_per_funcgr.csv"), header=TRUE, sep=";")
+        logistic_recovery_rates_per_month_per_funcgr <- recovery[,c('landscape', 'logistic_recovery_rate_per_month')]
+        write.table(logistic_recovery_rates_per_month_per_funcgr, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
+                        paste("logistic_recovery_rates_per_month_per_funcgr.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
+   
+ }                           
+
 
   
   ##----------------------------------------------------------------------------##
