@@ -352,14 +352,14 @@
 
 
 
-   if(!file.exists(file.path(general$main_path_gis, "HABITATS", "prop_loss_on_habitat_after_one_passage_per_metier_per_sz.csv"))){
-       estimates_biomass_per_cell_per_funcgr_per_landscape <- cbind.data.frame(landscape=rep(codes, each=2), biomass_per_cell=10000)  # ??
-       write.table(estimates_biomass_per_cell_per_funcgr_per_landscape, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
-                        paste("estimates_biomass_per_cell_per_funcgr_per_landscape.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
+   if(!file.exists(file.path(general$main_path_gis, "HABITATS", "prop_funcgr_biomass_per_node_per_landscape.csv"))){
+       prop_funcgr_biomass_per_node_per_landscape <- cbind.data.frame(landscape=rep(codes, each=2), prop_funcgr_per_node=0.5)  # sum to 1 per node per landscape 
+       write.table(prop_funcgr_biomass_per_node_per_landscape, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
+                        paste("prop_funcgr_biomass_per_node_per_landscape.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
   } else{
-     estimates_biomass_per_cell_per_funcgr_per_landscape <- read.table(file.path(general$main_path_gis, "HABITATS", "tot_benthos_biomass_on_habitat_per_node_per_sz.csv"), header=TRUE, sep=";")
-       write.table(estimates_biomass_per_cell_per_funcgr_per_landscape, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
-                        paste("estimates_biomass_per_cell_per_funcgr_per_landscape.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
+     prop_funcgr_biomass_per_node_per_landscape <- read.table(file.path(general$main_path_gis, "HABITATS", "prop_funcgr_biomass_per_node_per_landscape.csv"), header=TRUE, sep=";")
+       write.table(prop_funcgr_biomass_per_node_per_landscape, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
+                        paste("prop_funcgr_biomass_per_node_per_landscape.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
   
   }
 
