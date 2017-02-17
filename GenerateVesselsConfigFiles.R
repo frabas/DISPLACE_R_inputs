@@ -43,6 +43,17 @@
    #=> CAUTION: do not leave white rows at the end of this file! otherwise will create some extra wrong config_files
    cat(paste("Read vessels_specifications_per_harbour_metiers.csv \n"))
  
+ 
+   # a quick important check on the metier names (should be consistent with the ones available in spatialLayers)
+   for (met in 1:length(vessel_specifications$LE_MET)) {
+   if(length(
+        grep(as.character(vessel_specifications$name_gis_file_for_fishing_effort_per_polygon[met]), list.files(file.path(general$main_path_gis, "FISHERIES", "spatialLayers")))
+            )==0){
+           stop(paste("a spatial layer for ", vessel_specifications$name_gis_file_for_fishing_effort_per_polygon[met], "is missing!! rename the metier in specs or better to get this layer"))
+           } 
+   }
+   
+ 
    nb_agent_per_vessels <- 1  # caution: super-individuals to reduce the total nb of vessels to be simulated
    vessel_specifications[, "N..of.vessels"] <- ceiling(vessel_specifications[, "N..of.vessels"])/nb_agent_per_vessels
    
@@ -191,10 +202,10 @@
    # create a (intermediate) config file
    if(any("vid" %in% colnames(vessel_specifications))){
       namefile <- file.path(general$main_path_gis, "FISHERIES", "vessels_config_files",
-               paste("vessels_creator_args_",general$application,"_", as.character(vessel_specifications[i, "vid"]), "_", harbcode, "_", all_records_this_vid[imax, "metier"], ".dat", sep=''))
+               paste("vessels_creator_args_",general$application,"_", as.character(vessel_specifications[i, "vid"]), "_", harbcode, "_", all_records_this_vid[imax, "name_gis_file_for_fishing_effort_per_polygon"], ".dat", sep=''))
    } else{
       namefile <- file.path(general$main_path_gis, "FISHERIES", "vessels_config_files",
-               paste("vessels_creator_args_",general$application, "_", harbcode, "_", vessel_specifications[i, "metier"], ".dat", sep=''))
+               paste("vessels_creator_args_",general$application, "_", harbcode, "_", vessel_specifications[i, "name_gis_file_for_fishing_effort_per_polygon"], ".dat", sep=''))
    }
  
    cat(paste("write the config file.. \n"))
