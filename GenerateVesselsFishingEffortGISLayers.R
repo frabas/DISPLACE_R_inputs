@@ -315,3 +315,199 @@ cat(paste(".....done\n"))
 cat(paste("You might repeat but from a new country...\n"))
 
 
+
+
+
+if(FALSE){
+  # for the user going one step further to identify fishing grounds:
+  
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!GET DELINEATION OF FISHING GROUNDS!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!FROM VARIOUS CRITERIA!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+
+#-----------
+delineateFishingGrounds <- function (tacsatp,  type_agg="per_cell", based_on="feffort", threshold_in_percent=90){
+
+ 
+    if(based_on=="revenue") tacsatp <- cbind.data.frame(tacsatp,
+                          totfield= apply(tacsatp[,grep('EURO',colnames(tacsatp))], 1, sum, na.rm=TRUE) )
+    if(based_on=="weight") tacsatp <- cbind.data.frame(tacsatp,
+                          totfield= apply(tacsatp[,grep('KG',colnames(tacsatp))], 1, sum, na.rm=TRUE) )
+    if(based_on=="feffort") tacsatp <- cbind.data.frame(tacsatp,
+                          totfield= tacsatp$'LE_EFF_VMS')
+    if(based_on=="spatialdependency1") tacsatp <- cbind.data.frame(tacsatp,
+                          totfield= apply(tacsatp[,grep('EURO',colnames(tacsatp))], 1, sum, na.rm=TRUE) )
+    if(based_on=="spatialdependency2") tacsatp <- cbind.data.frame(tacsatp,
+                          totfield= apply(tacsatp[,grep('EURO',colnames(tacsatp))], 1, sum, na.rm=TRUE) )
+
+
+    # per cell
+    if(type_agg=="per_cell"){
+    totfield_per_cell                                                             <- aggregate(tacsatp$totfield, list(tacsatp$grID, tacsatp$CELL_LONG, tacsatp$CELL_LATI), sum )
+    colnames(totfield_per_cell)                                                   <- c("grID", "CELL_LONG", "CELL_LATI", "totfield")
+    totfield_per_cell$percent                                                     <- totfield_per_cell$totfield / sum(totfield_per_cell$totfield) *100 # percentage per node
+    totfield_per_cell_and_percentage                                              <- totfield_per_cell[order(totfield_per_cell$percent, decreasing=TRUE),]
+    totfield_per_cell_and_percentage$cumpercent                                   <- cumsum(totfield_per_cell_and_percentage$percent)
+    totfield_per_cell_and_percentage[,paste("thres.",threshold_in_percent, sep="")]  <- as.numeric(totfield_per_cell_and_percentage$cumpercent <  threshold_in_percent)
+    totfield_per_cell_and_percentage                                              <-  totfield_per_cell_and_percentage[totfield_per_cell_and_percentage[,ncol(totfield_per_cell_and_percentage)]==1,]
+    }
+   
+    if(type_agg=="per_cell_per_vessel"){
+    # per cell, per vessel (i.e. a grid cell is kept if the cell belongs to the 90%  of at least one vessel....) 
+    totfield_per_cell_per_vessel                                                  <- aggregate(tacsatp$totfield, list(tacsatp$VE_REF, tacsatp$grID, tacsatp$CELL_LONG, tacsatp$CELL_LATI), sum )
+    colnames(totfield_per_cell_per_vessel)                                        <- c("VE_REF", "grID", "CELL_LONG", "CELL_LATI", "totfield")
+    dd <- lapply(split(totfield_per_cell_per_vessel, f=totfield_per_cell_per_vessel$VE_REF),
+       function(x){
+         x$percent                                      <- x$totfield / sum(x$totfield) *100 # percentage per node
+         x                                              <- x[order(x$percent, decreasing=TRUE),]
+         x$cumpercent                                   <- cumsum(x$percent)
+         x[,paste("thres.",threshold_in_percent, sep="")]  <- as.numeric(x$cumpercent <  threshold_in_percent)
+        x
+       })
+    totfield_per_cell_per_vessel_and_percentage                                   <- do.call('rbind', dd)
+    totfield_per_cell_per_vessel_and_percentage                                   <- totfield_per_cell_per_vessel_and_percentage[totfield_per_cell_per_vessel_and_percentage[,ncol(totfield_per_cell_per_vessel_and_percentage)]==1,]
+    totfield_per_cell_per_vessel_and_percentage$VE_REF                            <- as.factor(totfield_per_cell_per_vessel_and_percentage$VE_REF)
+    }
+    
+    
+   if(based_on %in% c("revenue", "weight", "feffort"))
+     {
+     
+     if(type_agg=="per_cell"){
+      return(totfield_per_cell_and_percentage)
+     }
+     if(type_agg=="per_cell_per_vessel"){
+      return(totfield_per_cell_per_vessel_and_percentage)
+     }
+     
+     
+     } else{   # one step further.....
+     
+          if(based_on %in% 'spatialdependency1' && type_agg!="per_cell_per_vessel")
+             {
+            
+             # index 1
+             revenue_per_vessel                                  <- tapply(tacsatp$totfield, list(tacsatp$VE_REF), sum)
+             names_vessels_per_cell_this_threshold               <- tapply(tacsatp$VE_REF, list(tacsatp$grID), function(x) as.character(unique(x)))
+             tot_revenue_of_the_vessels_visiting_this_cell       <- lapply(names_vessels_per_cell_this_threshold, function(x) sum(revenue_per_vessel[x], na.rm=TRUE))
+             index1_importance_of_vessels                        <- unlist(tot_revenue_of_the_vessels_visiting_this_cell) / sum(revenue_per_vessel, na.rm=TRUE)  # index runs from 0 to 1
+             # retrieve info on cells....
+             index1_importance_of_vessels                        <- cbind.data.frame(totfield_per_cell_and_percentage, index1=index1_importance_of_vessels[as.character(totfield_per_cell_and_percentage$grID)])   # retrieve info
+             index1_importance_of_vessels                        <- index1_importance_of_vessels[order(index1_importance_of_vessels$index1, decreasing=TRUE),]     # order
+   
+            
+             return(index1_importance_of_vessels)
+            
+            } 
+            
+          if(based_on %in% 'spatialdependency2' && type_agg!="per_cell_per_vessel")
+          {  
+            
+            # index 2
+            revenue_per_vessel                                  <- tapply(tacsatp$totfield, list(tacsatp$VE_REF), sum)
+            revenue_per_cell                                    <- tapply(tacsatp$totfield, list(tacsatp$grID), sum)
+            index2_contribution_of_the_cell                     <- unlist(revenue_per_cell) / sum(revenue_per_vessel, na.rm=TRUE) 
+
+            # index 3
+            names_vessels_per_cell_this_threshold               <- tapply(tacsatp$VE_REF, list(tacsatp$grID), function(x) as.character(unique(x)))
+            tot_revenue_of_the_vessels_visiting_this_cell       <- lapply(names_vessels_per_cell_this_threshold, function(x) sum(revenue_per_vessel[x], na.rm=TRUE))
+            index3_dependency_to_the_cell                       <- unlist(revenue_per_cell) /  unlist(tot_revenue_of_the_vessels_visiting_this_cell)  # index runs from 0 to 1
+            # retrieve info on cells....
+            index3_dependency_to_the_cell                        <- cbind.data.frame(totfield_per_cell_and_percentage, index3=index3_dependency_to_the_cell[as.character(totfield_per_cell_and_percentage$grID)])   # retrieve info
+            index3_dependency_to_the_cell                        <- index3_dependency_to_the_cell[order(index3_dependency_to_the_cell$index3, decreasing=TRUE),]     # reorder
+
+         
+            # note that index2 = index1 * index3
+            # note that sum( index2_per_cell [,1])=1000 => per mille
+           
+            return(index3_dependency_to_the_cell)
+           }
+            
+            
+   }
+   
+   
+
+}
+
+#-----------
+plotFishingGrounds <- function (cells=cells, resx=3/60, resy=3/60, plot_type="grid", add_to=FALSE, name_export_file=file.path(getwd(),"gis_layer_test")){
+      
+   the_colours <-  rev(heat.colors(10))
+   xrange <- range(cells[,'CELL_LONG'])
+   yrange <- range(cells[,'CELL_LATI'])
+   
+   if(!add_to) plot(0, 0, xlim=xrange, ylim=yrange, type="n", xlab="Longitude", ylab="Latitude")
+   
+   if(plot_type=="grid") {   # note that it is always possible to Dissolve polygons in ArcGIS afterwards....
+      rect(cells[,'CELL_LONG']-resy/2, cells [,'CELL_LATI']-resx/2, cells[,'CELL_LONG']+resy/2, cells [,'CELL_LATI']+resx/2, col=the_colours[10])
+      #legend("topright", title="Dependency on revenue (%)", legend=c("10","20","30","40","50","60","70","80","90","100"), fill= heat.colors(10), bty="n")
+ 
+      uniqueCells   <- cells[!duplicated(cells$grID),c("grID","CELL_LONG","CELL_LATI")]
+      coords        <- SpatialPoints(cbind(SI_LONG=as.numeric(as.character(uniqueCells$CELL_LONG)),SI_LATI=as.numeric(as.character(uniqueCells$CELL_LATI))))
+      spix          <- SpatialPixels(coords)
+      spol          <- as(spix, "SpatialPolygons")
+      library(sp)
+      proj4string(spol) <- CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")
+  
+      if(nrow(cells)!=nrow(uniqueCells)){ # remove the vessel dimension
+       cells   <- aggregate(cells$percent, list(cells$grID, cells$CELL_LONG, cells$CELL_LATI), mean )
+       colnames(cells)  <- c("grID", "CELL_LONG", "CELL_LATI", "avpercent")
+      }
+   
+      cells[,ncol(cells)] <- as.numeric(cells[,ncol(cells)])
+   
+      # export in .shp attaching the df with the levels
+      IDs  <- sapply(slot(spol, "polygons"), function(x) slot(x, "ID"))
+      spdf <- SpatialPolygonsDataFrame(spol, data=cbind.data.frame(data.frame(id=row.names(spol),row.names=row.names(spol)), cells))
+      writePolyShape(spdf, file.path(name_export_file))
+      # note that 'percent' in attribute table can be used in ArcGIS symbology to color the relative importance of the cells
+      }
+      
+      
+return()
+}
+
+
+# calls
+cells <- delineateFishingGrounds(tacsatp,         type_agg="per_cell",    based_on="feffort", threshold_in_percent=80)
+plotFishingGrounds (cells=cells, resx=3/60, resy=3/60, plot_type="grid", add_to=FALSE, name_export_file=file.path(outPath,"2015_Danish_feffort_gis_layer_80percentthreshold"))
+sum(cells$percent)
+
+cells <- delineateFishingGrounds(tacsatp,         type_agg="per_cell",    based_on="weight",  threshold_in_percent=80)
+plotFishingGrounds (cells=cells, resx=3/60, resy=3/60, plot_type="grid", add_to=FALSE, name_export_file=file.path(outPath,"2015_Danish_weight_gis_layer_80percentthreshold"))
+sum(cells$percent)
+
+cells <- delineateFishingGrounds(tacsatp_value,   type_agg="per_cell",    based_on="revenue", threshold_in_percent=80)
+plotFishingGrounds (cells=cells, resx=3/60, resy=3/60, plot_type="grid", add_to=FALSE, name_export_file=file.path(outPath,"2015_Danish_revenue_gis_layer_80percentthreshold"))
+sum(cells$percent)
+
+cells <- delineateFishingGrounds(tacsatp,         type_agg="per_cell_per_vessel",    based_on="feffort", threshold_in_percent=80)
+plotFishingGrounds (cells=cells, resx=3/60, resy=3/60, plot_type="grid", add_to=FALSE, name_export_file=file.path(outPath,"2015_Danish_feffort_gis_layer_80percentthreshold_atleast1vessel"))
+sum(cells$percent)
+
+cells <- delineateFishingGrounds(tacsatp,         type_agg="per_cell_per_vessel",    based_on="weight", threshold_in_percent=80)
+plotFishingGrounds (cells=cells, resx=3/60, resy=3/60, plot_type="grid", add_to=FALSE, name_export_file=file.path(outPath,"2015_Danish_weight_gis_layer_80percentthreshold_atleast1vessel"))
+sum(cells$percent)
+
+cells <- delineateFishingGrounds(tacsatp_value,   type_agg="per_cell_per_vessel",    based_on="revenue", threshold_in_percent=80)
+plotFishingGrounds (cells=cells, resx=3/60, resy=3/60, plot_type="grid", add_to=FALSE, name_export_file=file.path(outPath,"2015_Danish_revenue_gis_layer_80percentthreshold_atleast1vessel"))
+sum(cells$percent)
+
+cells <- delineateFishingGrounds(tacsatp_value, based_on="spatialdependency1", threshold_in_percent=80)
+plotFishingGrounds (cells=cells, resx=3/60, resy=3/60, plot_type="grid", add_to=FALSE, name_export_file=file.path(outPath,"2015_Danish_spatialdependency1_gis_layer_80percentthreshold"))
+sum(cells$percent)
+
+cells <- delineateFishingGrounds(tacsatp_value, based_on="spatialdependency2", threshold_in_percent=80)
+plotFishingGrounds (cells=cells, resx=3/60, resy=3/60, plot_type="grid", add_to=FALSE, name_export_file=file.path(outPath,"2015_Danish_spatialdependency2_gis_layer_80percentthreshold"))
+sum(cells$percent)
+
+#=> all layers exported in ArcGIS....then use Generalization>Dissolve tool when necessary
+
+} # end FALSE

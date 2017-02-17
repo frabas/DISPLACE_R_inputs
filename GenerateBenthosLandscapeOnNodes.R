@@ -23,6 +23,7 @@
   
   #if(general$application=="adriatic")   name_GIS_file <- "Benthos_GSA17"
   #if(general$application=="testexample")  name_GIS_file <- "landscapes.tif"
+  #if(general$application=="testexample")  name_GIS_file <- "biomc_rfmodel_Gogina_et_al_2016_Figure7_wgs84" 
   if(general$application=="testexample")  name_GIS_file <- "habitat_landscapes" # this name used by the Objects Editor ui
   
    cat(paste("START \n"))
@@ -66,9 +67,11 @@
   ##---------------------------------------------------------------------------##
   ##---------------------------------------------------------------------------##
   ##---------------------------------------------------------------------------##
+
+ # the code is only provided as info here - better to use the DISPLACE GUI with Graph>Assign Landscape code
+ if(FALSE){
  
-  ## FROM A SHAPE FILE (OR A RASTER FILE)
-  
+  ## FROM A SHAPE FILE 
   #------------------
   # SHAPE-----------
   #------------------
@@ -112,7 +115,7 @@
   cat(paste("Write coordXX_with_landscape.dat in /graphsspe...done\n"))
   #----------------------------
 
-
+}
 
 
   if(FALSE){ # RASTER layer currently not handled by the DISPLACE Objects Editor
@@ -184,58 +187,7 @@
   } # end if raster
                                                 
   
-  ##---------------------------------------------------------------------------##
-  ##---------------------------------------------------------------------------##
-  ##---------------------------------------------------------------------------##
-  ##----------------------- OBTAIN A ABUNDANCE PER FUNCTIONAL GROUP------------##
-  ##---------------------------------------------------------------------------##
-  ##---------------------------------------------------------------------------##
-  ##---------------------------------------------------------------------------##
-
-   # TO DO e.g. from Gogina et al 2016 ICESJMS for balticRTI
-   
-   
-   
-  
-  ##---------------------------------------------------------------------------##
-  ##---------------------------------------------------------------------------##
-  ##---------------------------------------------------------------------------##
-  ##-------------- OBTAIN A MORTALITY FUNCTION PER FUNCTIONAL GROUP------------##
-  ##---------------------------------------------------------------------------##
-  ##---------------------------------------------------------------------------##
-  ##---------------------------------------------------------------------------##
-
-   # TO DO
- 
-   # a fake example:
-   maxpassage                              <- 10
-   Fk_this_metier                          <- 1: maxpassage # frequency of passage on the landscape-node
-   loss_after_one_passage_this_metier_this_landscape_j <- 0.20 # 20%
-   a_trawl_swept_area_per_tstep_km2        <- (0.300 * 4*1.853) # swept 300m fishing at 4knots 
-   area_around_node_km2                    <- 2.5*2.5 # graph node spaced by 2.5 km
-   M_on_landscape_j                        <- 1-((1-(loss_after_one_passage_this_metier_this_landscape_j*(a_trawl_swept_area_per_tstep_km2/area_around_node_km2)))^Fk_this_metier)
- 
-   # convert in an instantaneous depletion rate
-   M_per_tstep <- rep(0, 9)
-   for(passage in 1: 9)
-      M_per_tstep[passage] <- - ( (1-M_on_landscape_j[passage+1]) -  (1-M_on_landscape_j[passage]) )/     (1-M_on_landscape_j[passage])
-
-   # then check:
-   N <- 1000 
-   for(passage in 1: 9){
-     N<- N* (1-M_per_tstep[passage])
-    print(N)
-     }
-   
-   # which should be equivalent to: 
-   N <- 1000
-   N <- N*(1-M_on_landscape_j[9])
-   print(N)  
-     
-   # so we can summarize by applying the following at each time step,
-   M_on_landscape_j                        <- 1-((1-(loss_after_one_passage_this_metier_this_landscape_j*(a_trawl_swept_area_per_tstep_km2/area_around_node_km2))))
-  
-   
+    
  ##----------------------------------------------------------------------------##
 ##----------------------------------------------------------------------------##
 ##----------------------------------------------------------------------------##
@@ -248,21 +200,21 @@
            paste("coord", general$igraph,"_with_landscape.dat", sep='')))
 
    # translate the coding, CAUTION just a fake example here...
-   bottom   <- substr(as.numeric(as.character(landscape_per_node[,1])), 1,1)
-   photic   <- substr(as.numeric(as.character(landscape_per_node[,1])), 2,2)
-   salinity <- substr(as.numeric(as.character(landscape_per_node[,1])), 3,3)
+   #bottom   <- substr(as.numeric(as.character(landscape_per_node[,1])), 1,1)
+   #photic   <- substr(as.numeric(as.character(landscape_per_node[,1])), 2,2)
+   #salinity <- substr(as.numeric(as.character(landscape_per_node[,1])), 3,3)
 
 
-   bottom_levels <- factor(bottom)
-   levels(bottom_levels) <- c('Deep', 'Not_deep')
+   #bottom_levels <- factor(bottom)
+   #levels(bottom_levels) <- c('Deep', 'Not_deep')
 
-   photic_levels <- factor(photic)
-   levels(photic_levels) <- c('NA','Photic', 'Aphotic')
+   #photic_levels <- factor(photic)
+   #levels(photic_levels) <- c('NA','Photic', 'Aphotic')
 
-   salinity_levels <- factor(salinity)
-   levels(salinity_levels) <- c('NA', '<30psu', '>30psu')
+   #salinity_levels <- factor(salinity)
+   #levels(salinity_levels) <- c('NA', '<30psu', '>30psu')
 
-   landscape_per_node <- cbind.data.frame (landscape_per_node, landscape=paste(bottom_levels, photic_levels, salinity_levels, sep="_"))
+   #landscape_per_node <- cbind.data.frame (landscape_per_node, landscape=paste(bottom_levels, photic_levels, salinity_levels, sep="_"))
 
 
    codes <- unique(landscape_per_node[,1])
