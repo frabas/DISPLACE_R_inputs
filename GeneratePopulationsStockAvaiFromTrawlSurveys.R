@@ -382,6 +382,18 @@ set.avai <- function(lst.avai, sp, S, areas){
      obj.in.areas[,c(5:18)] <-
                 sweep(obj.in.areas[,c(5:18)], 2,
                    apply(obj.in.areas[,c(5:18)], 2, sum, na.rm=TRUE), FUN="/") # CAUTION: Assuming equal grid resolution
+     # Note that if the grid is made out of different grid resolution then this ratio will need to be adjusted e.g.
+     # by considering the Gauss circle problem. Because the nodes of the grid with lower resolution
+     # should represent a higher proportion of the stock then a node of the grid with higher resolution
+     # we need to compute how many nodes of the finest grid equals 1 node of the lower grid resolution.
+     # the Gauss circle approximation say 317 nodes for a circle of radius 10 time greater. 
+     # i.e. if res1 spaced by 0.6km and res2 spaced by 6km then the circle centered on a node of the res2 (radius 3km)
+     # will include 317 nodes of res1 i.e. ca. pi*r^2.                
+     #If the answer for a given r is denoted by N(r) then the following list shows the first few values of N(r) 
+     #for r an integer between 0 and 12 followed by the list of values pi r^{2} rounded to the nearest integer:
+     #1, 5, 13, 29, 49, 81, 113, 149, 197, 253, 317, 377, 441              
+                   
+                   
      name.areas <- 'undefined'
      if(sp %in% c("WHG", "SPR", "TUR", "DAB")){  # special case: west and east baltic merged
         if(all(c("IVa", "IVb", "IVc") %in% areas)) name.areas <- 'nsea'
