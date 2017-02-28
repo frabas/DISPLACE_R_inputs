@@ -102,7 +102,7 @@ for (popid in 1: length(catches_in_tons$POP)){
             # to fill in the pop attribute
         write.table(round(coord[, c('pt_graph', 'landings')]),
                file= file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
-                  paste((popid)-1, 'spe_stecf_oth_land_per_month_per_node_month', month, ".dat", sep='')),
+                   paste((popid)-1, 'spe_stecf_oth_land_per_month_per_node_month', month, "_fleetsce1.dat", sep='')), 
                  row.names=FALSE, col.names=TRUE, quote=FALSE)
 
         cat(paste("Write ", (popid)-1, 'spe_stecf_oth_land_per_month_per_node_month', month, ".dat\n", sep=''))
