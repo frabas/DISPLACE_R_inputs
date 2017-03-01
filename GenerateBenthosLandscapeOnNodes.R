@@ -186,14 +186,34 @@
   #----------------------------
   } # end if raster
                                                 
+ 
+  ##---------------------------------------------------------------------------##
+  ##---------------------------------------------------------------------------##
+  ##---------------------------------------------------------------------------##
+  ##----------------------- OBTAIN A BIOMASS ON NODE -------------------------##
+  ##---------------------------------------------------------------------------##
+  ##---------------------------------------------------------------------------##
+  ##---------------------------------------------------------------------------##
+
+   # use the DISPLACE GUI with Graph>Assign Benthos Biomass 
   
-    
+   ##---------------------------------------------------------------------------##
+  ##---------------------------------------------------------------------------##
+  ##---------------------------------------------------------------------------##
+  ##----------------------- OBTAIN A Number ON NODE -------------------------##
+  ##---------------------------------------------------------------------------##
+  ##---------------------------------------------------------------------------##
+  ##---------------------------------------------------------------------------##
+
+   # use the DISPLACE GUI with Graph>Assign Benthos Number 
+  
+   
  ##----------------------------------------------------------------------------##
-##----------------------------------------------------------------------------##
-##----------------------------------------------------------------------------##
-##----------------------------------------------------------------------------##
-##----------------------------------------------------------------------------##
-##----------------------------------------------------------------------------##
+ ##----------------------------------------------------------------------------##
+ ##----------------------------------------------------------------------------##
+ ##----------------------------------------------------------------------------##
+ ##----------------------------------------------------------------------------##
+ ##----------------------------------------------------------------------------##
 
  ## FROM THE GRAPH file map
  landscape_per_node <- read.table(file=file.path(general$main.path.ibm, "graphsspe", 
@@ -268,22 +288,37 @@
    # creating files with fake copy/paste info
    # and assuming at least two functional groups (--> will be a multimap in c++)
 
-
- if(!file.exists(file.path(general$main_path_gis, "HABITATS", "logistic_recovery_rates_per_month_per_funcgr.csv"))){
-     benthos_carrying_capacity_K_per_landscape_per_funcgr <- cbind.data.frame(
+ # biomass
+ if(!file.exists(file.path(general$main_path_gis, "HABITATS", "benthos_biomass_carrying_capacity_K_per_landscape_per_funcgr.csv"))){
+     benthos_biomass_carrying_capacity_K_per_landscape_per_funcgr <- cbind.data.frame(
                                                  landscape=rep(codes, each=2), # assuming 2 func grps
-                                                 benthos_carrying_capacity_K=500 
+                                                 benthos_biomass_carrying_capacity_K=500 
                                                  ) 
-     write.table(benthos_carrying_capacity_K_per_landscape_per_funcgr, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
-                        paste("benthos_carrying_capacity_K_per_landscape_per_funcgr.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
+     write.table(benthos_biomass_carrying_capacity_K_per_landscape_per_funcgr, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
+                        paste("benthos_biomass_carrying_capacity_K_per_landscape_per_funcgr.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
  } else{
-   K <- read.table(file.path(general$main_path_gis, "HABITATS", "benthos_carrying_capacity_K_per_landscape_per_funcgr.csv"), header=TRUE, sep=";")
-        benthos_carrying_capacity_K_per_landscape_per_funcgr <- K[,c('landscape', 'benthos_carrying_capacity_K')]
-        write.table(benthos_carrying_capacity_K_per_landscape_per_funcgr, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
-                        paste("benthos_carrying_capacity_K_per_landscape_per_funcgr.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
+   K <- read.table(file.path(general$main_path_gis, "HABITATS", "benthos_biomass_carrying_capacity_K_per_landscape_per_funcgr.csv"), header=TRUE, sep=";")
+        benthos_biomass_carrying_capacity_K_per_landscape_per_funcgr <- K[,c('landscape', 'benthos_biomass_carrying_capacity_K')]
+        write.table(benthos_biomass_carrying_capacity_K_per_landscape_per_funcgr, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
+                        paste("benthos_biomass_carrying_capacity_K_per_landscape_per_funcgr.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
    
  }                           
 
+ # number
+ if(!file.exists(file.path(general$main_path_gis, "HABITATS", "benthos_number_carrying_capacity_K_per_landscape_per_funcgr.csv"))){
+     benthos_number_carrying_capacity_K_per_landscape_per_funcgr <- cbind.data.frame(
+                                                 landscape=rep(codes, each=2), # assuming 2 func grps
+                                                 benthos_number_carrying_capacity_K=500 
+                                                 ) 
+     write.table(benthos_number_carrying_capacity_K_per_landscape_per_funcgr, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
+                        paste("benthos_number_carrying_capacity_K_per_landscape_per_funcgr.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
+ } else{
+   K <- read.table(file.path(general$main_path_gis, "HABITATS", "benthos_number_carrying_capacity_K_per_landscape_per_funcgr.csv"), header=TRUE, sep=";")
+        benthos_number_carrying_capacity_K_per_landscape_per_funcgr <- K[,c('landscape', 'benthos_number_carrying_capacity_K')]
+        write.table(benthos_number_carrying_capacity_K_per_landscape_per_funcgr, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
+                        paste("benthos_number_carrying_capacity_K_per_landscape_per_funcgr.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
+   
+ }                           
 
   
   ##----------------------------------------------------------------------------##
@@ -329,7 +364,7 @@
 ##----------------------------------------------------------------------------##
 ##----------------------------------------------------------------------------##
 ##------------------CREATE ONE FILE .dat FOR ESTIMATES OF---------------------##
-##--------------------OF BIOMASS PER CELL PER FUNCTIONAL GROUP----------------##
+##--------------------OF PROP BIOMASS OR NUMBER PER CELL PER FUNCTIONAL GROUP-##
 ##----------------------PER MARINE LANDSCAPE----------------------------------##
 ##----------------------------------------------------------------------------##
 
@@ -347,6 +382,38 @@
   }
 
 
+ 
+   if(!file.exists(file.path(general$main_path_gis, "HABITATS", "prop_funcgr_number_per_node_per_landscape.csv"))){
+       prop_funcgr_number_per_node_per_landscape <- cbind.data.frame(landscape=rep(codes, each=2), prop_funcgr_per_node=0.5)  # sum to 1 per node per landscape 
+       write.table(prop_funcgr_number_per_node_per_landscape, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
+                        paste("prop_funcgr_number_per_node_per_landscape.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
+  } else{
+     prop_funcgr_number_per_node_per_landscape <- read.table(file.path(general$main_path_gis, "HABITATS", "prop_funcgr_number_per_node_per_landscape.csv"), header=TRUE, sep=";")
+       write.table(prop_funcgr_number_per_node_per_landscape, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
+                        paste("prop_funcgr_number_per_node_per_landscape.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
+  
+  }
+
+
+##----------------------------------------------------------------------------##
+##----------------------------------------------------------------------------##
+##------------------CREATE ONE FILE .dat FOR ESTIMATES OF---------------------##
+##--------------------MEAN WEIGHT PER FUNCTIONAL GROUP-##
+##----------------------PER MARINE LANDSCAPE----------------------------------##
+##----------------------------------------------------------------------------##
+
+
+
+   if(!file.exists(file.path(general$main_path_gis, "HABITATS", "meanw_funcgr_per_landscape.csv"))){
+       meanw_funcgr_per_landscape <- cbind.data.frame(landscape=rep(codes, each=2), meanweight_funcgr_per_node=0.5)  # sum to 1 per node per landscape 
+       write.table(meanw_funcgr_per_landscape, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
+                        paste("meanw_funcgr_per_landscape.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
+  } else{
+     meanw_funcgr_per_landscape <- read.table(file.path(general$main_path_gis, "HABITATS", "meanw_funcgr_per_landscape.csv"), header=TRUE, sep=";")
+       write.table(meanw_funcgr_per_landscape, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
+                        paste("meanw_funcgr_per_landscape.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
+  
+  }
 
 
 cat(paste(".....stored in", general$main.path.ibm, "/benthossspe \n"))
