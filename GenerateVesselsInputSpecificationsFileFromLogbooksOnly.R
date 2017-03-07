@@ -406,7 +406,7 @@
   }
 
   # keep only DNK vessels
- logbooks <- logbooks[c(grep("DEN", logbooks$VE_REF)),]
+ logbooks <- logbooks[c(grep("DNK", logbooks$VE_REF)),]
  
  # finally, export!
  nameobj <- "vessels_specifications_per_harbour_metiers_from_logbooks_only.csv"  #....and possibly per vid!
