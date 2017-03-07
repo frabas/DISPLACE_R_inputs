@@ -18,6 +18,11 @@
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   if(ctry=="DEN"){
+  
+  
+  #------------------------------------
+  # VMS-equipped vessels---------------
+  #------------------------------------
   #load(file=file.path(general$main.path.param.gis, "FISHERIES", "all_merged_weight_DEN_2015.RData"))
   load(file=file.path(general$main.path.param.gis, "FISHERIES", "coupled_VMS_logbooks_DNK_2015.RData"))
   tacsatp_den           <- coupled_VMS_logbooks
@@ -58,6 +63,8 @@
     tacsatp_den[tacsatp_den$SI_STATE==2, "LE_EFF_VMS"] <- 0 # remove effort if non-fishing points
   
   tacsatp <- tacsatp_den
+  
+   
   }
   
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
@@ -311,7 +318,6 @@
   tacsatp_agg[, grep('LE_KG_', nm)]          <- tacsatp_agg[, grep('LE_KG_', nm)]   /   tacsatp_agg$LE_EFF_VMS
   colnames(tacsatp_agg)[grep('LE_KG_', nm)]  <- paste(gsub('LE_KG_', '', nm[grep('LE_KG_', nm)]), '_kg_h', sep='')
   
-  # to do
   # add other features such as:
    # fishing speed knots	cruise speed knots	fuel cons h	ave storage fish kg	fuel tank liter	trip duration h	multip fuel steaming	multip fuel fishing	multip fuel ret port fish	multip fuel inactive	range km fish ground	
    # fuel_price_Euro/liter	weekEndStartDay	WeekEndEndDay	WorkHoursStart	WorkHoursEnd
@@ -399,6 +405,8 @@
    tacsatp_agg$Crew <- NA
    tacsatp_agg$mean_GT <- NA
    
+   tacsatp_agg$FIRM    <- paste("FIRM", 1:nrow(tacsatp_agg))
+   tacsatp_agg$firm_id <- 1:nrow(tacsatp_agg)
  
   
   # finally, export!
@@ -451,5 +459,5 @@
   
   #Region,Harbor,metier,N. of vessels,Crew,mean_LOA_m,mean_GT,mean_kW,hake_kg_h,sole_kg_h,redmullet_kg_h,mantis_kg_h,fishing speed knots,cruise speed knots,fuel cons h,ave storage fish kg,fuel tank liter,trip duration h,multip fuel steaming,multip fuel fishing,multip fuel ret port fish,multip fuel inactive,range km fish ground,fuel_price_Euro/liter,weekEndStartDay,WeekEndEndDay,WorkHoursStart,WorkHoursEnd
   
- write.table(tacsatp_agg, file.path(general$main.path.param.gis, "FISHERIES", nameobj), row.names=FALSE, sep=";", quote=FALSE)
+ write.table(tacsatp, file.path(general$main.path.param.gis, "FISHERIES", nameobj), row.names=FALSE, sep=";", quote=FALSE)
 
