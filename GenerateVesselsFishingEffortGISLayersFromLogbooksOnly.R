@@ -236,7 +236,7 @@ exportEffortCtryMetierGISlayers <- function (logbooks, general=general, effort_f
   colnames(agglogbooks)[1:5] <- c("LE_MET","grID", "CELL_LONG", "CELL_LATI", "ctry")
   colnames(agglogbooks)[6]   <- "feffort"
 
-  aggtacsatp$EFFORT <- aggtacsatp$feffort # ECOAST GRID spe
+  agglogbooks$EFFORT <- agglogbooks$feffort # ECOAST GRID spe
 
   agglogbooks$ctry <- factor(agglogbooks$ctry)
   agglogbooks$LE_MET <- factor(agglogbooks$LE_MET)
