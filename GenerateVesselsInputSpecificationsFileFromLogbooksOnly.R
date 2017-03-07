@@ -7,7 +7,7 @@
 
   ## ROUTINE USED FOR NON-VMS EQUIPPED VESSELS (i.e. TACSATP NON AVAILABLE)
   ## CAUTION: SOME SPATIAL LAYERS (GIS SHAPE FILES in \SpatialLayers) FOR SOME METIERS SPECIFIC TO THESE VESSELS
-  ## WILL NEED TO BE INFORMED
+  ## WILL NEED TO BE INFORMED E.G. with GenerateVesselsFishingEffortGISLayersFromLogbooksOnly.R
   
   
   
@@ -346,7 +346,7 @@
    logbooks_agg$vessel_range_km     <- 30
    logbooks_agg[logbooks_agg$LE_MET_rough %in% c('Dredge', 'Trawl', 'Seine'), 'vessel_range_km'] <- 50
    
-   logbooks_agg$name_gis_file_for_fishing_effort_per_polygon <- paste(substr(as.character(logbooks_agg$VE_REF), 1,3), "_gis_feffort_", logbooks_agg$LE_MET, sep='')
+   logbooks_agg$name_gis_file_for_fishing_effort_per_polygon <- paste(substr(as.character(logbooks_agg$VE_REF), 1,3), "_gis_feffort_logbk_only_", logbooks_agg$LE_MET, sep='')
    logbooks_agg$name_gis_layer_field                         <- "feffort"                     # giving releative  e.g. in 5 categories: 1 to 5 with 1 high occurence or absoulte effort ditribtion
    logbooks_agg$is_gis_layer_field_relative_numbers          <- FALSE                           # if relative effort categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
    logbooks_agg$xfold_gis_layer_field                        <- "1"                            # giving relative importance of the 5 categories e.g. visting an area of cat 1 is 10000 times more probable than for cat 5
