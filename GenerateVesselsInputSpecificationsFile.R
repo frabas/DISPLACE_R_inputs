@@ -1,8 +1,8 @@
 
  general <- list()
       if(.Platform$OS.type == "windows") {
-        general$application           <- "balticRTI" # ...or myfish
-        general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub","DISPLACE_input_gis", general$application)
+        general$application           <- "DanishFleet" # ...
+        general$main.path.param.gis   <- file.path("C:","Users","fbas","Documents","GitHub", paste("DISPLACE_input_gis_", general$application, sep=""))
        }
 
 
@@ -161,7 +161,7 @@
    
  
   port_names <- read.table(file=file.path(general$main.path.param.gis, "GRAPH",
-                                  paste("harbours.dat", sep='')), sep=";")
+                                  paste("harbours.dat", sep='')), sep=";", header=TRUE)
 
   all_ports_in_input <- levels(tacsatp$SI_HARB)
   all_ports_in_input <- all_ports_in_input[all_ports_in_input!="NA"]
@@ -173,7 +173,7 @@
   # brute force to link nodes to harbours (with euclidian distance)
   idx <- rep(0, nrow(coord_ports))
   for(i in 1:nrow(coord_ports)){
-    idx[i] <- which.min ( sqrt( ((coord_ports[i, "SI_LONG"] -   port_names  [, "x"])^2) +  (((coord_ports[i, "SI_LATI"] -   port_names  [, "y"]))^2)) )
+    idx[i] <- which.min ( sqrt( ((coord_ports[i, "SI_LONG"] -   port_names  [, "lon"])^2) +  (((coord_ports[i, "SI_LATI"] -   port_names  [, "lat"]))^2)) )
     print(i)
   }
   coord_ports$harbour <- row.names(port_names)[idx]
@@ -187,7 +187,7 @@
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
    # relevant vessels only i.e. active in the area....
-  
+    if(FALSE){
      # keep only the vessels fishnig in the western Baltic  (and kattegat because her.3a22, and East baltic because spr.2232)
     library(maptools)
     handmade            <- readShapePoly(file.path(general$main.path.param.gis, "MANAGEMENT", "wbaltic_wgs84"))  # build in ArcGIS 10.1
@@ -198,6 +198,7 @@
     vid_this_case_study <- as.character(unique(tacsatp$VE_REF[in_area>0]))
     cat(paste(length(vid_this_case_study), " vessels in the area over ", length(unique(tacsatp$VE_REF)), " in total" , "\n"))
     tacsatp      <- tacsatp[tacsatp$VE_REF %in% vid_this_case_study,]
+  }
   
    ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
    ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
@@ -429,7 +430,7 @@
    ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
    ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
   # FINAL STEP, ONCE ALL COUNTRIES INFORMED THEN COMBINE ALL COUNTRIES
-  countries <- c('DEN', 'SWE', 'DEU')
+  countries <- c('DEN')
   tacsatp   <- NULL
   for (ctry in countries){
 
@@ -451,8 +452,8 @@
      }
   }
 
-  # keep only DNK and DEU, and SWE vessels
- tacsatp <- tacsatp[c(grep("DEN", tacsatp$VE_REF), grep("DEU",tacsatp$VE_REF), grep("SWE", tacsatp$VE_REF)),]
+  # keep only DNK  vessels
+ tacsatp <- tacsatp[c(grep("DNK", tacsatp$VE_REF)),]
  
  # finally, export!
  nameobj <- "vessels_specifications_per_harbour_metiers.csv"  #....and possibly per vid!
