@@ -71,6 +71,9 @@ getLogbooks<- function(year="2015", ctry="DNK") {
   
   logbooks$ctry       <- ctry
  
+  logbooks <- logbooks[ !is.na(as.numeric(as.character(logbooks$SI_LONG))) & 
+                           !is.na(as.numeric(as.character(logbooks$SI_LATI))) ,]
+                           #=> remove if the rectangle is not informed...
  
   
  
