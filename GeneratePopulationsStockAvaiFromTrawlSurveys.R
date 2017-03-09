@@ -80,8 +80,8 @@
    if(FALSE){
    x1 <- coord[,1] # long graph
    y1 <- coord[,2] # lat graph
-   x2 <- an(bits.cpue$ShootLon) # long bits
-   y2 <- an(bits.cpue$ShootLat) # lat bits
+   x2 <- an(ibts_and_bits_cpue$ShootLon) # long bits
+   y2 <- an(ibts_and_bits_cpue$ShootLat) # lat bits
    n1 <- length(x1)
    n2 <- length(x2)
    X1 <- matrix(rep(x1, n2), ncol = n2)
@@ -126,12 +126,12 @@ function(lon,lat,lonRef,latRef){
 #------------------------  
 #------------------------  
 
-  bits.cpue <- read.table(file.path(general$main_path_gis, "POPULATIONS", paste("Stock_spatial_research_survey_vessel_data.csv", sep='')), header=TRUE, sep=";")
+  ibts_and_bits_cpue <- read.table(file.path(general$main_path_gis, "POPULATIONS", paste("Stock_spatial_research_survey_vessel_data.csv", sep='')), header=TRUE, sep=";")
   cat(paste("Loading Stock_spatial_research_survey_vessel_data.csv....done \n"))
   
   # subset for the chosen period
-  bits.cpue <- bits.cpue[bits.cpue$Year %in% years,]
-  bits.cpue$Year <- factor(bits.cpue$Year)
+  ibts_and_bits_cpue       <- ibts_and_bits_cpue[ibts_and_bits_cpue$Year %in% years,]
+  ibts_and_bits_cpue$Year  <- factor(ibts_and_bits_cpue$Year)
 
   # get species fao code + add missing or mispelling species e.g. PRA and SAN
   load(file.path(general$main_path_gis, "POPULATIONS", "Stock_latin_names.RData"))
@@ -142,9 +142,73 @@ function(lon,lat,lonRef,latRef){
   speciesLatinNames <- rbind.data.frame(speciesLatinNames, 
                               data.frame(species_eng="TUR", ff_species_latin="Scophthalmus maximus", fao_code="TUR"))
 
-  bits.cpue$Species_latin <- bits.cpue$Species
-  bits.cpue$Species       <- speciesLatinNames$fao_code[match(bits.cpue$Species, speciesLatinNames$ff_species_latin)]
-  bits.cpue               <- bits.cpue[!is.na(bits.cpue$Species),] 
+  # get species fao code + add missing or mispelling species e.g. PRA and SAN
+  load(file.path(general$main_path_gis, "POPULATIONS", "Stock_latin_names.RData"))
+  speciesLatinNames <- rbind.data.frame(speciesLatinNames, 
+                              data.frame(species_eng="Pandalus", ff_species_latin="Pandalus", fao_code="PRA"))
+  speciesLatinNames <- rbind.data.frame(speciesLatinNames, 
+                              data.frame(species_eng="Ammodytes marinus", ff_species_latin="Ammodytes marinus", fao_code="SAN"))
+
+
+
+  ## CAUTION: CSH and PRA are all at 0s in the surveys!!
+  ## so use the commercial cpue instead. 
+  ## caution: tricky there because replace the records of the ibts survey with the commercial (Danish) geolocalized cpue...
+  # load the data from VMS/logbook coupling
+  load(file.path(general$main_path_gis, "FISHERIES", "coupled_VMS_logbooks_DNK_2015.RData"))
+  spp <- c("LE_KG_PRA", "LE_KG_CSH", "LE_KG_OYF", "LE_KG_MUS", "LE_KG_NEP")
+  ibts_and_bits_cpue$Species <- as.character(ibts_and_bits_cpue$Species)
+  ibts_and_bits_cpue$Species <- as.character(ibts_and_bits_cpue$Species)
+  for(sp in spp){
+   if(sp=="LE_KG_PRA") latin <- "Pandalus"
+   if(sp=="LE_KG_CSH") latin <- "Crangon crangon"
+   if(sp=="LE_KG_MUS") latin <- "Mytilus edulis"
+   if(sp=="LE_KG_OYF") latin <- "Ostrea edulis" 
+   if(sp=="LE_KG_NEP") latin <- "Nephrops norvegicus"
+   this.sp <- coupled_VMS_logbooks[!is.na(coupled_VMS_logbooks[,sp])  & coupled_VMS_logbooks[,sp] !=0 &
+                               as.numeric(as.character(coupled_VMS_logbooks$SI_LONG))>-10, 
+                         c("SI_LONG","SI_LATI","SI_DATE",sp,"LE_EFF_VMS")] 
+                         
+   this.sp$cpue                <- as.numeric(as.character(this.sp[,sp]))/(as.numeric(as.character(this.sp$LE_EFF_VMS))/60)
+   this.sp$quarter             <- quarters(as.POSIXct(as.character(this.sp$SI_DATE)))
+   this.sp                     <- this.sp[this.sp$quarter!="QNA",]
+   this.sp$cpue                <- replace(this.sp$cpue, is.na(this.sp$cpue), 0)
+   # create ibts_and_bits_cpue like data format and fill in from commercial cpue
+   cn                      <- colnames(ibts_and_bits_cpue[ibts_and_bits_cpue$Species==latin,])
+   zz                      <- data.frame(matrix(0,ncol=length(cn), nrow=nrow(this.sp)))
+   colnames(zz)            <- cn
+   zz$ShootLat             <- this.sp$SI_LATI
+   zz$ShootLon             <- this.sp$SI_LONG
+   zz$Year                 <- "2015"
+   zz$LngtClass            <- 5 # assume all indiv in the fist szgroup bin
+   zz$CPUE_number_per_hour <- this.sp$cpue
+   zz$Quarter              <- gsub("Q","", this.sp$quarter)
+   zz$Survey               <- "commercial"
+   zz$Species              <- latin
+   zz$Ship                 <- ""
+   zz$Gear                 <- ""
+   rand_sampling_idx       <- sample(size=min(nrow(zz), 5000), x=1:nrow(zz), replace=FALSE)    # bc too time demanding to keep all the points!
+   zz <- zz[rand_sampling_idx,]
+   # replace the data
+   if(sp=="LE_KG_PRA" || sp=="LE_KG_CSH") {
+     ibts_and_bits_cpue               <- ibts_and_bits_cpue[!ibts_and_bits_cpue$Species==latin,]
+     ibts_and_bits_cpue               <- rbind.data.frame(ibts_and_bits_cpue, zz[,colnames(ibts_and_bits_cpue)])
+     }
+   if(sp=="LE_KG_MUS" || sp=="LE_KG_OYF") {
+     ibts_and_bits_cpue               <- ibts_and_bits_cpue[!ibts_and_bits_cpue$Species==latin,]
+     ibts_and_bits_cpue               <- rbind.data.frame(ibts_and_bits_cpue, zz[,colnames(ibts_and_bits_cpue)])
+     }
+   if(sp=="LE_KG_NEP") {
+   # do not remove the NEP in the (north sea) scientific survey but also add the info from commercial Danish activity
+     ibts_and_bits_cpue               <- rbind.data.frame(ibts_and_bits_cpue, zz[,colnames(ibts_and_bits_cpue)])     
+     }
+
+   }  #=> do not care about warnings here...
+  rm(coupled_VMS_logbooks); gc(reset=TRUE)
+
+  ibts_and_bits_cpue$Species_latin <- ibts_and_bits_cpue$Species
+  ibts_and_bits_cpue$Species       <- speciesLatinNames$fao_code[match(ibts_and_bits_cpue$Species, speciesLatinNames$ff_species_latin)]
+  ibts_and_bits_cpue               <- ibts_and_bits_cpue[!is.na(ibts_and_bits_cpue$Species),] 
 
   ## FILES FOR BUILDING A IGRAPH
   coord <- read.table(file=file.path(general$main_path_gis,  "GRAPH", paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
@@ -157,26 +221,25 @@ function(lon,lat,lonRef,latRef){
   coord <- cbind(coord, 1:nrow(coord)) # keep track of the idx_node
 
   # add a semester code
-  bits.cpue$Semester <- factor(bits.cpue$Quarter) # init
-  levels(bits.cpue$Semester) <- c(1,2) # BTS in Q1 and Q4
+  ibts_and_bits_cpue$Semester <- factor(ibts_and_bits_cpue$Quarter) # init
+  levels(ibts_and_bits_cpue$Semester) <- c(1,1,2,2) # BTS in Q1 and Q4
 
 
  #------------------------  
  #------------------------  
  #------------------------  
  # keep only relevant species
- # BITS
- bits.cpue           <- bits.cpue [bits.cpue$Species %in% species.to.keep,] 
- bits.cpue$Species   <- factor(bits.cpue$Species)
+ ibts_and_bits_cpue           <- ibts_and_bits_cpue [ibts_and_bits_cpue$Species %in% species.to.keep,] 
+ ibts_and_bits_cpue$Species   <- factor(ibts_and_bits_cpue$Species)
 
 
  #------------------------  
  #------------------------  
  #------------------------  
  # design size group (every 5 cm)
- bits.cpue$size_group <- floor(as.numeric(as.character(bits.cpue$LngtClas)) / 50 )
+ ibts_and_bits_cpue$size_group <- floor(as.numeric(as.character(ibts_and_bits_cpue$LngtClas)) / 50 )
 
- bits.cpue$size_group[bits.cpue$size_group>13] <-13 # a plusgroup when > 70 cm  if every 5cm
+ ibts_and_bits_cpue$size_group[ibts_and_bits_cpue$size_group>13] <-13 # a plusgroup when > 70 cm  if every 5cm
  cat(paste("14 size groups, 5 cm bins....done \n"))
   
  #------------------------  
@@ -186,17 +249,16 @@ function(lon,lat,lonRef,latRef){
  # to sum the nb of individuals over the new defined size_group
  library(data.table)
 
- # BITS
- bits.cpue$ShootLat        <- factor(bits.cpue$ShootLat)
- bits.cpue$ShootLon        <- factor(bits.cpue$ShootLon)
- bits.cpue$size_group      <- factor(bits.cpue$size_group)
- bits.cpue$id              <- factor(paste(bits.cpue$Year,".",bits.cpue$Quarter,".",
-                                          bits.cpue$HaulNo,".",bits.cpue$Species,".",bits.cpue$ShootLon,".",bits.cpue$ShootLat, sep=''))
- DT                        <- data.table(bits.cpue) # library data.table for fast grouping replacing aggregate()
+ ibts_and_bits_cpue$ShootLat        <- factor(ibts_and_bits_cpue$ShootLat)
+ ibts_and_bits_cpue$ShootLon        <- factor(ibts_and_bits_cpue$ShootLon)
+ ibts_and_bits_cpue$size_group      <- factor(ibts_and_bits_cpue$size_group)
+ ibts_and_bits_cpue$id              <- factor(paste(ibts_and_bits_cpue$Year,".",ibts_and_bits_cpue$Quarter,".",
+                                          ibts_and_bits_cpue$HaulNo,".",ibts_and_bits_cpue$Species,".",ibts_and_bits_cpue$ShootLon,".",ibts_and_bits_cpue$ShootLat, sep=''))
+ DT                        <- data.table(ibts_and_bits_cpue) # library data.table for fast grouping replacing aggregate()
  eq1                       <- c.listquote(paste("sum(","CPUE_number_per_hour",",na.rm=TRUE)",sep=""))
- agg.bits.cpue             <- DT[,eval(eq1),by=list(Survey,Year,Semester,Quarter,id, ShootLon,ShootLat, Species,size_group)]
- agg.bits.cpue             <- data.frame(agg.bits.cpue)
- colnames(agg.bits.cpue)   <- c("Survey", "Year", "Semester", "Quarter", "id", "ShootLon", "ShootLat", "Species", "size_group", "nb_indiv")
+ agg.ibts_and_bits_cpue             <- DT[,eval(eq1),by=list(Survey,Year,Semester,Quarter,id, ShootLon,ShootLat, Species,size_group)]
+ agg.ibts_and_bits_cpue             <- data.frame(agg.ibts_and_bits_cpue)
+ colnames(agg.ibts_and_bits_cpue)   <- c("Survey", "Year", "Semester", "Quarter", "id", "ShootLon", "ShootLat", "Species", "size_group", "nb_indiv")
 
  #------------------------  
  #------------------------  
@@ -207,21 +269,20 @@ function(lon,lat,lonRef,latRef){
  library(doBy)
 
 
- # BITS
- agg.bits.cpue <- orderBy(~size_group, data=agg.bits.cpue)
- bits.cpue.lst <- NULL # chunk by chunk
- levels(agg.bits.cpue$id) <- 1:length(levels(agg.bits.cpue$id)) # make it easier...
- for(sp in unique(bits.cpue$Species)){
+ agg.ibts_and_bits_cpue <- orderBy(~size_group, data=agg.ibts_and_bits_cpue)
+ ibts_and_bits_cpue.lst <- NULL # chunk by chunk
+ levels(agg.ibts_and_bits_cpue$id) <- 1:length(levels(agg.ibts_and_bits_cpue$id)) # make it easier...
+ for(sp in unique(ibts_and_bits_cpue$Species)){
  cat(paste(sp, "\n"))
- bits.cpue.lst[[sp]] <- reshape(agg.bits.cpue[agg.bits.cpue$Species==sp,], timevar="size_group",
+ ibts_and_bits_cpue.lst[[sp]] <- reshape(agg.ibts_and_bits_cpue[agg.ibts_and_bits_cpue$Species==sp,], timevar="size_group",
          idvar="id", direction="wide", v.names="nb_indiv")
   
   # make dim compatible for do.call("rbind")
-  nbcol.to.add <- 14 - length(grep("nb_", colnames(bits.cpue.lst[[sp]])))   # knowing that we need 14 szgroup bins
+  nbcol.to.add <- 14 - length(grep("nb_", colnames(ibts_and_bits_cpue.lst[[sp]])))   # knowing that we need 14 szgroup bins
   if(nbcol.to.add>0){
-      tmp <- matrix(0,ncol=nbcol.to.add, nrow=nrow(bits.cpue.lst[[sp]]))
-      bits.cpue.lst[[sp]] <- cbind(bits.cpue.lst[[sp]], tmp)  
-      colnames(bits.cpue.lst[[sp]])  <- 
+      tmp <- matrix(0,ncol=nbcol.to.add, nrow=nrow(ibts_and_bits_cpue.lst[[sp]]))
+      ibts_and_bits_cpue.lst[[sp]] <- cbind(ibts_and_bits_cpue.lst[[sp]], tmp)  
+      colnames(ibts_and_bits_cpue.lst[[sp]])  <- 
        c('Survey', 'Year', 'Semester', 'Quarter', 'id', 'ShootLon', 'ShootLat', 'Species',
            'nb_indiv.0', 'nb_indiv.1', 'nb_indiv.2', 'nb_indiv.3',
              'nb_indiv.4', 'nb_indiv.5', 'nb_indiv.6', 'nb_indiv.7',
@@ -229,16 +290,16 @@ function(lon,lat,lonRef,latRef){
    }
 
  }                  
- bits.cpue <- do.call("rbind", bits.cpue.lst)
+ ibts_and_bits_cpue <- do.call("rbind", ibts_and_bits_cpue.lst)
 
- bits.cpue <- replace(bits.cpue, is.na(bits.cpue) | bits.cpue=="Inf", 0)
+ ibts_and_bits_cpue <- replace(ibts_and_bits_cpue, is.na(ibts_and_bits_cpue) | ibts_and_bits_cpue=="Inf", 0)
 
  # check
- head(bits.cpue[bits.cpue$Species==sp,])
+ head(ibts_and_bits_cpue[ibts_and_bits_cpue$Species==sp,])
 
  # save   
  dir.create(path=file.path(general$main_path_gis, "POPULATIONS", "avai"))                   
- save(bits.cpue, 
+ save(ibts_and_bits_cpue, 
    file=file.path(general$main_path_gis,  "POPULATIONS", "avai", paste("cpue_graph", general$igraph,".RData",sep='')))
   cat(paste("Save survey files in /POPULATIONS/avai folder....done \n"))
  
@@ -248,7 +309,7 @@ function(lon,lat,lonRef,latRef){
 #------------------------  
 #------------------------       
 #------------------------  
-get_cpue_on_graph_nodes <-  function (obj=bits.cpue, coord=coord, sp=sp, S=S, survey="bits", general=general){
+get_cpue_on_graph_nodes <-  function (obj=ibts_and_bits_cpue, coord=coord, sp=sp, S=S, survey="bits", general=general){
   
   nb_size_group <- 13  # caution: magic number
 
@@ -272,7 +333,7 @@ get_cpue_on_graph_nodes <-  function (obj=bits.cpue, coord=coord, sp=sp, S=S, su
  a.comment <- paste("graph", general$igraph, "_", sp,"_","S",S,"_",general$method,"_", survey, sep='')
  
 
-  # compute the distance from each node of the graph to the nearest survey points 
+  # TAKES HUGE TIME: compute the distance from each node of the graph to the nearest survey points 
   lst.graph.pts.with.idx.in.obj <- vector("list", length=nrow(coord))
   lst.graph.pts.with.idx.in.obj <- 
       lapply(1:length(lst.graph.pts.with.idx.in.obj), function(i, obj, coord){
@@ -379,6 +440,12 @@ set.avai <- function(lst.avai, sp, S, areas){
      idx.areas          <- which(ICESareas %in% areas)
      obj.in.areas <- obj[idx.areas,]
      obj.in.areas <- replace(obj.in.areas, is.infinite(obj.in.areas), NA)
+     
+     if(all(apply(obj.in.areas[,c(5:18)], 2, sum, na.rm=TRUE)==0))
+       {
+       cat(paste("CAUTION: no avai for this stock ",sp," in this area!!\n"))
+       obj.in.areas[,c(5:18)] <- 0.0000001 # assume even distribution!
+       }
      obj.in.areas[,c(5:18)] <-
                 sweep(obj.in.areas[,c(5:18)], 2,
                    apply(obj.in.areas[,c(5:18)], 2, sum, na.rm=TRUE), FUN="/") # CAUTION: Assuming equal grid resolution
@@ -410,13 +477,13 @@ set.avai <- function(lst.avai, sp, S, areas){
         if(all(c("27", "29","30","31","32") %in% areas)) name.areas <- '2732'    
      } else{
      if(sp %in% c("PLE")){  
-        if(all(c("IVa", "IVb", "IVc", "IIIas") %in% areas)) name.areas <- 'nsea'
+        if(all(c("IVa", "IVb", "IVc", "IIIan") %in% areas)) name.areas <- 'nsea'
         if(all(c("IIIas", "22", "23") %in% areas)) name.areas <- '2123'
         if(all(c("24","25","26", "28-1", "28-2", "29","30","31","32") %in% areas)) name.areas <- '2432'
      } else{
        if(sp %in% c("SOL")){  
         if(all(c("IVa", "IVb", "IVc") %in% areas)) name.areas <- 'nsea'
-        if(all(c("IIIas", "22", "23") %in% areas)) name.areas <- 'IIIa2223'
+        if(all(c("IIIas", "22", "23") %in% areas)) name.areas <- '3a2223'
      } else{
         if(sp %in% c("COD", "HAD")){ # special case: skagerat with nsea, kat alone
         if(all(c("IVa", "IVb", "IVc","IIIan") %in% areas)) name.areas <- 'nsea'
@@ -426,8 +493,8 @@ set.avai <- function(lst.avai, sp, S, areas){
        }else{
       if(sp %in% c("HER")){  # special case: 3a with western baltic
         if(all(c("IVa", "IVb", "IVc") %in% areas)) name.areas <- 'nsea'
-        if(all(c("IIIan") %in% areas)) name.areas <- 'IIIa22'
-        if(all(c("22", "23", "24") %in% areas)) name.areas <- 'IIIa22'
+        if(all(c("IIIan") %in% areas)) name.areas <- '3a22'
+        if(all(c("22", "23", "24") %in% areas)) name.areas <- '3a22'
         if(all(c("25", "26", "27","28-1","28-2","29","30","31","32") %in% areas)) name.areas <- '2532'
        } else{ # default
         if(all(c("IVa", "IVb", "IVc") %in% areas)) name.areas <- 'nsea'
@@ -496,13 +563,13 @@ if(do_plot){
  # calls
  # => assign the returned objects in .GlobalEnv
  # testexample
- spp                        <- unique(bits.cpue$Species)
+ spp                        <- unique(ibts_and_bits_cpue$Species)
  for (sp in as.character(spp)){ # per species
    for (S in 1:2){              # per semester
-      if(sp %in% unique(bits.cpue$Species)){
+      if(sp %in% unique(ibts_and_bits_cpue$Species)){
        cat(paste("This will take some time to look at sp ", sp, "...\n"))
        assign(paste("bits.coord.",sp,".",S,sep=''),
-            get_cpue_on_graph_nodes (obj=bits.cpue, coord=coord, sp=sp, S=S, survey="bits", general=general),  envir =.GlobalEnv )}                 
+            get_cpue_on_graph_nodes (obj=ibts_and_bits_cpue, coord=coord, sp=sp, S=S, survey="ibts_and_bits", general=general),  envir =.GlobalEnv )}                 
        assign(paste("coord.",sp,".",S,sep=''), get(paste("bits.coord.",sp,".",S,sep='')),  envir =.GlobalEnv  )          
        
    } # end S
@@ -619,12 +686,27 @@ if(do_plot){
 
 # check with plot
 if(do_plot){
-   obj <- lst.avai$SOL.IIIa2223$"1"
+   obj <- lst.avai$SOL.3a2223$"1"
    szgroup <-"nb_indiv.5"
    plot(x= obj[,1], y=obj[,2],  col=1, pch=16, 
                  cex=obj[,paste("SOL",".",szgroup,sep='')] /max(obj[,paste("SOL",".",szgroup,sep='')],na.rm=TRUE)*4)
 }
 
+# check with plot
+if(do_plot){
+   obj <- lst.avai$PLE.nsea$"1"
+   szgroup <-"nb_indiv.5"
+   plot(x= obj[,1], y=obj[,2],  col=1, pch=16, 
+                 cex=obj[,paste("PLE",".",szgroup,sep='')] /max(obj[,paste("PLE",".",szgroup,sep='')],na.rm=TRUE)*4)
+}
+
+# check with plot
+if(do_plot){
+   obj <- lst.avai$TUR.2232$"1"
+   szgroup <-"nb_indiv.5"
+   plot(x= obj[,1], y=obj[,2],  col=1, pch=16, 
+                 cex=obj[,paste("TUR",".",szgroup,sep='')] /max(obj[,paste("TUR",".",szgroup,sep='')],na.rm=TRUE)*4)
+}
 
 # save to R
 save("lst.avai", file = file.path(general$main_path_gis,  "POPULATIONS", "avai",
@@ -640,4 +722,4 @@ save("lst.avai", file = file.path(general$main_path_gis,  "POPULATIONS", "avai",
 
 
 
-    
+     
