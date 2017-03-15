@@ -261,7 +261,7 @@
  if(!file.exists(file.path(general$main_path_gis, "HABITATS", "logistic_recovery_rates_per_month_per_funcgr.csv"))){
      logistic_recovery_rates_per_month_per_funcgr <- cbind.data.frame(
                                                  landscape=rep(codes, each=2), # assuming 2 func grps
-                                                 logistic_recovery_rate_per_month=0.4  
+                                                 logistic_recovery_rate_per_month=0.375  # month-1 (which is strictly equivalent to 0.375*12 for year-1)
                                                  ) 
      write.table(logistic_recovery_rates_per_month_per_funcgr, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
                         paste("logistic_recovery_rates_per_month_per_funcgr.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
@@ -345,7 +345,7 @@
    for(met in 0: max_met){
      loss_after_one_passage_this_metier <- cbind.data.frame(
                                                  landscape=rep(codes, each=2),
-                                                 loss_after_one_passage=0.20  # 20% (fake)
+                                                 loss_after_one_passage=-0.79
                                                  ) 
      write.table(loss_after_one_passage_this_metier, file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''),
                         paste(met,"loss_after_one_passage_per_landscape_per_func_group.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
@@ -405,7 +405,7 @@
 
 
    if(!file.exists(file.path(general$main_path_gis, "HABITATS", "meanw_funcgr_per_landscape.csv"))){
-       meanw_funcgr_per_landscape <- cbind.data.frame(landscape=rep(codes, each=2), meanweight_funcgr_per_node=0.5)  # sum to 1 per node per landscape 
+       meanw_funcgr_per_landscape <- cbind.data.frame(landscape=rep(codes, each=2), meanweight_funcgr_per_node=30)  # gram per sq meter
        write.table(meanw_funcgr_per_landscape, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
                         paste("meanw_funcgr_per_landscape.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
   } else{

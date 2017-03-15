@@ -305,10 +305,23 @@ getPolyAroundACoord <- function(dat, a_dist_m){
  handmade_WGS84_reduced_df$xfold         <- as.factor(handmade_WGS84_reduced_df$xfold)
  }
 
-
  # then merge to coord  (c 'poly_id' give the polygon id from the handmade_WGS84 shape file)
+ if(all(is.na(coord$poly_id))) coord$poly_id <- coord$poly # debug if not a single fishing ground found in the circle! then assume all pts in circle are fishing ground!
  coord <- coord[!is.na(coord$poly_id),]
+ if(nrow(merge(coord, handmade_WGS84_reduced_df, by.x="poly_id", by.y="SP_ID"))==0) {coord$poly_id <- handmade_WGS84_reduced_df$SP_ID[1]} # debug - force a merge 
  coord <- merge(coord, handmade_WGS84_reduced_df, by.x="poly_id", by.y="SP_ID")
+
+ 
+ #-------------------------------------------------------------------------------
+ #-------------------------------------------------------------------------------
+ # reduce the dimensionality by random selection
+ prop_to_keep <- 1.0
+ coord <- coord[sample(x=1:nrow(coord), size=ceiling(nrow(coord)*prop_to_keep), replace=FALSE ),]
+ # => e.g. keep 100 % of the potential grounds by default...but you might reduce this prop if untractable simus
+ 
+ #-------------------------------------------------------------------------------
+ #-------------------------------------------------------------------------------
+
 
  
  # check
