@@ -31,16 +31,14 @@
  namefiles <- list.files(file.path( path))
  cat(paste("Entering /POPULATIONS/SpatialLayers folder....done \n"))
 
-
  # parse
  dd <- data.frame()
  for (a_file in namefiles){
     infos <- unlist(strsplit(a_file, split="_"))
     popid <- as.numeric(gsub("contour", "", infos[1])) 
     size  <- infos[2]
-    if(length(grep(".dbf", infos[3]))!=0) sizegroups <- as.character(gsub(".dbf", "", infos[3])) 
-    if(length(grep(".shx", infos[3]))!=0) sizegroups <- as.character(gsub(".shx", "", infos[3])) 
-    if(length(grep(".shp", infos[3]))!=0) sizegroups <- as.character(gsub(".shp", "", infos[3])) 
+    # remove the file extension:
+    if(length(grep(".", infos[3]))!=0) sizegroups <- unlist(lapply(strsplit (infos[3], split="\\."), function(x) x[1]))
     dd <- rbind.data.frame(dd, cbind(popid, size, sizegroups))
    }
    colnames(dd) <- c("popid", "size", "sizegroups")
