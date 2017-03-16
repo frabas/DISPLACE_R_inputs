@@ -185,6 +185,10 @@
                                    vessel_specifications[i, "WorkHoursEnd"],
                                    vessel_specifications[i, "firm_id"]
                                    ) 
+   if(length(vessel_features)!=19) stop("Missing field(s) in the vessel specification input file!!!")                                
+                                
+                                   
+                                   
    step_in_share              <- rep(vessel_specifications[i, "N..of.vessels"]/ sum(vessel_specifications[, "N..of.vessels"], na.rm=TRUE), nb_stocks) 
                                        # i.e. 100 % of each TAC per stock will be booked for these new vessels
    # catch equation parameters: totcatch_inkgperhour_thisspecies = exp( vesselspe_sp + metierspe_sp + (avaispe_sp_szgr * avai_sp_szgr *1000 * gearsel_szgr ) )

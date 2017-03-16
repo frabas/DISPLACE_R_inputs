@@ -319,6 +319,7 @@ getPolyAroundACoord <- function(dat, a_dist_m){
  coord <- coord[sample(x=1:nrow(coord), size=ceiling(nrow(coord)*prop_to_keep), replace=FALSE ),]
  # => e.g. keep 100 % of the potential grounds by default...but you might reduce this prop if untractable simus
  
+ # caution if  prop_to_keep<1 then you´ll potentially have to redo the shortPaths library each time this present routine is re-run....
  #-------------------------------------------------------------------------------
  #-------------------------------------------------------------------------------
 
