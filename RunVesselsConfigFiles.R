@@ -429,6 +429,7 @@ for (a.quarter in c("Q1","Q2","Q3","Q4")){
     # vesselsspe_freq_harbours_quarter[xx].dat
      ## get back the port name
     port_names <- read.table(file.path(general$main.path.param.gis, "GRAPH", name_file_ports), sep=";", row.names=NULL, header=TRUE)
+    if(!"idx_port"  %in% colnames(port_names)) stop("a field named 'idx_port' is required in the harbour.dat file!!")   
     port_names$pt_graph   <- saved_coord[match(port_names$idx_port, saved_coord[,"harb"]), "pt_graph"]
     rownames(port_names)  <- port_names[,1]
     

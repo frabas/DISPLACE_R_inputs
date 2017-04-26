@@ -305,6 +305,8 @@ cat(paste("Write time steps related files ...done \n"))
    
 
 # the graph-related files are needed....
+ dir.create(file.path(general$main.path.ibm, "graphsspe"))
+
 file.copy(
           from=file.path(general$main_path_gis, "GRAPH", paste("coord",general$igraph,".dat", sep='')),
           to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("coord",general$igraph,".dat", sep=''))
@@ -314,72 +316,128 @@ file.copy(
           to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("graph",general$igraph,".dat", sep=''))
           )
 file.copy(
-          from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_quarter1.dat", sep='')),
+          from=file.path(general$main_path_gis, "GRAPH", paste("coord",general$igraph,"_with_benthos_total_biomass.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("coord",general$igraph,"_with_benthos_total_biomass.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("coord",general$igraph,"_with_benthos_total_number.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("coord",general$igraph,"_with_benthos_total_number.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("coord",general$igraph,"_with_landscape.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("coord",general$igraph,"_with_landscape.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("coord",general$igraph,"_with_salinity.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("coord",general$igraph,"_with_salinity.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("coord",general$igraph,"_with_sst.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("coord",general$igraph,"_with_sst.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("coord",general$igraph,"_with_wind.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("coord",general$igraph,"_with_wind.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month1.dat", sep='')),
           to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_month1.dat", sep=''))
           )
 file.copy(
           from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month2.dat", sep='')),
-          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter2.dat", sep=''))
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_month2.dat", sep=''))
           )
 file.copy(
           from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month3.dat", sep='')),
-          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter3.dat", sep=''))
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_month3.dat", sep=''))
           )
 file.copy(
           from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month4.dat", sep='')),
-          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep=''))
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_month4.dat", sep=''))
           )
 file.copy(
           from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month5.dat", sep='')),
-          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep=''))
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_month5.dat", sep=''))
           )
 file.copy(
           from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month6.dat", sep='')),
-          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep=''))
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_month6.dat", sep=''))
           )
 file.copy(
           from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month7.dat", sep='')),
-          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep=''))
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_month7.dat", sep=''))
           )
 file.copy(
           from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month8.dat", sep='')),
-          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep=''))
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_month8.dat", sep=''))
           )
 file.copy(
           from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month9.dat", sep='')),
-          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep=''))
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_month9.dat", sep=''))
           )
 file.copy(
           from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month10.dat", sep='')),
-          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep=''))
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_month10.dat", sep=''))
           )
 file.copy(
           from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month11.dat", sep='')),
-          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep=''))
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_month11.dat", sep=''))
           )
 file.copy(
           from=file.path(general$main_path_gis, "GRAPH", paste("metier_closure_a_graph",general$igraph,"_month12.dat", sep='')),
-          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_quarter4.dat", sep=''))
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("metier_closure_a_graph",general$igraph,"_month12.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("vsize_closure_a_graph",general$igraph,"_month1.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("vsize_closure_a_graph",general$igraph,"_month1.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("vsize_closure_a_graph",general$igraph,"_month2.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("vsize_closure_a_graph",general$igraph,"_month2.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("vsize_closure_a_graph",general$igraph,"_month3.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("vsize_closure_a_graph",general$igraph,"_month3.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("vsize_closure_a_graph",general$igraph,"_month4.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("vsize_closure_a_graph",general$igraph,"_month4.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("vsize_closure_a_graph",general$igraph,"_month5.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("vsize_closure_a_graph",general$igraph,"_month5.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("vsize_closure_a_graph",general$igraph,"_month6.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("vsize_closure_a_graph",general$igraph,"_month6.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("vsize_closure_a_graph",general$igraph,"_month7.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("vsize_closure_a_graph",general$igraph,"_month7.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("vsize_closure_a_graph",general$igraph,"_month8.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("vsize_closure_a_graph",general$igraph,"_month8.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("vsize_closure_a_graph",general$igraph,"_month9.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("vsize_closure_a_graph",general$igraph,"_month9.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("vsize_closure_a_graph",general$igraph,"_month10.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("vsize_closure_a_graph",general$igraph,"_month10.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("vsize_closure_a_graph",general$igraph,"_month11.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("vsize_closure_a_graph",general$igraph,"_month11.dat", sep=''))
+          )
+file.copy(
+          from=file.path(general$main_path_gis, "GRAPH", paste("vsize_closure_a_graph",general$igraph,"_month12.dat", sep='')),
+          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''), paste("vsize_closure_a_graph",general$igraph,"_month12.dat", sep=''))
           )
 file.copy(
           from=file.path(general$main_path_gis, "GRAPH", paste("code_area_for_graph",general$igraph,"_points.dat", sep='') ),
           to=file.path(general$main.path.ibm, paste("graphsspe", sep=''),  paste("code_area_for_graph",general$igraph,"_points.dat", sep='') )
-          )
-file.copy(
-          from=file.path(general$main_path_gis, "GRAPH", paste("nodes_in_polygons_a_graph",general$igraph,"_quarter1.dat", sep='') ),
-          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''),  paste("nodes_in_polygons_a_graph",general$igraph,"_quarter1.dat", sep='') )
-          )
-file.copy(
-          from=file.path(general$main_path_gis, "GRAPH", paste("nodes_in_polygons_a_graph",general$igraph,"_quarter2.dat", sep='') ),
-          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''),  paste("nodes_in_polygons_a_graph",general$igraph,"_quarter2.dat", sep='') )
-          )
-file.copy(
-          from=file.path(general$main_path_gis, "GRAPH", paste("nodes_in_polygons_a_graph",general$igraph,"_quarter3.dat", sep='') ),
-          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''),  paste("nodes_in_polygons_a_graph",general$igraph,"_quarter3.dat", sep='') )
-          )
-file.copy(
-          from=file.path(general$main_path_gis, "GRAPH", paste("nodes_in_polygons_a_graph",general$igraph,"_quarter4.dat", sep='') ),
-          to=file.path(general$main.path.ibm, paste("graphsspe", sep=''),  paste("nodes_in_polygons_a_graph",general$igraph,"_quarter4.dat", sep='') )
           )
           
 

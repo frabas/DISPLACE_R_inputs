@@ -121,7 +121,7 @@
         is_gis_layer_field_relative_numbers          <- all_records_this_vid[imax, "is_gis_layer_field_relative_numbers"]  # if relative effort categories (e.g. high to low) then xfold_gis_layer_field will be used to convert in absolute
         xfold_gis_layer_field                        <- all_records_this_vid[imax, "xfold_gis_layer_field"] # giving relative importance of the 5 categories e.g. visting an area of cat 1 is 10000 times more probable than for cat 5
       } else{
-        metierids                                    <- 0 # adapt
+        metierids                                    <-  metier_names[metier_names$name==vessel_specifications[i, "LE_MET"], "idx"] # adapt if necessary
         metierids_frequencies                        <- c(1)  # pure fishery        # or e.g. c(0.2,0.8)
         name_gis_file_for_fishing_effort_per_polygon <- as.character(vessel_specifications[i, "name_gis_file_for_fishing_effort_per_polygon"])
         name_gis_layer_field                         <- as.character(vessel_specifications[i, "name_gis_layer_field"])       # giving releative effort ditribtion e.g. in 5 categories: 1 to 5 with 1 high occurence
@@ -153,6 +153,11 @@
       stop("Inconsistencies in port names!")
      }
     name_file_ports            <- "harbours.dat" 
+
+
+     if(!any("vid" %in% colnames(vessel_specifications))){  
+       vesselids                                    <- paste("ROM_",harbcode,"_", metierids, "_", 1:nbvids, sep="") # caution: three first letters (nationality) should be consistent with  popsspe/XXctrysspe_relative_stability_semesterXX
+       }
 
      
 
