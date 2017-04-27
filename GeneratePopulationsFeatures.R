@@ -75,6 +75,10 @@
  rownames(pa) <- pa$stock
  
  
+ # check
+ if(any(is.na(pa))) stop("Need for replacing NAs by 0s in Stock_biological_traits.csv")
+ 
+ 
  pa            <- pa[spp,]  # reorder
  pa$index_pops <- 0: (length(spp)-1)
 
