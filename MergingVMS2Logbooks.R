@@ -1,6 +1,6 @@
 
-FRANCOIS     <- FALSE
-CHRISTIAN    <- TRUE
+FRANCOIS     <- TRUE
+CHRISTIAN    <- FALSE
 
 
 # set your own path here:
@@ -34,7 +34,8 @@ if(CHRISTIAN){
   #y <- "2012"
   #y <- "2013"
   #y <- "2014"
-  y <- "2015"
+  #y <- "2015"
+  y <- "2016"
   
   if(FRANCOIS){ 
                 # ease the loading by creating RData objects.
@@ -43,8 +44,11 @@ if(CHRISTIAN){
                 #eflalo <- read.table(file.path("C:","merging","EflaloAndTacsat", paste("eflalo3_",y,".csv",sep="")), header=TRUE, sep=",")
                 #save(eflalo, file=file.path("C:","merging","EflaloAndTacsat", paste("eflalo_",y,".RData",sep="")))
                 
-                load(file.path(main_path_data, paste("tacsat",y,".RData",sep='')) )
+                load(file.path(main_path_data, paste("tacsat_",y,".RData",sep='')) )
                 load(file.path(main_path_data, paste("eflalo_",y,".RData",sep='')))
+                eflalo <- get(ls()[grep('eflalo', ls())])
+                tacsat <- get(ls()[grep('tacsat', ls())])
+ 
   }
   if(CHRISTIAN){ 
         eflalo <-read.table(file=file.path(main_path_data, paste("ger_eflalo",y,".csv", sep="")), sep=",", header=TRUE)
@@ -63,7 +67,7 @@ if(CHRISTIAN){
   ###--------------------------------###
   ###--------------------------------###
    
-   load(file.path(main_path_ibm_param, "GRAPH", "myEUports.RData"))  # get EU_ports
+   load(file.path(main_path_ibm_param, "testexample", "GRAPH", "myEUports.RData"))  # get EU_ports
  
   
   ###--------------------------------###
@@ -204,13 +208,13 @@ if(CHRISTIAN){
   
   # rename if you like
   if(FRANCOIS) {
-  load(file.path(namefolder, "all_merged_weight_2015.RData"))
+  load(file.path(namefolder, "all_merged_weight_2016.RData"))
   coupled_VMS_logbooks <- all.merged
-  save(coupled_VMS_logbooks, file=file.path(namefolder, "coupled_VMS_logbooks_DEN_2015.RData"))
+  save(coupled_VMS_logbooks, file=file.path(namefolder, "coupled_VMS_logbooks_DEN_2016.RData"))
  
-  load(file.path(main_path_data, paste("eflalo_","2015",".RData",sep='')))
+  load(file.path(main_path_data, paste("eflalo_","2016",".RData",sep='')))
   logbooks <- eflalo
-  save(logbooks, file=file.path(namefolder, "logbooks_DEN_2015.RData"))
+  save(logbooks, file=file.path(namefolder, "logbooks_DEN_2016.RData"))
   } 
    
   if(CHRISTIAN) {
@@ -229,7 +233,7 @@ if(CHRISTIAN){
  #------plot used harbours---------------------#
  #---------------------------------------------# 
 
- load(file.path(namefolder, "all_merged_weight_2015.RData"))
+ load(file.path(namefolder, "all_merged_weight_2016.RData"))
  used.ports.when.merging.proc <- as.character(unique(all.merged$SI_HARB))
  used.ports.when.merging.proc <- used.ports.when.merging.proc [!used.ports.when.merging.proc=="NA"]
  all(used.ports.when.merging.proc %in% EU_ports$Description ) # should be TRUE
@@ -241,5 +245,5 @@ if(CHRISTIAN){
 
  # save
  if(CHRISTIAN) { used_ger <- used$Description; save(used_ger, file=file.path(main_path_ibm_param, "used_ports_ger_2015.RData")) }
- if(FRANCOIS) { used_den <- used$Description; save(used_den, file=file.path(main_path_ibm_param, "used_ports_den_2015.RData")) }
+ if(FRANCOIS) { used_den <- used$Description; save(used_den, file=file.path(main_path_ibm_param, "used_ports_den_2016.RData")) }
                  

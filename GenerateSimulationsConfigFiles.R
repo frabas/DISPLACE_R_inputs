@@ -443,6 +443,8 @@ file.copy(
 
 cat(paste("Transfer graph related files ...done \n"))
 
+# createa folder for the shortPaths lib....CAUTION: the lib HAS TO BE CREATED FROM THE DISPLACE GUI!
+ dir.create(file.path(general$main.path.ibm, paste("shortPaths_",general$application,"_a_graph",general$igraph, sep="")))
 
 
 dir.create(file.path(general$main.path.ibm, paste("dtrees")))
