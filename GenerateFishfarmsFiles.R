@@ -107,10 +107,9 @@
      some_fishfarms_features <- fishfarms_features
     }
   
-  ## aggregate per graph node given c++ object are created on nodes only
-  #some_fishfarms_features <- tapply(some_fishfarms_features$size_km2, some_fishfarms_features$idx_node, sum)
-  #some_fishfarms_features <- cbind.data.frame(rownames(some_fishfarms_features), some_fishfarms_features)
-  #colnames(some_fishfarms_features) <- c('idx_node', 'size_km2')
+
+  ## lastly, set up the activity
+  some_fishfarms_features <- cbind.data.frame(some_fishfarms_features, is_active=1)
 
   
   # write
