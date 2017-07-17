@@ -170,7 +170,9 @@
     } 
    gshape_cpue_per_stock      <- rep(1, nb_stocks)     # for Gamma on each node
    gscale_cpue_per_stock      <-apply(all_records_this_vid[, paste(substr(spp, 1,3), "_kg_h", sep='') ], 2, mean)  *nb_agent_per_vessels# for Gamma on each node e.g. hist(rgamma(1000,shape=0.74,scale=1))
-   vessel_features            <- c(cruisespeed, 
+   is_active                  <- 1 # all active
+   vessel_features            <- c(is_active,
+                                   cruisespeed, 
                                    vessel_specifications[i, "fuel.cons.h"] *nb_agent_per_vessels,
                                    vessel_specifications[i, "mean_LOA_m"] *nb_agent_per_vessels, 
                                    vessel_specifications[i, "mean_kW"] *nb_agent_per_vessels,
@@ -190,7 +192,7 @@
                                    vessel_specifications[i, "WorkHoursEnd"],
                                    vessel_specifications[i, "firm_id"]
                                    ) 
-   if(length(vessel_features)!=19) stop("Missing field(s) in the vessel specification input file!!!")                                
+   if(length(vessel_features)!=20) stop("Missing field(s) in the vessel specification input file!!!")                                
                                 
                                    
                                    
