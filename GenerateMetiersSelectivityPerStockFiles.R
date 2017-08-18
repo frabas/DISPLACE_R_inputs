@@ -135,6 +135,7 @@ return(csv_selectivity_table)
 
  create_metier_selectivity_files <- function(csv_selectivity_table){
  
+ 
  for (met in unique(csv_selectivity_table[,2])) {
  
     selectivities <- csv_selectivity_table[csv_selectivity_table[,2]==met,-c(1:3)]
@@ -172,10 +173,11 @@ return(csv_selectivity_table)
                   create_metier_selectivity_files(csv_selectivity_table)
                   
                   # and create the file....
+                  colnames (csv_selectivity_table) <- c("metier_name", "met", "stock", paste("sz group", 0:13))
                   write.table(csv_selectivity_table,
                     file=file.path(general$main_path_gis,"FISHERIES", 
                     paste("fishing_gear_selectivity_ogives_per_stock.csv",sep='')),
-                   col.names=FALSE,  row.names=FALSE, sep= ';', quote=FALSE)
+                   col.names=TRUE,  row.names=FALSE, sep= ';', quote=FALSE)
                   cat( paste("Write in fishing_gear_selectivity_ogives_per_stock.csv\n",sep=''))
                  
                  }else{
@@ -183,7 +185,7 @@ return(csv_selectivity_table)
                   csv_selectivity_table <- read.table(
                     file=file.path(general$main_path_gis, "FISHERIES",
                     paste("fishing_gear_selectivity_ogives_per_stock.csv",sep='')),
-                   header=FALSE, sep= ';')
+                   header=TRUE, sep= ';')
                    cat( paste("Use fishing_gear_selectivity_ogives_per_stock.csv to deduce metier selectivity files\n",sep=''))
                    
                    create_metier_selectivity_files(csv_selectivity_table)
