@@ -23,6 +23,14 @@
 
 
 
+   
+   # caution fleet sce
+   fleetsce <-  data.frame(sce=1, namesce=c('baseline'))
+   
+    write.table(fleetsce, quote=FALSE,
+                 file=file.path(general$main.path.ibm, paste("multiplier_for_fleetsce", general$application,".dat",sep='')), append=FALSE,
+                   row.names=FALSE, col.names=TRUE)
+
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
@@ -40,7 +48,8 @@ popnames <- as.character(catches_in_tons$POP)
 lst_layers <- list.files (file.path(general$main_path_gis, "POPULATIONS", "SpatialLayers"))  
 
 
-for (popid in 1: length(catches_in_tons$POP)){
+  for(sce in fleetsce$sce){
+  for (popid in 1: length(catches_in_tons$POP)){
  
      a_file <-  lst_layers [ grep(paste("contour",popid-1,"_large", sep=''), lst_layers) ]
      a_file <-  a_file[grep(".shp", a_file)]
@@ -102,7 +111,7 @@ for (popid in 1: length(catches_in_tons$POP)){
             # to fill in the pop attribute
         write.table(round(coord[, c('pt_graph', 'landings')]),
                file= file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
-                   paste((popid)-1, 'spe_stecf_oth_land_per_month_per_node_month', month, "_fleetsce1.dat", sep='')), 
+                   paste((popid)-1, 'spe_stecf_oth_land_per_month_per_node_month', month, "_fleetsce",sce,".dat", sep='')), 
                  row.names=FALSE, col.names=TRUE, quote=FALSE)
 
         cat(paste("Write ", (popid)-1, 'spe_stecf_oth_land_per_month_per_node_month', month, ".dat\n", sep=''))
@@ -112,6 +121,6 @@ for (popid in 1: length(catches_in_tons$POP)){
 
 
     } # end popid
-
+    } # end sce
 
   cat(paste(".....done \n"))

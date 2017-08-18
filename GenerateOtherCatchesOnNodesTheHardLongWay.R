@@ -698,6 +698,11 @@ function (tacsat, string = TRUE)
   
    # caution myfish stecf fleet sce
    fleetsce <-  data.frame(sce=1:4, namesce=c('stecf_baseline', 'tor1aOr2a', 'tor1bOr2b', 'tor1cOr2c'))
+   
+    write.table(fleetsce, quote=FALSE,
+                 file=file.path(general$main.path.ibm, paste("multiplier_for_fleetsce", general$application,".dat",sep='')), append=FALSE,
+                   row.names=FALSE, col.names=TRUE)
+
   
    # add coordinates
    land.agg <- cbind.data.frame(land.agg, ICESrectangle2LonLat(land.agg$rectangle, midpoint = TRUE))

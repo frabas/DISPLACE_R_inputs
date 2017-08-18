@@ -58,7 +58,7 @@
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
- create_selectivity_from_L50_parameters <- function(){
+ create_selectivity_from_L50_parameters <- function(a_multiplier=1){
  
    ## SELECTIVITY ###################
   # by default, create a fake selectivity ogive i.e. all at 1 (and not species-specific...)
@@ -106,6 +106,7 @@
     l           <- c(0,1,2,3,4,5,6,7,8,9,10,11,12,1000) *a_size_group_bin_in_cm  # vector of 14 length groups of eg 10 cm bin or 5 cm
     length.fish <-  l + mid # i.e. mid size in cm
     equ.sel     <- paste("1/(1+exp(S1-S2*length.fish))")  # cf. Rasmus paper
+    L50         <- L50*a_multiplier # fleetsce, if required
     S1          <- L50*log(3) / (L75 - L50)      # L75=L50+(1/2*SR)
     S2          <-  S1/L50
     # eval(parse("",text=equ.sel)) # a sigmoid....
@@ -133,7 +134,7 @@ return(csv_selectivity_table)
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
 
 
- create_metier_selectivity_files <- function(csv_selectivity_table){
+ create_metier_selectivity_files <- function(csv_selectivity_table, sce=1){
  
  
  for (met in unique(csv_selectivity_table[,2])) {
@@ -143,7 +144,7 @@ return(csv_selectivity_table)
     # save the .dat file per metier
     write.table(selectivities,
           file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''),
-                 paste(met, "metier_selectivity_per_stock_ogives.dat",sep='')),
+                 paste(met, "metier_selectivity_per_stock_ogives_fleetsce",sce,".dat",sep='')),
                    col.names=FALSE,  row.names=FALSE, sep= ' ', quote=FALSE)
    cat( paste("Write in metiersspe: ", met, "metier_selectivity_per_stock_ogives.dat\n",sep=''))
 
@@ -156,6 +157,57 @@ return(csv_selectivity_table)
   
 ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##  
 ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##  
+
+      ##-------------------
+      ##---utils-----------
+      ## a function to read the fleet scenario file before we expand it with a new field...
+      ## this suppose to replicate all the existing fleet files...
+      add_a_new_scenario_type_to_fleet_scenarios <- function(a_new_field_defining_scenarios="selectivity_L50_multiplier", 
+                                                            values_for_this_scenario_type=c(0.75, 1, 1.5)){
+         if(all(values_for_this_scenario)!=1) stop("need at least the value '1' for this new scenario field")                                                    
+         multiplier_for_fleetsce                   <- read.table (file=file.path(general$main.path.ibm, paste("multiplier_for_fleetsce", general$application, ".dat", sep=""))  , header=TRUE)   
+         new_sces                                 <- expand.grid(sce=multiplier_for_fleetsce$sce, values_for_this_scenario_type)
+         colnames(new_sces)[ncol(new_sces)]       <- a_new_field_defining_scenarios
+         multiplier_for_fleetsce                   <- merge(multiplier_for_fleetsce, new_sces)
+         if(length(values_for_this_scenario_type)>1){
+         nr                                       <- nrow(multiplier_for_fleetsce [multiplier_for_fleetsce[,a_new_field_defining_scenarios]==1, ])  # baseline sce for this new field
+         nr2                                      <- nrow(multiplier_for_fleetsce [multiplier_for_fleetsce[,a_new_field_defining_scenarios]!=1, ])  # other sces
+         
+         multiplier_for_fleetsce$initial_sce <- multiplier_for_fleetsce$sce
+         multiplier_for_fleetsce [multiplier_for_fleetsce[,a_new_field_defining_scenarios]!=1, "sce"] <- (1:nr2)+nr
+         library(doBy)
+         multiplier_for_fleetsce    <- orderBy(~sce, data=multiplier_for_fleetsce)
+         
+      
+         # then replicate all the fleetsce files for this new numbering.
+         all_fleet_files <- list.files(file.path(general$main.path.ibm, paste("popsspe_",general$application,sep='')))
+         for(sce in ((1:nr2)+nr)){
+            initial_sce_number_for_this_new_sce <- multiplier_for_fleetsce[multiplier_for_fleetsce$sce==sce, "initial_sce"]  # duplicate the ones correponding to the initial sce number
+            all_filenames_to_replicates         <- all_fleet_files[grep(paste("fleetsce",initial_sce_number_for_this_new_sce,sep=''), all_fleet_files)]
+      
+            all_filenames_to_replicates_new_name <- gsub(paste("fleetsce",initial_sce_number_for_this_new_sce,sep=''), paste("fleetsce",sce,sep=""), all_filenames_to_replicates)    
+            for(i in 1:length(all_filenames_to_replicates)) {
+              file.copy(from=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=""), all_filenames_to_replicates[i]), 
+                            to=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=""), all_filenames_to_replicates_new_name[i]))
+              }
+            }
+       
+       multiplier_for_fleetsce <- multiplier_for_fleetsce[, -ncol(multiplier_for_fleetsce)] # remove no longer useful initial sce field      
+       }
+       return(multiplier_for_fleetsce)
+       }
+       #--------------------
+       #--------------------
+       
+       
+       
+      # add a new field for some fleet scenarios:
+      # CAUTION: the 0spe_stecf_oth_land_per_month_per_node_semester1.dat types of file are in /POPSSPE !!
+       multiplier_for_fleetsce <- add_a_new_scenario_type_to_fleet_scenarios(
+                                                      a_new_field_defining_scenarios="selectivity_L50_multiplier", 
+                                                      values_for_this_scenario_type=c(1)
+                                                      )
+
 ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##  
 ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##  
 ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##  
@@ -169,8 +221,13 @@ return(csv_selectivity_table)
   if(!file.exists(file.path(general$main_path_gis,"FISHERIES", 
                     paste("fishing_gear_selectivity_ogives_per_stock.csv",sep=''))))
                  {
-                  csv_selectivity_table <- create_selectivity_from_L50_parameters()
-                  create_metier_selectivity_files(csv_selectivity_table)
+                  for(sce in multiplier_for_fleetsce$sce)
+                  {
+                     a_multiplier            <- multiplier_for_fleetsce[multiplier_for_fleetsce$sce==sce,"selectivity_L50_multiplier"]
+                     csv_selectivity_table   <- create_selectivity_from_L50_parameters(a_multiplier)
+                     create_metier_selectivity_files(csv_selectivity_table, sce=sce)
+                  }
+                  
                   
                   # and create the file....
                   colnames (csv_selectivity_table) <- c("metier_name", "met", "stock", paste("sz group", 0:13))
@@ -188,7 +245,7 @@ return(csv_selectivity_table)
                    header=TRUE, sep= ';')
                    cat( paste("Use fishing_gear_selectivity_ogives_per_stock.csv to deduce metier selectivity files\n",sep=''))
                    
-                   create_metier_selectivity_files(csv_selectivity_table)
+                   create_metier_selectivity_files(csv_selectivity_table, sce=1)
                  
                  }
 
