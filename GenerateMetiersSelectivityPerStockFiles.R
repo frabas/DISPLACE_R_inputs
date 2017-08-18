@@ -5,6 +5,9 @@
  
    # GENERAL SETTINGS
 
+   # CAUTION: either using the already existing fishing_gear_selectivity_ogives_per_stock.csv file
+   # or creating it from scratch from L50 hardcoded L50 parameters...
+
    args <- commandArgs(trailingOnly = TRUE)
 
    general <- list()
@@ -50,16 +53,25 @@
        file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''), "metier_names.dat"),
           header=TRUE)
 
-
+ 
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ create_selectivity_from_L50_parameters <- function(){
+ 
    ## SELECTIVITY ###################
   # by default, create a fake selectivity ogive i.e. all at 1 (and not species-specific...)
+  csv_selectivity_table  <- NULL
   for (met in unique(metier_names$idx) ) {
 
   selectivities <- NULL
     the_met <- metier_names[metier_names[, 'idx']==met, "name"]
 
+    count <-0
     for (sp in  sapply(spp, function (spp) substr(spp,1,3)) )  {
-
+    count <- count+1
+    
     sel <- NULL
     clupeid <- FALSE  ; gadoid <- FALSE; trawl <- FALSE ; gillnet <- FALSE
 
@@ -101,20 +113,82 @@
     sel <-  round( eval(parse("",text=equ.sel)), 4)  # ...assuming 14 szgroup bins
 
     selectivities <- rbind(selectivities, sel)
+ 
+
+    csv_selectivity_table <- rbind(csv_selectivity_table, cbind.data.frame(metiername= the_met, metier=met, stock=spp[count], matrix(sel,nrow=1)))
+
     }
+    
+ 
+
+  }
+
+return(csv_selectivity_table)
+}
 
 
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
 
 
-  # save the .dat file
-  write.table(selectivities,
+ create_metier_selectivity_files <- function(csv_selectivity_table){
+ 
+ for (met in unique(csv_selectivity_table[,2])) {
+ 
+    selectivities <- csv_selectivity_table[csv_selectivity_table[,2]==met,-c(1:3)]
+    
+    # save the .dat file per metier
+    write.table(selectivities,
           file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''),
                  paste(met, "metier_selectivity_per_stock_ogives.dat",sep='')),
                    col.names=FALSE,  row.names=FALSE, sep= ' ', quote=FALSE)
    cat( paste("Write in metiersspe: ", met, "metier_selectivity_per_stock_ogives.dat\n",sep=''))
 
-  }
+   }
+   
+ return()
+ }
 
+
+  
+##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##  
+##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##  
+##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##  
+##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##  
+##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##  
+##!!!!!!!!!!!!!!!!!!!!CALLS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##  
+##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##  
+##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##  
+##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##  
+##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##  
+  
+  # save the .dat file all metiers for display in object editor
+  if(!file.exists(file.path(general$main_path_gis,"FISHERIES", 
+                    paste("fishing_gear_selectivity_ogives_per_stock.csv",sep=''))))
+                 {
+                  csv_selectivity_table <- create_selectivity_from_L50_parameters()
+                  create_metier_selectivity_files(csv_selectivity_table)
+                  
+                  # and create the file....
+                  write.table(csv_selectivity_table,
+                    file=file.path(general$main_path_gis,"FISHERIES", 
+                    paste("fishing_gear_selectivity_ogives_per_stock.csv",sep='')),
+                   col.names=FALSE,  row.names=FALSE, sep= ';', quote=FALSE)
+                  cat( paste("Write in fishing_gear_selectivity_ogives_per_stock.csv\n",sep=''))
+                 
+                 }else{
+                  
+                  csv_selectivity_table <- read.table(
+                    file=file.path(general$main_path_gis, "FISHERIES",
+                    paste("fishing_gear_selectivity_ogives_per_stock.csv",sep='')),
+                   header=FALSE, sep= ';')
+                   cat( paste("Use fishing_gear_selectivity_ogives_per_stock.csv to deduce metier selectivity files\n",sep=''))
+                   
+                   create_metier_selectivity_files(csv_selectivity_table)
+                 
+                 }
 
 cat(paste("....done\n"))
 
