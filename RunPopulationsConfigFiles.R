@@ -257,24 +257,76 @@
     
       }
       
-     
-      # Diffuse N coefficients - here, avai used as a proxy for long/short residence time
-       for(pid in unique(popsspe_avai_semester[,c('pids')])){
+      
+      ##-------------------
+      ##---utils-----------
+      ## a function to read the biol scenario file before we expand it with a new field...
+      ## this suppose to replicate all the existing biol files...
+      add_a_new_scenario_type_to_biol_scenarios <- function(a_new_field_defining_scenarios="diffuse_type_multiplier", 
+                                                            values_for_this_scenario=c(0.75, 1, 1.5)){
+         if(all(values_for_this_scenario)!=1) stop("need at least the value '1' for this new scenario field")                                                    
+         multiplier_for_biolsce                   <- read.table (file=file.path(general$main.path.ibm, paste("multiplier_for_biolsce", general$application, ".dat", sep=""))  , header=TRUE)   
+         new_sces                                 <- expand.grid(sce=multiplier_for_biolsce$sce, values_for_this_scenario)
+         colnames(new_sces)[ncol(new_sces)]       <- a_new_field_defining_scenarios
+         multiplier_for_biolsce                   <- merge(multiplier_for_biolsce, new_sces)
+         nr                                       <- nrow(multiplier_for_biolsce [multiplier_for_biolsce[,a_new_field_defining_scenarios]==1, ])  # baseline sce for this new field
+         nr2                                      <- nrow(multiplier_for_biolsce [multiplier_for_biolsce[,a_new_field_defining_scenarios]!=1, ])  # other sces
+         
+         multiplier_for_biolsce$initial_sce <- multiplier_for_biolsce$sce
+         multiplier_for_biolsce [multiplier_for_biolsce[,a_new_field_defining_scenarios]!=1, "sce"] <- (1:nr2)+nr
+         library(doBy)
+         multiplier_for_biolsce    <- orderBy(~sce, data=multiplier_for_biolsce)
+         
+      
+         # then replicate all the biolsce files for this new numbering.
+         all_pop_files <- list.files(file.path(general$main.path.ibm, paste("popsspe_",general$application,sep='')))
+         for(sce in ((1:nr2)+nr)){
+            initial_sce_number_for_this_new_sce <- multiplier_for_biolsce[multiplier_for_biolsce$sce==sce, "initial_sce"]  # duplicate the ones correponding to the initial sce number
+            all_filenames_to_replicates         <- all_pop_files[grep(paste("biolsce",initial_sce_number_for_this_new_sce,sep=''), all_pop_files)]
+      
+            all_filenames_to_replicates_new_name <- gsub(paste("biolsce",initial_sce_number_for_this_new_sce,sep=''), paste("biolsce",sce,sep=""), all_filenames_to_replicates)    
+            for(i in 1:length(all_filenames_to_replicates)) {
+              file.copy(from=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=""), all_filenames_to_replicates[i]), 
+                            to=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=""), all_filenames_to_replicates_new_name[i]))
+              }
+            }
+       
+       multiplier_for_biolsce <- multiplier_for_biolsce[, -ncol(multiplier_for_biolsce)] # remove no longer useful initial sce field      
+       return(multiplier_for_biolsce)
+       }
+       #--------------------
+       #--------------------
+       
+       
+       
+      # add a new field for some biol scenarios:
+       multiplier_for_biolsce <- add_a_new_scenario_type_to_biol_scenarios(
+                                                      a_new_field_defining_scenarios="diffuse_type_multiplier", 
+                                                      values_for_this_scenario=c(0.75, 1, 1.5)
+                                                      )
+           
+      for (sce in multiplier_for_biolsce$sce){
+       # Diffuse N coefficients - here, avai used as a proxy for long/short residence time
+        for(pid in unique(popsspe_avai_semester[,c('pids')])){
          popsspe_coeffs_semester_this_pop <- x[x$pids==pid, c('pids','pt_graph', 'abundance')]
          popsspe_coeffs_semester_this_pop$quant <- cut( popsspe_coeffs_semester_this_pop$abundance+.00000001,
                        breaks=quantile(popsspe_coeffs_semester_this_pop$abundance, prob=c(0, 0.5,0.75, 1))) # just arbitrary values for this example!
          popsspe_coeffs_semester_this_pop$quant [is.na(popsspe_coeffs_semester_this_pop$quant )] <- levels(popsspe_coeffs_semester_this_pop$quant)[1] # AVOID NAs by all means!
          
          popsspe_coeffs_semester_this_pop$coeff <- popsspe_coeffs_semester_this_pop$quant
-         levels(popsspe_coeffs_semester_this_pop$coeff) <- c(0.5,0.1,0.05) # just arbitrary for this example!
+         
+         a_multiplier <- multiplier_for_biolsce[multiplier_for_biolsce$sce==sce,"diffuse_type_multiplier"]
+         
+         levels(popsspe_coeffs_semester_this_pop$coeff) <- c(0.5*a_multiplier,0.1,0.05) # just arbitrary for this example!
           
          write.table(popsspe_coeffs_semester_this_pop[,c('pt_graph', 'coeff')],  # the szgroup dim is implicit....
             file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''), "static_avai", 
-              paste(pid, "spe_field_of_coeff_diffusion_this_pop_nodes_semester",gsub("Q","",a.semester),".dat",sep='')),
+              paste(pid, "spe_field_of_coeff_diffusion_this_pop_nodes_semester",gsub("Q","",a.semester),"_biolsce",sce,".dat",sep='')),
                   col.names=TRUE,  row.names=FALSE, sep= ' ', quote=FALSE, append=FALSE)
     
-         cat(paste("Write", pid, "spe_field_of_coeff_diffusion_this_pop_nodes_semester",gsub("Q","",a.semester),".dat....done \n"))
+         cat(paste("Write", pid, "spe_field_of_coeff_diffusion_this_pop_nodes_semester",gsub("Q","",a.semester),"_biolsce",sce,".dat....done \n"))
   
+        }
       }
      
      
