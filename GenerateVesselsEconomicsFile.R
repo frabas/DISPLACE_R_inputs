@@ -33,13 +33,39 @@ dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$applica
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
-  filename <- file.path(general$main_path_gis, "FISHERIES", "fisheries_economics_variables.csv")
-   cnts     <- count.fields(filename, sep = ";") 
-   vessel_specifications <- read.table(file=filename, sep=";", header=TRUE )
-   vessel_specifications <- cbind.data.frame(vessel_specifications, id=1:nrow(vessel_specifications))
-   #=> CAUTION: do not leave white rows at the end of this file! otherwise will create some extra wrong config_files
-   cat(paste("Read vessels_specifications_per_harbour_metiers.csv \n"))
- 
+  if(length(grep("fisheries_economics_variables", list.files(file.path(general$main_path_gis, "FISHERIES"))))!=0)
+   {
+   # if a parameter file exists, use it:
+     filename <- file.path(general$main_path_gis, "FISHERIES", "fisheries_economics_variables.csv")
+     cnts     <- count.fields(filename, sep = ";") 
+     vessel_specifications <- read.table(file=filename, sep=";", header=TRUE )
+     vessel_specifications <- cbind.data.frame(vessel_specifications, id=1:nrow(vessel_specifications))
+     #=> CAUTION: do not leave white rows at the end of this file! otherwise will create some extra wrong config_files
+     cat(paste("Read vessels_specifications_per_harbour_metiers.csv \n"))
+   } else{
+   # if no parameter file then create it:
+   
+   
+     nameobj           <- paste("vessels_specifications_per_harbour_metiers.csv",sep='')  #....and possibly per vid!
+     tacsatp_this_ctry <- read.table(file.path(general$main_path_gis, "FISHERIES", nameobj), header=TRUE, sep=";")
+
+     # create and populate with default values
+     vessel_specifications <- cbind.data.frame(VE_REF=unique(tacsatp_this_ctry$VE_REF),
+                                                  "Nb_crew"=2,  # for this boat                                 
+                                                  "Annual_other_income"=4790, # for this boat, e.g. in euro
+                                                  "Landing_costs_percent"=5.0, # for this boat, taxes in percent                    
+                                                  "Crewshare_and_unpaid_labour_costs_percent"=27.9,   # for this boat, percent share
+                                                  "Other_variable_costs_per_unit_effort"=587,  # for this boat, euro per hour    
+                                                  "Annual_insurance_costs_per_crew"=1500,   # for this boat, per crew member
+                                                  "Standard_labour_hour_opportunity_costs"=26,   # for this boat e.g. in euro per hour
+                                                  "Standard_annual_full_time_employment_hours"=2000,    # FTE, for this boat
+                                                  "Other_annual_fixed_costs"=14000,   # for this boat, e.g. in euro 
+                                                  "Vessel_value"=300000,  # for this boat, e.g. in euro
+                                                  "Annual_depreciation_rate"=4,  # for this boat, in percent
+                                                  "Opportunity_interest_rate"=4,   # for this boat, in percent
+                                                  "Annual_discount_rate"=4     # for this boat, in percent
+                                               )  
+   }
     
 
 
