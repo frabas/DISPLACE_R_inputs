@@ -46,8 +46,11 @@ dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$applica
    # if no parameter file then create it:
    
    
-     nameobj           <- paste("vessels_specifications_per_harbour_metiers.csv",sep='')  #....and possibly per vid!
-     tacsatp_this_ctry <- read.table(file.path(general$main_path_gis, "FISHERIES", nameobj), header=TRUE, sep=";")
+     #nameobj           <- paste("vessels_specifications_per_harbour_metiers.csv",sep='')  #....and possibly per vid!
+     #tacsatp_this_ctry <- read.table(file.path(general$main_path_gis, "FISHERIES", nameobj), header=TRUE, sep=";")
+     # caution, not all vids are here.....so use instead:
+     nameobj           <- paste("vesselsspe_features_quarter1.dat",sep='')  #....and possibly per vid!
+     tacsatp_this_ctry <- read.table(file.path(general$main.path.ibm, paste("vesselsspe_",general$application,sep=""), nameobj), header=FALSE, sep="|")
 
      # create and populate with default values
      vessel_specifications <- cbind.data.frame(VE_REF=unique(tacsatp_this_ctry$VE_REF),
@@ -63,8 +66,21 @@ dir.create(file.path(general$main.path.ibm, paste("metiersspe_", general$applica
                                                   "Vessel_value"=300000,  # for this boat, e.g. in euro
                                                   "Annual_depreciation_rate"=4,  # for this boat, in percent
                                                   "Opportunity_interest_rate"=4,   # for this boat, in percent
-                                                  "Annual_discount_rate"=4     # for this boat, in percent
+                                                  "Annual_discount_rate"=4,     # for this boat, in percent
+                                               
+                                                  # some extra variables (PUT AFTER!)
+                                                  "vsize" = tacsatp_this_ctry[, 5]
+                                 
                                                )  
+   
+    # just an illustration for ad hoc corrections
+   vessel_specifications[vessel_specifications$vsize < 15, "Other_variable_costs_per_unit_effort"] <- 
+                            vessel_specifications[vessel_specifications$vsize < 15, "Other_variable_costs_per_unit_effort"]  *0.1
+   vessel_specifications[vessel_specifications$vsize < 15, "Other_annual_fixed_costs"] <- 
+                            vessel_specifications[vessel_specifications$vsize < 15, "Other_annual_fixed_costs"]  *0.2
+   vessel_specifications[vessel_specifications$vsize < 15, "Vessel_value"] <- 
+                            vessel_specifications[vessel_specifications$vsize < 15, "Vessel_value"]  *0.5
+  
    }
     
 

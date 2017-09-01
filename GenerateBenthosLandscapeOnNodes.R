@@ -416,6 +416,35 @@
   }
 
 
+##----------------------------------------------------------------------------##
+##----------------------------------------------------------------------------##
+##------------------INFORM DISPLACE HARVEST FUNCTION WITH A SPECIFIC FACTOR---##
+##--------------------LINKED TO HABITAT TYPE BEING VISITED -------------------##
+##----------------------i.e. DELTA PARAMETERS PER MARINE LANDSCAPE------------##
+##----------------------------------------------------------------------------##
+
+     # (caution: give the order for naming stocks in integer from 0 to n-1)
+   spp_table <-  read.table(file=file.path(general$main_path_gis, "POPULATIONS", 
+                           paste("pop_names_", general$application,".txt",sep='')), header=TRUE)
+   spp                        <- as.character(spp_table$spp)
+   cat(paste("Reading the stock names in", paste(general$main_path_gis, "POPULATIONS", 
+                           paste("pop_names_", general$application,".txt",sep='')),"....done \n"))
+   nbpops <- length(spp)
+
+   if(!file.exists(file.path(general$main_path_gis, "HABITATS", "habitat_deltas_per_pop.csv"))){
+       # populate with 0 as default value
+       habitat_deltas_per_pop <- cbind.data.frame(landscape=rep(codes, each=nbpops), habitat_deltas_per_pop=0)  
+       # harvest function parameter for habitat effect (if 0=> no effect)
+       write.table(habitat_deltas_per_pop, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
+                        paste("habitat_deltas_per_pop.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
+  } else{
+     habitat_deltas_per_pop <- read.table(file.path(general$main_path_gis, "HABITATS", "habitat_deltas_per_pop.csv"), header=TRUE, sep=";")
+       write.table(habitat_deltas_per_pop, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
+                        paste("habitat_deltas_per_pop.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
+  
+  }
+
+
 cat(paste(".....stored in", general$main.path.ibm, "/benthossspe \n"))
 
 cat(paste(".....done\n"))
