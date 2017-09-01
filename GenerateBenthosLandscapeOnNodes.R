@@ -69,6 +69,7 @@
   ##---------------------------------------------------------------------------##
 
  # the code is only provided as info here - better to use the DISPLACE GUI with Graph>Assign Landscape code
+ 
  if(FALSE){
  
   ## FROM A SHAPE FILE 
@@ -259,8 +260,9 @@
 
 
  if(!file.exists(file.path(general$main_path_gis, "HABITATS", "logistic_recovery_rates_per_month_per_funcgr.csv"))){
+     nbfuncgrps <-2
      logistic_recovery_rates_per_month_per_funcgr <- cbind.data.frame(
-                                                 landscape=rep(codes, each=2), # assuming 2 func grps
+                                                 landscape=rep(codes, each=nbfuncgrps), # assuming 2 func grps
                                                  logistic_recovery_rate_per_month=0.375  # month-1 (which is strictly equivalent to 0.375*12 for year-1)
                                                  ) 
      write.table(logistic_recovery_rates_per_month_per_funcgr, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
@@ -290,8 +292,9 @@
 
  # biomass
  if(!file.exists(file.path(general$main_path_gis, "HABITATS", "benthos_biomass_carrying_capacity_K_per_landscape_per_funcgr.csv"))){
+    nbfuncgrps <-2
      benthos_biomass_carrying_capacity_K_per_landscape_per_funcgr <- cbind.data.frame(
-                                                 landscape=rep(codes, each=2), # assuming 2 func grps
+                                                 landscape=rep(codes, each=nbfuncgrps), # assuming 2 func grps
                                                  benthos_biomass_carrying_capacity_K=500 
                                                  ) 
      write.table(benthos_biomass_carrying_capacity_K_per_landscape_per_funcgr, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
@@ -306,8 +309,9 @@
 
  # number
  if(!file.exists(file.path(general$main_path_gis, "HABITATS", "benthos_number_carrying_capacity_K_per_landscape_per_funcgr.csv"))){
+    nbfuncgrps <-2
      benthos_number_carrying_capacity_K_per_landscape_per_funcgr <- cbind.data.frame(
-                                                 landscape=rep(codes, each=2), # assuming 2 func grps
+                                                 landscape=rep(codes, each=nbfuncgrps), # assuming 2 func grps
                                                  benthos_number_carrying_capacity_K=500 
                                                  ) 
      write.table(benthos_number_carrying_capacity_K_per_landscape_per_funcgr, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
@@ -371,7 +375,8 @@
 
 
    if(!file.exists(file.path(general$main_path_gis, "HABITATS", "prop_funcgr_biomass_per_node_per_landscape.csv"))){
-       prop_funcgr_biomass_per_node_per_landscape <- cbind.data.frame(landscape=rep(codes, each=2), prop_funcgr_per_node=0.5)  # sum to 1 per node per landscape 
+      nbfuncgrps <- 2
+       prop_funcgr_biomass_per_node_per_landscape <- cbind.data.frame(landscape=rep(codes, each=nbfuncgrps), prop_funcgr_per_node=0.5)  # sum to 1 per node per landscape 
        write.table(prop_funcgr_biomass_per_node_per_landscape, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
                         paste("prop_funcgr_biomass_per_node_per_landscape.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
   } else{
@@ -384,7 +389,8 @@
 
  
    if(!file.exists(file.path(general$main_path_gis, "HABITATS", "prop_funcgr_number_per_node_per_landscape.csv"))){
-       prop_funcgr_number_per_node_per_landscape <- cbind.data.frame(landscape=rep(codes, each=2), prop_funcgr_per_node=0.5)  # sum to 1 per node per landscape 
+      nbfuncgrps <- 2
+       prop_funcgr_number_per_node_per_landscape <- cbind.data.frame(landscape=rep(codes, each=nbfuncgrps), prop_funcgr_per_node=0.5)  # sum to 1 per node per landscape 
        write.table(prop_funcgr_number_per_node_per_landscape, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
                         paste("prop_funcgr_number_per_node_per_landscape.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
   } else{
@@ -402,10 +408,10 @@
 ##----------------------PER MARINE LANDSCAPE----------------------------------##
 ##----------------------------------------------------------------------------##
 
-
-
+  
    if(!file.exists(file.path(general$main_path_gis, "HABITATS", "meanw_funcgr_per_landscape.csv"))){
-       meanw_funcgr_per_landscape <- cbind.data.frame(landscape=rep(codes, each=2), meanweight_funcgr_per_node=30)  # gram per sq meter
+      nbfuncgrps <- 2
+      meanw_funcgr_per_landscape <- cbind.data.frame(landscape=rep(codes, each=nbfuncgrps), meanweight_funcgr_per_node=30)  # gram per sq meter
        write.table(meanw_funcgr_per_landscape, file=file.path(general$main.path.ibm, paste("benthosspe_", general$application, sep=''),
                         paste("meanw_funcgr_per_landscape.dat", sep='')), col.names=TRUE, row.names=FALSE, quote=FALSE)
   } else{
