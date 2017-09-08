@@ -303,9 +303,80 @@ function(lon,lat,lonRef,latRef){
    file=file.path(general$main_path_gis,  "POPULATIONS", "avai", paste("cpue_graph", general$igraph,".RData",sep='')))
   cat(paste("Save survey files in /POPULATIONS/avai folder....done \n"))
  
+#------------------------  
+#------------------------       
+#------------------------  
 
 
+  if(FALSE){
+  # obtain format for the displace merger:
+  #dd <- reshape(bits.cpue, varying = list(9:22), v.names="nb_indiv",
+  #        direction="long") # we actually don´t need to reshape because displace require a wide format 
+  #(with headers: "Year" "Semester" "ShootLat" "ShootLon" "Stock" and pattern "nb_indiv."
+  spp_table <-  read.table(file=file.path(general$main_path_gis, "POPULATIONS",
+                           paste("pop_names_", general$application,".txt",sep='')), header=TRUE)
+  spp                        <- as.character(spp_table$spp)
+  #=> required species for this app
   
+  
+  load("C:\\Users\\fbas\\Documents\\GitHub\\DISPLACE_input_gis_myfish\\POPULATIONS\\avai\\cpue_graph56.RData") # for example...
+  obj       <- ibts_and_bits_cpue # e.g. after load  C:\Users\fbas\Documents\GitHub\DISPLACE_input_gis_DanishFleet\POPULATIONS\avai\cpue_graph40.RData
+  obj$Stock <- as.character(obj$Species) # init
+  obj$x     <- as.numeric(as.character(obj$ShootLon)) # init
+  obj$y     <- as.numeric(as.character(obj$ShootLat)) # init
+  source(file=file.path(general$main_path_R_inputs, "old", "vmstools_longlat_to_ICESareas.r"))
+  obj$ICESareas  <- longlat_to_ICESareas(obj)
+  # convert Species in Stock name
+  idx                <- obj$Species %in% c("SPR", "PLE", "FLE", "TUR", "DAB") & obj$ICESareas %in% c("IVa", "IVb", "IVc") 
+  obj[idx, "Stock" ] <- paste(obj[idx,"Species"], 'nsea', sep=".")
+  idx                <- obj$Species %in% c("SPR", "PLE", "FLE", "TUR", "DAB") & obj$ICESareas %in% c("IIIan","IIIas")
+  obj[idx, "Stock" ] <- paste(obj[idx,"Species"], 'kask', sep=".")
+  idx                <- obj$Species %in% c("SPR", "PLE", "FLE", "TUR", "DAB") & obj$ICESareas %in% c("IIIan","IIIas")
+  obj[idx, "Stock" ] <- paste(obj[idx,"Species"], 'kask', sep=".")
+  idx                <- obj$Species %in% c("SPR", "PLE", "FLE", "TUR", "DAB") & obj$ICESareas %in% c("22", "23", "24", "25", "26", "27","28-1","28-2","29","30","31","32")
+  obj[idx, "Stock" ] <- paste(obj[idx,"Species"], '2232', sep=".")
+
+  idx                <- obj$Species %in% c("COD", "HAD") & obj$ICESareas %in% c("IVa", "IVb", "IVc","IIIan")
+  obj[idx, "Stock" ] <- paste(obj[idx,"Species"], 'nsea', sep=".")
+  idx                <- obj$Species %in% c("COD", "HAD") & obj$ICESareas %in% c("IIIas")
+  obj[idx, "Stock" ] <- paste(obj[idx,"Species"], 'kat', sep=".")
+  idx                <- obj$Species %in% c("COD", "HAD") & obj$ICESareas %in% c("22", "23", "24")
+  obj[idx, "Stock" ] <- paste(obj[idx,"Species"], '2224', sep=".")
+  idx                <- obj$Species %in% c("COD", "HAD") & obj$ICESareas %in% c("25", "26", "27","28-1","28-2","29","30","31","32")
+  obj[idx, "Stock" ] <- paste(obj[idx,"Species"], '2532', sep=".")
+
+  idx                <- obj$Species %in% c("HER") & obj$ICESareas %in% c("IVa", "IVb", "IVc")
+  obj[idx, "Stock" ] <- paste(obj[idx,"Species"], 'nsea', sep=".")
+  idx                <- obj$Species %in% c("HER") & obj$ICESareas %in% c("IIIan")
+  obj[idx, "Stock" ] <- paste(obj[idx,"Species"], '3a22', sep=".")
+  idx                <- obj$Species %in% c("HER") & obj$ICESareas %in% c("22", "23", "24")
+  obj[idx, "Stock" ] <- paste(obj[idx,"Species"], '3a22', sep=".")
+  idx                <- obj$Species %in% c("HER") & obj$ICESareas %in% c("25", "26", "27","28-1","28-2","29","30","31","32")
+  obj[idx, "Stock" ] <- paste(obj[idx,"Species"], '2532', sep=".")
+
+  all_other_species  <- !obj$Species %in% c("SPR", "PLE", "FLE", "TUR", "DAB", "COD", "HAD", "HER")
+  idx                <- all_other_species & obj$ICESareas %in% c("IVa", "IVb", "IVc")
+  obj[idx, "Stock" ] <- paste(obj[idx,"Species"], 'nsea', sep=".")
+  idx                <- all_other_species & obj$ICESareas %in% c("IIIan","IIIas")
+  obj[idx, "Stock" ] <- paste(obj[idx,"Species"], 'kask', sep=".")
+  idx                <- all_other_species & obj$ICESareas %in% c("22", "23", "24")
+  obj[idx, "Stock" ] <- paste(obj[idx,"Species"], '2224', sep=".")
+  idx                <- all_other_species & obj$ICESareas %in% c("25", "26", "27","28-1","28-2","29","30","31","32")
+  obj[idx, "Stock" ] <- paste(obj[idx,"Species"], '2532', sep=".")
+
+  obj$StockId <- factor(obj$Stock) # init
+  levels(obj$StockId)  <- spp_table[match(levels(obj$StockId), as.character(spp_table[,2])), 1]
+
+  obj <- obj[!is.na(obj$StockId),] # get rid of stocks not in this DISPLACE app
+  obj$StockId <- factor(obj$StockId)
+  
+  write.table(obj, file= file.path(general$main_path_gis, "POPULATIONS",
+            "avai", "input_file_for_displace_merger.csv"), sep=";", row.names=FALSE, quote=FALSE)   # for DISPLACE popdistributionmerger
+  write.table(obj, file= file.path(general$main.path.ibm, paste("popsspe_", general$casestudy, sep=''),
+            "static_avai", "input_file_for_displace_merger.csv"), sep=";", row.names=FALSE, quote=FALSE)   # for input2AvaiUpdater.R
+            
+ }
+ 
 #------------------------  
 #------------------------       
 #------------------------  
