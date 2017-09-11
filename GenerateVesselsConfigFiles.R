@@ -171,6 +171,7 @@
    gshape_cpue_per_stock      <- rep(1, nb_stocks)     # for Gamma on each node
    gscale_cpue_per_stock      <-apply(all_records_this_vid[, paste(substr(spp, 1,3), "_kg_h", sep='') ], 2, mean)  *nb_agent_per_vessels# for Gamma on each node e.g. hist(rgamma(1000,shape=0.74,scale=1))
    is_active                  <- 1 # all active
+   is_belong_to_ref_fleet     <- 1 # all 
    vessel_features            <- c(is_active,
                                    cruisespeed, 
                                    vessel_specifications[i, "fuel.cons.h"] *nb_agent_per_vessels,
@@ -190,9 +191,10 @@
                                    vessel_specifications[i, "WeekEndEndDay"],
                                    vessel_specifications[i, "WorkHoursStart"],
                                    vessel_specifications[i, "WorkHoursEnd"],
-                                   vessel_specifications[i, "firm_id"]
+                                   vessel_specifications[i, "firm_id"],
+                                   is_belong_to_ref_fleet
                                    ) 
-   if(length(vessel_features)!=20) stop("Missing field(s) in the vessel specification input file!!!")                                
+   if(length(vessel_features)!=21) stop("Missing field(s) in the vessel specification input file!!!")                                
                                 
                                    
                                    
@@ -288,7 +290,7 @@
    write("# [vessel_features_speed_fuelconsrate_length_kW_carryingcapacity_tankcapacity_nbpingspertrip_shapeinbtw_scaleinbtw_avtripduration]",
    file=namefile, ncolumns=1, append=TRUE)
   
-   write("# [multfuelconswhensteaming_multfuelconswhenfishing_multfuelconswhenreturning_multfuelconswheninactive_firmid]",
+   write("# [multfuelconswhensteaming_multfuelconswhenfishing_multfuelconswhenreturning_multfuelconswheninactive_firmid_isreffleet]",
      file=namefile, ncolumns=1, append=TRUE)         
    write(vessel_features, file=namefile, ncolumns=length(vessel_features), append=TRUE)
   
