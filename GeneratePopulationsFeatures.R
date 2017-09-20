@@ -345,6 +345,17 @@ cat(paste("pop ", x-1, "\n"))
   As <-t(A)
   C  <-round(C,7)
   Cs <-t(C)
+  
+   # check for leaks and correct if required:
+ if(! all(apply(As[1:11,1:14], 1, sum) ==1)){
+      idx <- apply(As[1:11,1:14], 1, sum) <1.0
+      As[idx,14] <- 1-apply(As[idx,, drop=FALSE], 1, sum) # a fix
+   } 
+ if(! all(apply(Cs[1:11,1:14], 2, sum) ==1)){
+      idx <- apply(Cs[1:11,1:14], 2, sum) <1.0
+      Cs[11,idx] <- 1-apply(Cs[,idx,  drop=FALSE], 2, sum) # a fix
+   }
+
   write(As[1:11,1:14],file=file.path(general$main.path.ibm, paste("popsspe_", general$application, sep=''),
            paste(pa$index_pops[x],"spe_percent_age_per_szgroup_biolsce",sce,".dat",sep='')),ncolumns=11, sep=" ")   #age 0-10
    cat(paste("spe_percent_age_per_szgroup_biolsce",sce,".dat\n",sep=''))
