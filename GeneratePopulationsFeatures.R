@@ -82,6 +82,22 @@
  pa            <- pa[spp,]  # reorder
  pa$index_pops <- 0: (length(spp)-1)
 
+ 
+ 
+ ## by the way, look at the nice way of getting the pop params to populate the input pa table:
+ ## the brand new icesSAG R package:
+ library("icesSAG")
+ dd <- getListStocks(2015)
+ dd$StockKeyLabel
+ assessmentKey <- findAssessmentKey("cod-2224", year = 2015)
+ refpts        <- getFishStockReferencePoints(assessmentKey)
+ refpts
+ sumtab <- getSummaryTable(assessmentKey)
+ sumtab[[1]] [sumtab[[1]]$Year==2015, c("F","SSB")]     # retrieve assessed F and SSB
+
+
+
+
 
 ##### DEFINE THE BIOLOGICAL SCENARIOS #################################
 ##### (RELATED TO STOCK CONDITIONING AND POTENTIAL MIXING #############
