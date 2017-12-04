@@ -79,21 +79,29 @@
   met_target_names <- NULL
     the_met <- as.character(metier_names[metier_names[, 'idx']==met, "name"])
 
-    demersal_gear <- FALSE  ; pelagic_gear <- FALSE
+    demersal_gear <- FALSE  ; pelagic_gear <- FALSE  ; demersal_gear_cru <- FALSE  ; passive_gear <- FALSE  ; dredge_gear <- FALSE
   
-    if (length (grep("DEF", the_met))!=0 || length (grep("MCD", the_met))!=0 || length (grep("CRU", the_met))!=0)  {demersal_gear <- TRUE; pelagic_gear <- FALSE}
-    if (length (grep("SPF", the_met))!=0 )  {demersal_gear <- FALSE; pelagic_gear <- TRUE}
- 
+    if (length (grep("DEF", the_met))!=0 || length (grep("MCD", the_met))!=0 || length (grep("CRU", the_met))!=0)  {demersal_gear <- TRUE; pelagic_gear <- FALSE ;demersal_gear_cru <- FALSE ; passive_gear <- FALSE; dredge_gear <- FALSE}
+    if (length (grep("MCD", the_met))!=0 || length (grep("CRU", the_met))!=0)  {demersal_gear <- FALSE; pelagic_gear <- FALSE; demersal_gear_cru <- TRUE ; passive_gear <- FALSE; dredge_gear <- FALSE}
+    if (length (grep("SPF", the_met))!=0 )  {demersal_gear <- FALSE; pelagic_gear <- TRUE; demersal_gear_cru <- FALSE ; passive_gear <- FALSE; dredge_gear <- FALSE}
+    if (length (grep("LLD", the_met))!=0 || length (grep("GNS", the_met))!=0 || length (grep("other", the_met))!=0)  {demersal_gear <- FALSE; pelagic_gear <- FALSE; demersal_gear_cru <- TRUE ; passive_gear <- FALSE; dredge_gear <- FALSE}
+    if (length (grep("MOL", the_met))!=0)  {demersal_gear <- FALSE; pelagic_gear <- FALSE; demersal_gear_cru <- FALSE ; passive_gear <- FALSE; dredge_gear <- TRUE}
+  
     all_species <- sapply(spp, function (spp) substr(spp,1,3))   
     count <- -1
     for (sp in all_species ) {
       count <- count+1 # idx sp
-      demersal_sp <- FALSE  ; pelagic_sp <- FALSE
-      if(sp %in% c('COD', 'FLE', 'PLE', 'SOL', 'WHG', 'DAB', 'TUR') )  {pelagic_sp<- FALSE; demersal_sp <- TRUE}
-      if(sp %in% c('HER', 'SPR')) {pelagic_sp<- TRUE; demersal_sp <- FALSE}
+      demersal_sp <- FALSE  ; pelagic_sp <- FALSE ;  crustacean_sp <-FALSE
+      if(sp %in% c('COD', 'FLE', 'PLE', 'SOL', 'WHG', 'DAB', 'TUR') )  {pelagic_sp<- FALSE; demersal_sp <- TRUE; crustacean_sp <-FALSE; molluscs_sp <- FALSE}
+      if(sp %in% c("PRA", "NEP") )  {pelagic_sp<- FALSE; demersal_sp <- FALSE; crustacean_sp <-TRUE; molluscs_sp<-TRUE}
+      if(sp %in% c('HER', 'SPR', 'NOP', 'MAC')) {pelagic_sp<- TRUE; demersal_sp <- FALSE; crustacean_sp <-FALSE; molluscs_sp <- FALSE}
+      if(sp %in% c('MUS', 'OYE')) {pelagic_sp<- FALSE; demersal_sp <- FALSE; crustacean_sp <-FALSE; molluscs_sp <- TRUE}
     
       if(
          demersal_gear && demersal_sp ||
+         demersal_gear_cru && crustacean_sp ||
+         dredge_gear && molluscs_sp ||
+         passive_gear && demersal_sp ||
          pelagic_gear && pelagic_sp 
          ){
           write(c(met, count),
@@ -299,6 +307,40 @@
   }
   
 
+   #########################################
+   ## metiersspe_discardratio_limits_semester.dat ###############
+   #########################################
+   for (a.semester in 1:2){
+   #-----------
+   #-----------
+   ## METIER SPE----------
+      # export betas specific to the metier given this pop
+      # mean estimates
+      nb_met         <- (nrow(metier_names))
+      nb_stk         <- length(spp)
+      # Note that we assume exp(vesseleffect+metiereffect+stockdensityeffect*sel) in the catch equation 
+      # so you will have to put -20 if this actually metier not catching this stock at all....for now we put 0
+      
+      metiersspe_discardratio_limits_semester <- data.frame(rep(metier_names[,1], each=nb_stk), rep(2, each=nb_met*nb_stk))  
+        # disc/land = 2 by default, which is high but then not that limiting
+      colnames(metiersspe_discardratio_limits_semester) <- c('LE_MET_level6', 'discardratio_limits')
+      if(length(unique(metiersspe_discardratio_limits_semester[,'LE_MET_level6'])) != nb_met)   stop("missing metier(s) for info on metier effects")
+
+      # reorder:
+      library(doBy)
+      metiersspe_discardratio_limits_semester <- orderBy(~LE_MET_level6, data=metiersspe_discardratio_limits_semester)
+      
+     
+      # save .dat files
+       write.table(metiersspe_discardratio_limits_semester,
+           file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''),
+             paste("metierspe_discardratio_limits_semester", a.semester,".dat",sep='')),
+               col.names=TRUE,  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")
+  
+
+ 
+
+ } # end a.semester
  
             
  cat(paste(".......done \n"))
