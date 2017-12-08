@@ -342,6 +342,43 @@
 
  } # end a.semester
  
+ 
+   #########################################
+   ## metiersspe_avoided_stocks_semester.dat ###############
+   #########################################
+   for (a.semester in 1:2){
+   #-----------
+   #-----------
+   ## METIER SPE----------
+      # export betas specific to the metier given this pop
+      # mean estimates
+      nb_met         <- (nrow(metier_names))
+      nb_stk         <- length(spp)
+      # CODED 0/1
+      # Note that this info will be used in predicting where to fish and if should move away (possibly in the dtrees)
+      # espacially relevant in a EU LO context      
+     
+      metiersspe_avoided_stocks_semester <- data.frame(rep(metier_names[,1], each=nb_stk), rep(0, each=nb_met*nb_stk))   # 0s by default
+        # disc/land = 2 by default, which is high but then not that limiting
+      colnames(metiersspe_avoided_stocks_semester) <- c('LE_MET_level6', 'discardratio_limits')
+      if(length(unique(metiersspe_avoided_stocks_semester[,'LE_MET_level6'])) != nb_met)   stop("missing metier(s) for info on metier effects")
+
+      # reorder:
+      library(doBy)
+      metiersspe_avoided_stocks_semester <- orderBy(~LE_MET_level6, data=metiersspe_avoided_stocks_semester)
+      
+     
+      # save .dat files
+       write.table(metiersspe_avoided_stocks_semester,
+           file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''),
+             paste("metiersspe_avoided_stocks_semester", a.semester,".dat",sep='')),
+               col.names=TRUE,  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")
+  
+
+ 
+
+ } # end a.semester
+
             
  cat(paste(".......done \n"))
   
