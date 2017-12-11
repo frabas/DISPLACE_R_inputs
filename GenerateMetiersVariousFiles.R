@@ -360,7 +360,7 @@
      
       metiersspe_avoided_stocks_semester <- data.frame(rep(metier_names[,1], each=nb_stk), rep(0, each=nb_met*nb_stk))   # 0s by default
         # disc/land = 2 by default, which is high but then not that limiting
-      colnames(metiersspe_avoided_stocks_semester) <- c('LE_MET_level6', 'discardratio_limits')
+      colnames(metiersspe_avoided_stocks_semester) <- c('LE_MET_level6', 'is_avoided_stocks')
       if(length(unique(metiersspe_avoided_stocks_semester[,'LE_MET_level6'])) != nb_met)   stop("missing metier(s) for info on metier effects")
 
       # reorder:
@@ -371,7 +371,7 @@
       # save .dat files
        write.table(metiersspe_avoided_stocks_semester,
            file=file.path(general$main.path.ibm, paste("metiersspe_", general$application, sep=''),
-             paste("metiersspe_avoided_stocks_semester", a.semester,".dat",sep='')),
+             paste("metiersspe_is_avoided_stocks_semester", a.semester,".dat",sep='')),
                col.names=TRUE,  row.names=FALSE, quote=FALSE, append=FALSE, sep = " ")
   
 
