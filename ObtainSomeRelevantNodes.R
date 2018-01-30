@@ -150,7 +150,9 @@
   
   
   # export final result
-  write(relevant_nodes, file=file.path(general$main.path.ibm, "graphsspe", "idx_additional_relevant_nodes_in_building_shortPaths.dat"))
+  write.table(cbind.data.frame(type= "coastline", nodeids=relevant_nodes),
+              file=file.path(general$main.path.ibm, "graphsspe", "idx_additional_relevant_nodes_in_building_shortPaths.dat"),
+              col.names=TRUE, row.names=FALSE, sep=" ", quote=FALSE)
  
   #=> to supplement the fgrounds when creating the shortPaths library (optional)
   
