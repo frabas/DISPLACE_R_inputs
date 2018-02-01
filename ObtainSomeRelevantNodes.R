@@ -158,4 +158,90 @@
   
   
   
+  
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!## 
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!## 
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CHECK UTILS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!## 
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!## 
+ ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!## 
+
+ readShortPaths <- function (general, from=91, to=8005){
+   
+   previous <- read.table(file.path(general$main.path.ibm, 
+                               paste("shortPaths_",general$application,"_a_graph",general$igraph,sep=""), 
+                               paste("previous_",from,".dat", sep="")
+                               ), header=TRUE)
+   distance <- read.table(file.path(general$main.path.ibm, 
+                               paste("shortPaths_",general$application,"_a_graph",general$igraph,sep=""), 
+                               paste("min_distance_",from,".dat", sep="")
+                               ), header=TRUE)
+   distance <- rbind(c(from, 0), distance)                            
+ 
+  # a check
+  if(length(previous[,2][!previous[,2] %in% distance[,1]])!=0) stop("inconsistent distance & previous dataset")
+ 
+  path <- to
+  node <- to
+  while(node!=from)
+  {
+  nodes <- previous[previous[,1]==node, 2]
+  #if(length(nodes)==0 || nodes %in% path ) {
+  #nodes <- previous[previous[,2]==node, 1]  
+  #print(nodes)
+  #}
+  dists <-  distance[distance[,1] %in% nodes, 2] 
+  node <- nodes[which.min(dists)]
+
+  path <-  c(path, node)
+  
+  }
+  
+ return(rev(path))
+ }
+
+ # CALLS
+ 
+    # load the graph
+  general$igraph <- 56
+  coord <- read.table(file=file.path(general$main_path_gis, "GRAPH",
+             paste("coord", general$igraph, ".dat", sep=""))) # build from the c++ gui
+  coord <- as.matrix(as.vector(coord))
+  coord <- matrix(coord, ncol=3)
+  coord <- cbind(coord, 1:nrow(coord))
+  colnames(coord) <- c('x', 'y', 'harb', 'pt_graph')
+  plot(coord[,1], coord[,2])
+  
+  
+  graph <- read.table(file=file.path(general$main_path_gis, "GRAPH",
+           paste("graph", general$igraph, ".dat", sep=""))) # build from the c++ gui
+  graph <- as.matrix(as.vector(graph))
+  graph <- matrix(graph, ncol=3)
+
+
+   a_path <- readShortPaths (general, from=91, to=8005)
+  points(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=4)
+
+   a_path <- readShortPaths (general, from=91, to=2000)
+  points(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=3)
+   
+    a_path <- readShortPaths (general, from=91, to=7842)
+  points(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=2)
+
+  # compare with simplified shortPaths:
+  general$igraph <- 100
+     a_path <- readShortPaths (general, from=91, to=7842)
+  points(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=5)
+
+ 
+  interPts <- read.table( file=file.path(general$main.path.ibm, "graphsspe", "idx_additional_relevant_nodes_in_building_shortPaths.dat"),
+             header=TRUE)
+  7018 %in% interPts[,2]
+   relevant_nodes <- read.table( file=file.path(general$main.path.ibm, "vesselsspe_myfish", "vesselsspe_fgrounds_quarter1.dat"),
+             header=TRUE)[,2]
+  7018 %in% relevant_nodes
+   relevant_nodes <- read.table( file=file.path(general$main.path.ibm, "vesselsspe_myfish", "vesselsspe_harbours_quarter1.dat"),
+             header=TRUE)[,2]
+  7018 %in% relevant_nodes
+
+
 
