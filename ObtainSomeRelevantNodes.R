@@ -85,8 +85,8 @@
  for(iLand in 1:length(dd)){
   #if(a_smoothed_shape_utm@data$C_NAME[iLand]=="DENMARK") {
        p1 <- readWKT(paste("POLYGON((",paste(dd[[iLand]][[1]][,1], dd[[iLand]][[1]][,2], collapse=","),"))", sep=''))
-       buff.minus3nm <- gBuffer(p1,width=-3*1853)
-       buff.3nm <- gBuffer(p1,width=3*1853)
+       buff.minus3nm <- gBuffer(p1,width=-6*1853)
+       buff.3nm <- gBuffer(p1,width=6*1853)
        
        #plot(buff.minus3nm, add=TRUE)
        #plot(buff.3nm, add=TRUE)
@@ -177,8 +177,6 @@
                                ), header=TRUE)
    distance <- rbind(c(from, 0), distance)                            
  
-  # a check
-  if(length(previous[,2][!previous[,2] %in% distance[,1]])!=0) stop("inconsistent distance & previous dataset")
  
   path <- to
   node <- to
@@ -209,39 +207,77 @@
   coord <- matrix(coord, ncol=3)
   coord <- cbind(coord, 1:nrow(coord))
   colnames(coord) <- c('x', 'y', 'harb', 'pt_graph')
-  plot(coord[,1], coord[,2])
+  plot(coord[,1], coord[,2], ylim=c(54,58), xlim=c(8,12))
   
   
   graph <- read.table(file=file.path(general$main_path_gis, "GRAPH",
            paste("graph", general$igraph, ".dat", sep=""))) # build from the c++ gui
   graph <- as.matrix(as.vector(graph))
   graph <- matrix(graph, ncol=3)
+ 
+  intermediatePts <- read.table(file=file.path(general$main.path.ibm, "graphsspe", "idx_additional_relevant_nodes_in_building_shortPaths.dat"),
+              header=TRUE)
+  points(coord[intermediatePts[,2],1], coord[intermediatePts[,2],2], pch=16, col=6)
+              
+ 
+ # then test between RELEVANT nodes
+ 
+  general$igraph <- 56
+  a_path <- readShortPaths (general, from=9976, to=5571)
+  #points(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=5)
+  lines(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=5) 
+    
+   general$igraph <- 100
+   a_path <- readShortPaths (general, from=9976, to=5571)
+  #points(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=2)
+  lines(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=4) 
+  
 
+   general$igraph <- 56
+  a_path <- readShortPaths (general, from=91, to=7842)
+  #points(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=5)
+  lines(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=5) 
+    
+   general$igraph <- 100
+   a_path <- readShortPaths (general, from=91, to=7842)
+  #points(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=2)
+  lines(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=2) 
+ 
 
-   a_path <- readShortPaths (general, from=91, to=8005)
-  points(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=4)
-
-   a_path <- readShortPaths (general, from=91, to=2000)
-  points(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=3)
-   
-    a_path <- readShortPaths (general, from=91, to=7842)
-  points(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=2)
-
-  # compare with simplified shortPaths:
-  general$igraph <- 100
-     a_path <- readShortPaths (general, from=91, to=7842)
-  points(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=5)
 
  
+   general$igraph <- 56
+  a_path <- readShortPaths (general, from=91, to=8120)
+  #points(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=5)
+  lines(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=7) 
+    
+   general$igraph <- 100
+   a_path <- readShortPaths (general, from=91, to=8120)
+  #points(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=2)
+  lines(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=3) 
+ 
+
+     general$igraph <- 56
+  a_path <- readShortPaths (general, from=91, to=2160)
+  #points(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=5)
+  lines(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=3, lwd=2) 
+    
+   general$igraph <- 100
+   a_path <- readShortPaths (general, from=91, to=2160)
+  #points(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=2)
+  lines(coord[a_path+1,1], coord[a_path+1,2], pch=16, col=1, lwd=2) 
+
+
+  ####
   interPts <- read.table( file=file.path(general$main.path.ibm, "graphsspe", "idx_additional_relevant_nodes_in_building_shortPaths.dat"),
              header=TRUE)
-  7018 %in% interPts[,2]
+  9933 %in% interPts[,2]
    relevant_nodes <- read.table( file=file.path(general$main.path.ibm, "vesselsspe_myfish", "vesselsspe_fgrounds_quarter1.dat"),
              header=TRUE)[,2]
-  7018 %in% relevant_nodes
+  9933 %in% relevant_nodes
    relevant_nodes <- read.table( file=file.path(general$main.path.ibm, "vesselsspe_myfish", "vesselsspe_harbours_quarter1.dat"),
              header=TRUE)[,2]
-  7018 %in% relevant_nodes
+  9933 %in% relevant_nodes
 
 
 
