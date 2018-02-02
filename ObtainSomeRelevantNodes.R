@@ -85,8 +85,8 @@
  for(iLand in 1:length(dd)){
   #if(a_smoothed_shape_utm@data$C_NAME[iLand]=="DENMARK") {
        p1 <- readWKT(paste("POLYGON((",paste(dd[[iLand]][[1]][,1], dd[[iLand]][[1]][,2], collapse=","),"))", sep=''))
-       buff.minus3nm <- gBuffer(p1,width=-6*1853)
-       buff.3nm <- gBuffer(p1,width=6*1853)
+       buff.minus3nm <- gBuffer(p1,width=-3*1853)
+       buff.3nm <- gBuffer(p1,width=3*1853)
        
        #plot(buff.minus3nm, add=TRUE)
        #plot(buff.3nm, add=TRUE)
