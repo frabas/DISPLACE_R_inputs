@@ -1,9 +1,7 @@
  
    # GENERAL SETTINGS
 
-   # CAUTION: either using the already existing fishing_gear_selectivity_ogives_per_stock.csv file
-   # or creating it from scratch from L50 hardcoded L50 parameters...
-
+  
    args <- commandArgs(trailingOnly = TRUE)
 
    general <- list()
