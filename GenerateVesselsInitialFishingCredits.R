@@ -32,15 +32,6 @@
                       showWarnings = TRUE, recursive = TRUE, mode = "0777")
 
 
-   
-  #!#!#!#!#!#
-  #!#!#!#!#!#
-  # choose your country (and adapt below accordingly)
-  ctry <- "DNK"
-  year <- "2015"
-  #!#!#!#!#!#
-  #!#!#!#!#!#
-cat(paste("Country chosen is",ctry,"; otherwise adapt the script. \n"))
 
 
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
@@ -52,6 +43,7 @@ cat(paste("Country chosen is",ctry,"; otherwise adapt the script. \n"))
 getTacsatp<- function(what="weight", year="2015", ctry="DNK") {
  
   # a generic case
+  if(ctry=="DNK"){
   if(what=="weight")  load(file=file.path(general$main_path_gis, "FISHERIES", paste("coupled_VMS_logbooks_",ctry,"_",year,".RData", sep=""))) # get the coupled_VMS_logbooks object
   if(what=="value")   load(file=file.path(general$main_path_gis, "FISHERIES", paste("coupled_VMS_logbooks_",ctry,"_",year,"_value.RData", sep="")))
   tacsatp            <- coupled_VMS_logbooks
@@ -62,13 +54,14 @@ getTacsatp<- function(what="weight", year="2015", ctry="DNK") {
   tacsatp$LE_EFF_VMS <- as.numeric(as.character(tacsatp$LE_EFF_VMS)) /60
   tacsatp            <- tacsatp[tacsatp$SI_STATE==1, ]  # keep fishing positions only
   tacsatp$ctry       <- ctry
- 
+  }
+  
  
   # e.g. a special case
   if(ctry=="SWE"){
-   if(what=="weight") load(file=file.path(general$main_path_gis, paste("coupled_VMS_logbooks_",ctry,"_",year,".RData", sep="")))
-   if(what=="value")  load(file=file.path(general$main_path_gis, paste("coupled_VMS_logbooks_",ctry,"_",year,"_value.RData", sep="")))
-    tacsatp_swe            <- tacsat.swe
+   if(what=="weight") load(file=file.path(general$main_path_gis, "FISHERIES", paste("coupled_VMS_logbooks_",ctry,"_",year,".RData", sep="")))
+   if(what=="value")  load(file=file.path(general$main_path_gis, "FISHERIES", paste("coupled_VMS_logbooks_",ctry,"_",year,"_value.RData", sep="")))
+    tacsatp_swe            <- coupled_VMS_logbooks
     tacsatp_swe$SI_LONG    <- as.numeric(as.character(tacsatp_swe$SI_LONG))
     tacsatp_swe$SI_LATI    <- as.numeric(as.character(tacsatp_swe$SI_LATI))
     tacsatp_swe$SI_STATE   <- as.numeric(as.character(tacsatp_swe$SI_STATE))
@@ -91,10 +84,19 @@ getTacsatp<- function(what="weight", year="2015", ctry="DNK") {
 }
 
   # calls
-  tacsatp       <- getTacsatp(what="weight", year=year, ctry=ctry)
-  tacsatp_value <- getTacsatp(what="value", year=year, ctry=ctry)
+  tacsatp       <- getTacsatp(what="weight", year="2015", ctry="DNK")
+  tacsatp_value <- getTacsatp(what="value", year="2015", ctry="DNK")
 
-
+  tacsatp2       <- getTacsatp(what="weight", year="2015", ctry="SWE") 
+  
+  # keep common cols only
+  colnames(tacsatp)[!colnames(tacsatp) %in%  colnames(tacsatp2)]
+  tacsatp <- tacsatp[,    colnames(tacsatp)[colnames(tacsatp) %in%  colnames(tacsatp2)]    ]
+  colnames(tacsatp2)[!colnames(tacsatp2) %in%  colnames(tacsatp)]
+  tacsatp2 <- tacsatp2[,    colnames(tacsatp2)[colnames(tacsatp2) %in%  colnames(tacsatp)]    ]
+  
+  tacsatp <- rbind.data.frame(tacsatp[,colnames(tacsatp)], tacsatp2[,colnames(tacsatp)])
+ 
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!AGGREGATE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
  ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!##
@@ -363,7 +365,13 @@ getTacsatp<- function(what="weight", year="2015", ctry="DNK") {
  
    initial_fishing_credits_per_vid                         <- initial_fishing_credits_per_vid[, c("VE_REF", "share_annual_fishing_credits_per_vid")]
   
-# save .dat files
+  
+    # last but not least, by default repeat the same credits for 0:All, 1:Pop, and 2:Benthos 
+   initial_fishing_credits_per_vid  <-
+       cbind.data.frame(VE_REF=rep(initial_fishing_credits_per_vid[,1], each=3), 
+                             share_annual_fishing_credits_per_vid=rep(initial_fishing_credits_per_vid[,2], each=3))
+
+   # save .dat files
        write.table(initial_fishing_credits_per_vid,
            file=file.path(general$main.path, paste("vesselsspe_",general$application, sep=""),
              paste("initial_share_fishing_credits_per_vid.dat",sep='')),
@@ -397,8 +405,15 @@ getTacsatp<- function(what="weight", year="2015", ctry="DNK") {
    initial_tariffs_on_nodes                         <- initial_tariffs_on_nodes[, c("pt_graph", "tariff_per_day")]
   
    initial_tariffs_on_nodes$pt_graph  <-  initial_tariffs_on_nodes$pt_graph - 1 ##!!! OFFSET FOR C++ !!!##
+   
+   
+   
+   # last but not least, by default repeat the same tariffs for 0:All, 1:Pop, and 2:Benthos 
+   initial_tariffs_on_nodes  <-
+       cbind.data.frame(pt_graph=rep(initial_tariffs_on_nodes[,1], each=3), tariff_per_day=rep(initial_tariffs_on_nodes[,2], each=3))
+   
  
-# save .dat files
+   # save .dat files
        write.table(initial_tariffs_on_nodes,
            file=file.path(general$main.path, "graphsspe",
              paste("initial_tariffs_on_nodes_a_graph",general$igraph,".dat",sep='')),
